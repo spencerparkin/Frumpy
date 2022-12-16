@@ -28,6 +28,20 @@ Vector::Vector(const Vector& vector)
 {
 }
 
+void Vector::SetComponents(double x, double y, double z)
+{
+	this->x = x;
+	this->y = y;
+	this->z = z;
+}
+
+void Vector::GetComponents(double& x, double& y, double& z) const
+{
+	x = this->x;
+	y = this->y;
+	z = this->z;
+}
+
 void Vector::operator=(const Vector& vector)
 {
 	this->x = vector.x;

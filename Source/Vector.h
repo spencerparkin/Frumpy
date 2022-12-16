@@ -15,6 +15,9 @@ namespace Frumpy
 
 		void operator=(const Vector& vector);
 
+		void SetComponents(double x, double y, double z);
+		void GetComponents(double& x, double& y, double& z) const;
+
 		void Add(const Vector& leftVector, const Vector& rightVector);
 		void Subtract(const Vector& leftVector, const Vector& rightVector);
 

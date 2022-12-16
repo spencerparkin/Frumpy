@@ -12,6 +12,31 @@ Camera::Camera()
 {
 }
 
+bool Camera::LookAt(const Vector& eyePoint, const Vector& eyeTarget, const Vector& upDirection)
+{
+	Vector zAxis = eyePoint - eyeTarget;
+	if (!zAxis.Normalize())
+		return false;
+
+	Vector yAxis;
+	if (!yAxis.Rejection(upDirection, zAxis))
+		return false;
+
+	if (!yAxis.Normalize())
+		return false;
+
+	Vector xAxis;
+	xAxis.Cross(yAxis, zAxis);
+
+	this->worldTransform.Identity();
+	this->worldTransform.SetCol(0, xAxis);
+	this->worldTransform.SetCol(1, yAxis);
+	this->worldTransform.SetCol(2, zAxis);
+	this->worldTransform.SetCol(3, eyePoint);
+
+	return true;
+}
+
 Camera::Frustum::Frustum()
 {
 	this->_near = 0.1;

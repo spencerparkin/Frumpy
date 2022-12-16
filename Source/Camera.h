@@ -27,6 +27,8 @@ namespace Frumpy
 			void CalcProjectionMatrix(Matrix& projectionMatrix) const;
 		};
 
+		bool LookAt(const Vector& eyePoint, const Vector& eyeTarget, const Vector& upDirection);
+
 		Frustum frustum;
 		Matrix worldTransform;
 	};

@@ -67,6 +67,7 @@ void Scene::ForAllObjects(std::function<bool(Object*)> lambda)
 	{
 		ObjectList::Node* node = objectQueue.GetHead();
 		Object* object = node->value;
+		objectQueue.Remove(node);
 		if (!lambda(object))
 			break;
 
