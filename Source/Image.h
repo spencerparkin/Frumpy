@@ -64,6 +64,11 @@ namespace Frumpy
 			unsigned int col;
 		};
 
+		bool ValidLocation(const Location& location) const;
+
+		Pixel* GetPixel(const Location& location);
+		const Pixel* GetPixel(const Location& location) const;
+
 		void RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const Vertex& vertexC, const Matrix& transformMatrix, Image& depthBuffer);
 
 	private:

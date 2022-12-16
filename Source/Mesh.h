@@ -26,6 +26,12 @@ namespace Frumpy
 		void SetIndexBufferSize(unsigned int indexBufferSize);
 		unsigned int GetIndexBufferSize() const;
 
+		Vertex* GetVertex(unsigned int i);
+		const Vertex* GetVertex(unsigned int i) const;
+
+		unsigned int GetIndex(unsigned int i) const;
+		bool SetIndex(unsigned int i, unsigned int index);
+
 	protected:
 		Vertex* vertexBuffer;
 		unsigned int vertexBufferSize;
@@ -33,6 +39,6 @@ namespace Frumpy
 		unsigned int* indexBuffer;
 		unsigned int indexBufferSize;
 
-		// TODO: Point here to any associated texture.
+		// TODO: Point here to any associated texture.  Or material?  This would combine textures with shaders.
 	};
 }

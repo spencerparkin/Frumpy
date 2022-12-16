@@ -5,6 +5,7 @@
 
 #include "framework.h"
 #include "Demo.h"
+#include "Image.h"
 
 Demo::Demo()
 {
@@ -15,29 +16,42 @@ Demo::Demo()
     this->frameDCHandle = nullptr;
     this->framePixelBuffer = nullptr;
     this->exitProgram = false;
+    this->scene = nullptr;
+    this->camera = nullptr;
+    this->image = nullptr;
 }
 
 /*virtual*/ Demo::~Demo()
 {
 }
 
-void Demo::FillFramebufferWithColor(unsigned char red, unsigned char green, unsigned char blue)
+void Demo::UpdateFramebuffer()
 {
-    for (int i = 0; i < this->frameBitmapInfo.bmiHeader.biHeight; i++)
+    if (this->image && this->image->GetWidth() == this->frameBitmapInfo.bmiHeader.biWidth && this->image->GetHeight() == this->frameBitmapInfo.bmiHeader.biHeight)
     {
-        for (int j = 0; j < this->frameBitmapInfo.bmiHeader.biWidth; j++)
+        for (unsigned int i = 0; i < (unsigned)this->frameBitmapInfo.bmiHeader.biHeight; i++)
         {
-            unsigned char* pixel = (unsigned char*)&this->framePixelBuffer[i * this->frameBitmapInfo.bmiHeader.biWidth + j];
-            pixel[0] = blue;
-            pixel[1] = green;
-            pixel[2] = red;
-            pixel[4] = 0x00;        // alpha?
+            for (unsigned int j = 0; j < (unsigned)this->frameBitmapInfo.bmiHeader.biWidth; j++)
+            {
+                unsigned char* dstPixel = (unsigned char*)&this->framePixelBuffer[i * this->frameBitmapInfo.bmiHeader.biWidth + j];
+                const Frumpy::Image::Pixel* srcPixel = this->image->GetPixel(Frumpy::Image::Location{ i, j });
+                
+                dstPixel[0] = srcPixel->color.blue;
+                dstPixel[1] = srcPixel->color.green;
+                dstPixel[2] = srcPixel->color.red;
+                dstPixel[4] = 0x00;        // alpha?
+            }
         }
     }
 }
 
 bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 {
+    this->scene = new Frumpy::Scene();
+    this->scene->clearPixel.color.SetColor(255, 255, 255, 0);
+
+    this->camera = new Frumpy::Camera();
+
     this->hInst = hInstance;
     this->exitProgram = false;
 
@@ -91,12 +105,12 @@ void Demo::Run()
             DispatchMessage(&this->msg);
 
         // Render a frame.
-        static unsigned char red = 0x00;
-        static unsigned char green = 0x00;
-        static unsigned char blue = 0x00;
-        FillFramebufferWithColor(red++, green, blue);
-        green += 2;
-        blue += 3;
+        if (this->image && this->camera && this->scene)
+        {
+            // TODO: We could save a step by rendering directly into the windows bitmap.
+            this->scene->Render(*this->camera, *this->image);
+            this->UpdateFramebuffer();
+        }
 
         // Ask windows to have us repaint our window.
         InvalidateRect(this->hWnd, NULL, FALSE);
@@ -110,6 +124,24 @@ int Demo::Shutdown()
     {
         DeleteObject(this->frameBitmapHandle);
         this->frameBitmapHandle = NULL;
+    }
+
+    if (this->scene)
+    {
+        delete this->scene;
+        this->scene = nullptr;
+    }
+
+    if (this->camera)
+    {
+        delete this->camera;
+        this->camera = nullptr;
+    }
+
+    if (this->image)
+    {
+        delete this->image;
+        this->image = nullptr;
     }
 
     return this->msg.wParam;
@@ -170,7 +202,11 @@ int Demo::Shutdown()
             // TODO: Perform error handling.
             SelectObject(demo->frameDCHandle, demo->frameBitmapHandle);
 
-            demo->FillFramebufferWithColor(0xFF, 0x00, 0x00);
+            if (!demo->image || demo->image->GetWidth() != demo->frameBitmapInfo.bmiHeader.biWidth || demo->image->GetHeight() != demo->frameBitmapInfo.bmiHeader.biHeight)
+            {
+                delete demo->image;
+                demo->image = new Frumpy::Image(demo->frameBitmapInfo.bmiHeader.biWidth, demo->frameBitmapInfo.bmiHeader.biHeight);
+            }
 
             break;
         }

@@ -14,8 +14,8 @@ Camera::Camera()
 
 Camera::Frustum::Frustum()
 {
-	this->near = 0.1;
-	this->far = 1000.0;
+	this->_near = 0.1;
+	this->_far = 1000.0;
 	this->hfovi = 60.0;
 	this->vfovi = 50.0;
 }
@@ -36,11 +36,11 @@ void Camera::Frustum::GeneratePlanes(List<Plane>& frustumPlanesList) const
 	frustumPlanesList.AddTail(Plane(Vector(-sin((hfoviRads + FRUMPY_PI) / 2.0), -cos((hfoviRads + FRUMPY_PI) / 2.0), 0.0), Vector(-tan(hfoviRads / 2.0), 0.0, -1.0)));
 
 	// Near/far planes:
-	frustumPlanesList.AddTail(Plane(Vector(0.0, 0.0, -this->near), Vector(0.0, 0.0, 1.0)));
-	frustumPlanesList.AddTail(Plane(Vector(0.0, 0.0, -this->far), Vector(0.0, 0.0, -1.0)));
+	frustumPlanesList.AddTail(Plane(Vector(0.0, 0.0, -this->_near), Vector(0.0, 0.0, 1.0)));
+	frustumPlanesList.AddTail(Plane(Vector(0.0, 0.0, -this->_far), Vector(0.0, 0.0, -1.0)));
 }
 
 void Camera::Frustum::CalcProjectionMatrix(Matrix& projectionMatrix) const
 {
-	projectionMatrix.Projection(this->hfovi, this->vfovi, this->near, this->far);
+	projectionMatrix.Projection(this->hfovi, this->vfovi, this->_near, this->_far);
 }

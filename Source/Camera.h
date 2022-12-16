@@ -20,8 +20,8 @@ namespace Frumpy
 
 			double hfovi;
 			double vfovi;
-			double near;
-			double far;
+			double _near;
+			double _far;
 
 			void GeneratePlanes(List<Plane>& frustumPlanesList) const;
 			void CalcProjectionMatrix(Matrix& projectionMatrix) const;

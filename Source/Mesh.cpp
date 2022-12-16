@@ -94,3 +94,33 @@ unsigned int Mesh::GetIndexBufferSize() const
 {
 	return this->indexBufferSize;
 }
+
+Vertex* Mesh::GetVertex(unsigned int i)
+{
+	if (i >= this->vertexBufferSize)
+		return nullptr;
+
+	return &this->vertexBuffer[i];
+}
+
+const Vertex* Mesh::GetVertex(unsigned int i) const
+{
+	return const_cast<Mesh*>(this)->GetVertex(i);
+}
+
+unsigned int Mesh::GetIndex(unsigned int i) const
+{
+	if (i >= this->indexBufferSize)
+		return -1;
+
+	return this->indexBuffer[i];
+}
+
+bool Mesh::SetIndex(unsigned int i, unsigned int index)
+{
+	if (i >= this->indexBufferSize)
+		return false;
+
+	this->indexBuffer[i] = index;
+	return true;
+}

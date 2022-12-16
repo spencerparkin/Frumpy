@@ -5,7 +5,7 @@ using namespace Frumpy;
 
 Scene::Scene()
 {
-	//this->clearPixel.color.SetColor(0.0, 0.0, 0.0, 0.0);
+	this->clearPixel.color.SetColor(0, 0, 0, 0);
 }
 
 /*virtual*/ Scene::~Scene()
@@ -39,7 +39,7 @@ Scene::Scene()
 	// Before we can go render, we need a depth buffer.  Make sure we have one now.
 	this->depthBuffer.SetWidthAndHeight(image.GetWidth(), image.GetHeight());
 	Image::Pixel pixel;
-	pixel.depth = (float)camera.frustum.far;
+	pixel.depth = (float)camera.frustum._far;
 	this->depthBuffer.Clear(pixel);
 
 	// Also, clear the given image buffer before we start rasterizing to it.

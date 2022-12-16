@@ -44,6 +44,30 @@ void Image::Clear(const Pixel& pixel)
 		this->pixelData[i] = pixel;
 }
 
+bool Image::ValidLocation(const Location& location) const
+{
+	if (location.row >= this->height)
+		return false;
+
+	if (location.col >= this->width)
+		return false;
+
+	return true;
+}
+
+Image::Pixel* Image::GetPixel(const Location& location)
+{
+	if (!this->ValidLocation(location))
+		return nullptr;
+
+	return &this->pixelData[location.row * this->width + location.col];
+}
+
+const Image::Pixel* Image::GetPixel(const Location& location) const
+{
+	return const_cast<Image*>(this)->GetPixel(location);
+}
+
 void Image::RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const Vertex& vertexC, const Matrix& transformMatrix, Image& depthBuffer)
 {
 	// TODO: This is where the rubber meets the road.  How do we do it?  Converting from projection space to image space is easy, and

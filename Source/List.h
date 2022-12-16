@@ -29,12 +29,24 @@ namespace Frumpy
 
 		void AddHead(T value)
 		{
-			this->InsertBefore(this->head, value);
+			if (this->head)
+				this->InsertBefore(this->head, value);
+			else
+			{
+				this->head = this->tail = new Node(value, this);
+				this->count = 1;
+			}
 		}
 
 		void AddTail(T value)
 		{
-			this->InsertAfter(this->tail, value);
+			if (this->tail)
+				this->InsertAfter(this->tail, value);
+			else
+			{
+				this->head = this->tail = new Node(value, this);
+				this->count = 1;
+			}
 		}
 
 		void InsertAfter(Node* node, T value)
@@ -127,8 +139,10 @@ namespace Frumpy
 			{
 				this->prev = before;
 				this->next = after;
-				before->next = this;
-				after->prev = this;
+				if (before)
+					before->next = this;
+				if (after)
+					after->prev = this;
 			}
 
 			List<T>* list;

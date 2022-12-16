@@ -1,6 +1,9 @@
 #pragma once
 
 #include "resource.h"
+#include "Scene.h"
+#include "Camera.h"
+#include "Image.h"
 
 #define MAX_LOADSTRING 100
 
@@ -16,7 +19,7 @@ public:
 
 private:
 
-	void FillFramebufferWithColor(unsigned char red, unsigned char green, unsigned char blue);
+	void UpdateFramebuffer();
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	static INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
@@ -31,4 +34,7 @@ private:
 	HDC frameDCHandle;
 	unsigned int* framePixelBuffer;
 	bool exitProgram;
+	Frumpy::Scene* scene;
+	Frumpy::Camera* camera;
+	Frumpy::Image* image;
 };
