@@ -25,8 +25,13 @@ Mesh::Mesh()
 
 /*virtual*/ void Mesh::Render(const Matrix& cameraMatrix, const Matrix& projectionMatrix, Image& image, Image& depthBuffer) const
 {
-	Matrix viewMatrix = cameraMatrix * this->worldTransform;
-	Matrix transformMatrix = projectionMatrix * viewMatrix;
+	Matrix clipMatrix = projectionMatrix * cameraMatrix * this->worldTransform;
+
+	for (unsigned int i = 0; i < this->vertexBufferSize; i++)
+	{
+		const Vertex& vertex = this->vertexBuffer[i];
+		clipMatrix.TransformPoint(vertex.point, vertex.clipSpacePoint);
+	}
 
 	for (unsigned int i = 0; i < this->indexBufferSize; i += 3)
 	{
@@ -45,19 +50,19 @@ Mesh::Mesh()
 		const Vertex& vertexB = this->vertexBuffer[indexB];
 		const Vertex& vertexC = this->vertexBuffer[indexC];
 
-		Vector pointA, pointB, pointC;
+		const Vector& pointA = vertexA.clipSpacePoint;
+		const Vector& pointB = vertexB.clipSpacePoint;
+		const Vector& pointC = vertexC.clipSpacePoint;
 
-		viewMatrix.TransformPoint(vertexA.point, pointA);
-		viewMatrix.TransformPoint(vertexB.point, pointB);
-		viewMatrix.TransformPoint(vertexC.point, pointC);
+		// TODO: Frustum-cull individual triangles?
 
-		// Perform back-face culling.
+		// Perform back-face culling in clip-space.
 		Vector triangleNorm;
 		triangleNorm.Cross(pointB - pointA, pointC - pointA);
 		if (triangleNorm.z < 0.0)
 			continue;
 
-		image.RenderTriangle(vertexA, vertexB, vertexC, transformMatrix, depthBuffer);
+		image.RenderTriangle(vertexA, vertexB, vertexC, depthBuffer);
 	}
 }
 

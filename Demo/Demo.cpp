@@ -53,7 +53,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->scene->clearPixel.color.SetColor(255, 255, 255, 0);
 
     this->camera = new Frumpy::Camera();
-    this->camera->LookAt(Frumpy::Vector(0.0, 0.0, -10.0), Frumpy::Vector(0.0, 0.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
+    this->camera->LookAt(Frumpy::Vector(0.0, 0.0, 10.0), Frumpy::Vector(0.0, 0.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
 
     Frumpy::Mesh* mesh = new Frumpy::Mesh();
     
@@ -178,7 +178,14 @@ int Demo::Shutdown()
 /*static*/ LRESULT CALLBACK Demo::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     Demo* demo = (Demo*)GetWindowLongPtr(hWnd, 0);
+    if (demo)
+        return demo->HandleMessage(hWnd, message, wParam, lParam);
 
+    return DefWindowProc(hWnd, message, wParam, lParam);
+}
+
+LRESULT Demo::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
     switch (message)
     {
         case WM_COMMAND:
@@ -188,7 +195,7 @@ int Demo::Shutdown()
             {
                 case IDM_ABOUT:
                 {
-                    DialogBox(demo->hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+                    DialogBox(this->hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                     break;
                 }
                 case IDM_EXIT:
@@ -210,43 +217,46 @@ int Demo::Shutdown()
 
             BitBlt(hdc, ps.rcPaint.left, ps.rcPaint.top,
                 ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top,
-                demo->frameDCHandle, ps.rcPaint.left, ps.rcPaint.top, SRCCOPY);
+                this->frameDCHandle, ps.rcPaint.left, ps.rcPaint.top, SRCCOPY);
 
             EndPaint(hWnd, &ps);
             break;
         }
         case WM_SIZE:
         {
-            demo->frameBitmapInfo.bmiHeader.biWidth = LOWORD(lParam);
-            demo->frameBitmapInfo.bmiHeader.biHeight = HIWORD(lParam);
+            this->frameBitmapInfo.bmiHeader.biWidth = LOWORD(lParam);
+            this->frameBitmapInfo.bmiHeader.biHeight = HIWORD(lParam);
 
-            if (demo->frameBitmapHandle != NULL)
+            if (this->frameBitmapHandle != NULL)
             {
-                DeleteObject(demo->frameBitmapHandle);
-                demo->frameBitmapHandle = NULL;
+                DeleteObject(this->frameBitmapHandle);
+                this->frameBitmapHandle = NULL;
             }
 
-            demo->frameBitmapHandle = CreateDIBSection(NULL, &demo->frameBitmapInfo, DIB_RGB_COLORS, (void**)&demo->framePixelBuffer, NULL, 0);
+            this->frameBitmapHandle = CreateDIBSection(NULL, &this->frameBitmapInfo, DIB_RGB_COLORS, (void**)&this->framePixelBuffer, NULL, 0);
             // TODO: Perform error handling.
-            SelectObject(demo->frameDCHandle, demo->frameBitmapHandle);
+            SelectObject(this->frameDCHandle, this->frameBitmapHandle);
 
-            if (!demo->image || demo->image->GetWidth() != demo->frameBitmapInfo.bmiHeader.biWidth || demo->image->GetHeight() != demo->frameBitmapInfo.bmiHeader.biHeight)
+            if (!this->image || this->image->GetWidth() != this->frameBitmapInfo.bmiHeader.biWidth || this->image->GetHeight() != this->frameBitmapInfo.bmiHeader.biHeight)
             {
-                delete demo->image;
-                demo->image = new Frumpy::Image(demo->frameBitmapInfo.bmiHeader.biWidth, demo->frameBitmapInfo.bmiHeader.biHeight);
+                delete this->image;
+                this->image = new Frumpy::Image(this->frameBitmapInfo.bmiHeader.biWidth, this->frameBitmapInfo.bmiHeader.biHeight);
             }
+
+            double aspectRatio = this->image->GetAspectRatio();
+            this->camera->frustum.AdjustVFoviForAspectRatio(aspectRatio);
 
             break;
         }
         case WM_DESTROY:
         {
             PostQuitMessage(0);
-            demo->exitProgram = true;
+            this->exitProgram = true;
             break;
         }
         case WM_QUIT:   // Not sure why we don't get this.
         {
-            demo->exitProgram = true;
+            this->exitProgram = true;
             break;
         }
         default:
@@ -254,6 +264,7 @@ int Demo::Shutdown()
             return DefWindowProc(hWnd, message, wParam, lParam);
         }
     }
+
     return 0;
 }
 

@@ -45,6 +45,16 @@ Camera::Frustum::Frustum()
 	this->vfovi = 50.0;
 }
 
+void Camera::Frustum::AdjustVFoviForAspectRatio(double aspectRatio)
+{
+	this->vfovi = FRUMPY_RADS_TO_DEGS(2.0 * atan(tan(FRUMPY_DEGS_TO_RADS(this->hfovi) / 2.0) / aspectRatio));
+}
+
+void Camera::Frustum::AdjustHfoviForAspectRatio(double aspectRatio)
+{
+	this->vfovi = FRUMPY_RADS_TO_DEGS(2.0 * atan(tan(FRUMPY_DEGS_TO_RADS(this->vfovi) / 2) * aspectRatio));
+}
+
 void Camera::Frustum::GeneratePlanes(List<Plane>& frustumPlanesList) const
 {
 	double hfoviRads = FRUMPY_DEGS_TO_RADS(this->hfovi);
@@ -67,5 +77,5 @@ void Camera::Frustum::GeneratePlanes(List<Plane>& frustumPlanesList) const
 
 void Camera::Frustum::CalcProjectionMatrix(Matrix& projectionMatrix) const
 {
-	projectionMatrix.Projection(this->hfovi, this->vfovi, this->_near, this->_far);
+	projectionMatrix.Projection(FRUMPY_DEGS_TO_RADS(this->hfovi), FRUMPY_DEGS_TO_RADS(this->vfovi), this->_near, this->_far);
 }

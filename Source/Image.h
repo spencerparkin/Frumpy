@@ -34,6 +34,8 @@ namespace Frumpy
 		unsigned int GetWidth() const { return this->width; }
 		unsigned int GetHeight() const { return this->height; }
 
+		double GetAspectRatio() const { return double(this->width) / double(this->height); }
+
 		struct Color
 		{
 			unsigned char red, green, blue, alpha;
@@ -69,7 +71,7 @@ namespace Frumpy
 		Pixel* GetPixel(const Location& location);
 		const Pixel* GetPixel(const Location& location) const;
 
-		void RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const Vertex& vertexC, const Matrix& transformMatrix, Image& depthBuffer);
+		void RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const Vertex& vertexC, Image& depthBuffer);
 
 	private:
 

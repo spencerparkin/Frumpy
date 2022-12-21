@@ -23,6 +23,9 @@ namespace Frumpy
 			double _near;
 			double _far;
 
+			void AdjustVFoviForAspectRatio(double aspectRatio);
+			void AdjustHfoviForAspectRatio(double aspectRatio);
+
 			void GeneratePlanes(List<Plane>& frustumPlanesList) const;
 			void CalcProjectionMatrix(Matrix& projectionMatrix) const;
 		};
