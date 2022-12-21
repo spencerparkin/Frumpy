@@ -15,14 +15,22 @@ Scene::Scene()
 
 /*virtual*/ void Scene::Render(const Camera& camera, Image& image) const
 {
-	// First, resolve the world transformation for each object in the scene hierarchy.
-	Matrix parentMatrix;
-	parentMatrix.Identity();
+	// First, resolve the object-to-world transform for each object in the scene hierarchy.
+	Matrix parentToWorld;
+	parentToWorld.Identity();
 	for (const ObjectList::Node* node = this->objectList.GetHead(); node; node = node->GetNext())
 	{
 		const Object* object = node->value;
-		object->CalculateWorldTransform(parentMatrix);
+		object->CalculateWorldTransform(parentToWorld);
 	}
+
+	// Calculate the other matrices we'll need.
+	PipelineMatrices pipelineMatrices;
+	camera.frustum.CalcProjectionMatrix(pipelineMatrices.cameraToProjection);
+	pipelineMatrices.worldToCamera.Invert(camera.worldTransform);
+	image.CalcImageMatrix(pipelineMatrices.projectionToImage);
+	pipelineMatrices.worldToImage = pipelineMatrices.projectionToImage * pipelineMatrices.cameraToProjection * pipelineMatrices.worldToCamera;
+	pipelineMatrices.imageToCamera.Invert(pipelineMatrices.projectionToImage * pipelineMatrices.cameraToProjection);
 
 	// Next, go determine the list of objects visible to the viewing frustum.  This, of course,
 	// does not account for any kind of occlusion that may be taking place.  The depth buffer will
@@ -46,14 +54,10 @@ Scene::Scene()
 	image.Clear(this->clearPixel);
 
 	// Finally, go render the list of objects we think are visible.
-	Matrix projectionMatrix;
-	camera.frustum.CalcProjectionMatrix(projectionMatrix);
-	Matrix cameraMatrix;
-	cameraMatrix.Invert(camera.worldTransform);
 	for (ObjectList::Node* node = visibleObjectList.GetHead(); node; node = node->GetNext())
 	{
 		const Object* object = node->value;
-		object->Render(cameraMatrix, projectionMatrix, image, depthBuffer);
+		object->Render(pipelineMatrices, image, depthBuffer);
 	}
 }
 
@@ -85,18 +89,18 @@ Scene::Object::Object()
 	this->childObjectList.Delete();
 }
 
-/*virtual*/ void Scene::Object::CalculateWorldTransform(const Matrix& parentMatrix) const
+/*virtual*/ void Scene::Object::CalculateWorldTransform(const Matrix& parentToWorld) const
 {
-	this->worldTransform.Multiply(parentMatrix, this->localTransform);
+	this->objectToWorld = parentToWorld * this->childToParent;
 
 	for (const ObjectList::Node* node = this->childObjectList.GetHead(); node; node = node->GetNext())
 	{
 		const Object* childObject = node->value;
-		childObject->CalculateWorldTransform(this->worldTransform);
+		childObject->CalculateWorldTransform(this->objectToWorld);
 	}
 }
 
-/*virtual*/ void Scene::Object::Render(const Matrix& cameraMatrix, const Matrix& projectionMatrix, Image& image, Image& depthBuffer) const
+/*virtual*/ void Scene::Object::Render(const PipelineMatrices& pipelineMatrices, Image& image, Image& depthBuffer) const
 {
 	// This method must be overridden for anything to actually get rendered.
 }

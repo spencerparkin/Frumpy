@@ -39,4 +39,13 @@ namespace Frumpy
 	};
 
 	FRUMPY_API Matrix operator*(const Matrix& leftMatrix, const Matrix& rightMatrix);
+
+	struct PipelineMatrices
+	{
+		Matrix worldToCamera;
+		Matrix cameraToProjection;
+		Matrix projectionToImage;
+		Matrix worldToImage;
+		Matrix imageToCamera;
+	};
 }

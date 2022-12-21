@@ -228,13 +228,12 @@ void Matrix::Translation(const Vector& delta)
 void Matrix::Projection(double hfovi, double vfovi, double near, double far)
 {
 	this->Identity();
-
 	this->ele[0][0] = 1.0 / tan(hfovi / 2.0);
 	this->ele[1][1] = 1.0 / tan(vfovi / 2.0);
 	this->ele[2][2] = -far / (far - near);
 	this->ele[3][3] = 0.0;
 	this->ele[2][3] = far * near / (far - near);
-	this->ele[3][2] = 1.0;
+	this->ele[3][2] = -1.0;
 }
 
 namespace Frumpy

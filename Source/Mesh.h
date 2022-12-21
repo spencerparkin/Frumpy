@@ -18,7 +18,7 @@ namespace Frumpy
 		// TODO: Add load/save for .OBJ file format?
 
 		virtual bool IntersectsFrustum(const List<Plane>& frustumPlanesList) const override;
-		virtual void Render(const Matrix& cameraMatrix, const Matrix& projectionMatrix, Image& image, Image& depthBuffer) const override;
+		virtual void Render(const PipelineMatrices& pipelineMatrices, Image& image, Image& depthBuffer) const override;
 
 		void SetVertexBufferSize(unsigned int vertexBufferSize);
 		unsigned int GetVertexBufferSize() const;

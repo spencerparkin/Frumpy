@@ -15,6 +15,6 @@ namespace Frumpy
 		Vector color;		// TODO: How do we interpolate color with perspective in mind?
 		Vector texCoords;	// TODO: How do we interpolate these with perspective in mind?
 
-		mutable Vector clipSpacePoint;
+		mutable Vector imageSpacePoint;
 	};
 }

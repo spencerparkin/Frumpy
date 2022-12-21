@@ -36,6 +36,8 @@ namespace Frumpy
 
 		double GetAspectRatio() const { return double(this->width) / double(this->height); }
 
+		void CalcImageMatrix(Matrix& imageMatrix) const;
+
 		struct Color
 		{
 			unsigned char red, green, blue, alpha;
@@ -71,7 +73,7 @@ namespace Frumpy
 		Pixel* GetPixel(const Location& location);
 		const Pixel* GetPixel(const Location& location) const;
 
-		void RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const Vertex& vertexC, Image& depthBuffer);
+		void RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const Vertex& vertexC, const PipelineMatrices& pipelineMatrices, Image& depthBuffer);
 
 	private:
 

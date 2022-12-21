@@ -33,12 +33,12 @@ namespace Frumpy
 			Object();
 			virtual ~Object();
 
-			virtual void CalculateWorldTransform(const Matrix& parentMatrix) const;
+			virtual void CalculateWorldTransform(const Matrix& parentToWorld) const;
 			virtual bool IntersectsFrustum(const List<Plane>& frustumPlanesList) const;
-			virtual void Render(const Matrix& cameraMatrix, const Matrix& projectionMatrix, Image& image, Image& depthBuffer) const;
+			virtual void Render(const PipelineMatrices& pipelineMatrices, Image& image, Image& depthBuffer) const;
 
-			Matrix localTransform;
-			mutable Matrix worldTransform;
+			Matrix childToParent;
+			mutable Matrix objectToWorld;
 			ObjectList childObjectList;
 		};
 

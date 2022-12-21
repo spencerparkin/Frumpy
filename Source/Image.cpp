@@ -68,7 +68,16 @@ const Image::Pixel* Image::GetPixel(const Location& location) const
 	return const_cast<Image*>(this)->GetPixel(location);
 }
 
-void Image::RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const Vertex& vertexC, Image& depthBuffer)
+void Image::CalcImageMatrix(Matrix& imageMatrix) const
+{
+	imageMatrix.Identity();
+	imageMatrix.ele[0][0] = double(this->width) / 2.0;
+	imageMatrix.ele[0][3] = double(this->width) / 2.0;
+	imageMatrix.ele[1][1] = double(this->height) / 2.0;
+	imageMatrix.ele[1][3] = double(this->height) / 2.0;
+}
+
+void Image::RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const Vertex& vertexC, const PipelineMatrices& pipelineMatrices, Image& depthBuffer)
 {
 	// TODO: This is where the rubber meets the road.  How do we do it?  Converting from projection space to image space is easy, and
 	//       so is the process of filling in the triangle, one scan-line at a time.  The hard part is interpolating depth values and
