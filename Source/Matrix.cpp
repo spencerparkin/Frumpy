@@ -135,12 +135,68 @@ bool Matrix::Divide(const Matrix& leftMatrix, const Matrix& rightMatrix)
 
 bool Matrix::Invert(const Matrix& matrix)
 {
-	return false;
+	double det = matrix.Determinant();
+	if (det == 0.0)
+		return false;
+
+	this->ele[0][0] = (matrix.ele[1][1] * (matrix.ele[2][2] * matrix.ele[3][3] - matrix.ele[3][2] * matrix.ele[2][3]) - matrix.ele[1][2] * (matrix.ele[2][1] * matrix.ele[3][3] - matrix.ele[3][1] * matrix.ele[2][3]) + matrix.ele[1][3] * (matrix.ele[2][1] * matrix.ele[3][2] - matrix.ele[3][1] * matrix.ele[2][2])) / det;
+	this->ele[0][1] = -(matrix.ele[0][1] * (matrix.ele[2][2] * matrix.ele[3][3] - matrix.ele[3][2] * matrix.ele[2][3]) - matrix.ele[0][2] * (matrix.ele[2][1] * matrix.ele[3][3] - matrix.ele[3][1] * matrix.ele[2][3]) + matrix.ele[0][3] * (matrix.ele[2][1] * matrix.ele[3][2] - matrix.ele[3][1] * matrix.ele[2][2])) / det;
+	this->ele[0][2] = (matrix.ele[0][1] * (matrix.ele[1][2] * matrix.ele[3][3] - matrix.ele[3][2] * matrix.ele[1][3]) - matrix.ele[0][2] * (matrix.ele[1][1] * matrix.ele[3][3] - matrix.ele[3][1] * matrix.ele[1][3]) + matrix.ele[0][3] * (matrix.ele[1][1] * matrix.ele[3][2] - matrix.ele[3][1] * matrix.ele[1][2])) / det;
+	this->ele[0][3] = -(matrix.ele[0][1] * (matrix.ele[1][2] * matrix.ele[2][3] - matrix.ele[2][2] * matrix.ele[1][3]) - matrix.ele[0][2] * (matrix.ele[1][1] * matrix.ele[2][3] - matrix.ele[2][1] * matrix.ele[1][3]) + matrix.ele[0][3] * (matrix.ele[1][1] * matrix.ele[2][2] - matrix.ele[2][1] * matrix.ele[1][2])) / det;
+	this->ele[1][0] = -(matrix.ele[1][0] * (matrix.ele[2][2] * matrix.ele[3][3] - matrix.ele[3][2] * matrix.ele[2][3]) - matrix.ele[1][2] * (matrix.ele[2][0] * matrix.ele[3][3] - matrix.ele[3][0] * matrix.ele[2][3]) + matrix.ele[1][3] * (matrix.ele[2][0] * matrix.ele[3][2] - matrix.ele[3][0] * matrix.ele[2][2])) / det;
+	this->ele[1][1] = (matrix.ele[0][0] * (matrix.ele[2][2] * matrix.ele[3][3] - matrix.ele[3][2] * matrix.ele[2][3]) - matrix.ele[0][2] * (matrix.ele[2][0] * matrix.ele[3][3] - matrix.ele[3][0] * matrix.ele[2][3]) + matrix.ele[0][3] * (matrix.ele[2][0] * matrix.ele[3][2] - matrix.ele[3][0] * matrix.ele[2][2])) / det;
+	this->ele[1][2] = -(matrix.ele[0][0] * (matrix.ele[1][2] * matrix.ele[3][3] - matrix.ele[3][2] * matrix.ele[1][3]) - matrix.ele[0][2] * (matrix.ele[1][0] * matrix.ele[3][3] - matrix.ele[3][0] * matrix.ele[1][3]) + matrix.ele[0][3] * (matrix.ele[1][0] * matrix.ele[3][2] - matrix.ele[3][0] * matrix.ele[1][2])) / det;
+	this->ele[1][3] = (matrix.ele[0][0] * (matrix.ele[1][2] * matrix.ele[2][3] - matrix.ele[2][2] * matrix.ele[1][3]) - matrix.ele[0][2] * (matrix.ele[1][0] * matrix.ele[2][3] - matrix.ele[2][0] * matrix.ele[1][3]) + matrix.ele[0][3] * (matrix.ele[1][0] * matrix.ele[2][2] - matrix.ele[2][0] * matrix.ele[1][2])) / det;
+	this->ele[2][0] = (matrix.ele[1][0] * (matrix.ele[2][1] * matrix.ele[3][3] - matrix.ele[3][1] * matrix.ele[2][3]) - matrix.ele[1][1] * (matrix.ele[2][0] * matrix.ele[3][3] - matrix.ele[3][0] * matrix.ele[2][3]) + matrix.ele[1][3] * (matrix.ele[2][0] * matrix.ele[3][1] - matrix.ele[3][0] * matrix.ele[2][1])) / det;
+	this->ele[2][1] = -(matrix.ele[0][0] * (matrix.ele[2][1] * matrix.ele[3][3] - matrix.ele[3][1] * matrix.ele[2][3]) - matrix.ele[0][1] * (matrix.ele[2][0] * matrix.ele[3][3] - matrix.ele[3][0] * matrix.ele[2][3]) + matrix.ele[0][3] * (matrix.ele[2][0] * matrix.ele[3][1] - matrix.ele[3][0] * matrix.ele[2][1])) / det;
+	this->ele[2][2] = (matrix.ele[0][0] * (matrix.ele[1][1] * matrix.ele[3][3] - matrix.ele[3][1] * matrix.ele[1][3]) - matrix.ele[0][1] * (matrix.ele[1][0] * matrix.ele[3][3] - matrix.ele[3][0] * matrix.ele[1][3]) + matrix.ele[0][3] * (matrix.ele[1][0] * matrix.ele[3][1] - matrix.ele[3][0] * matrix.ele[1][1])) / det;
+	this->ele[2][3] = -(matrix.ele[0][0] * (matrix.ele[1][1] * matrix.ele[2][3] - matrix.ele[2][1] * matrix.ele[1][3]) - matrix.ele[0][1] * (matrix.ele[1][0] * matrix.ele[2][3] - matrix.ele[2][0] * matrix.ele[1][3]) + matrix.ele[0][3] * (matrix.ele[1][0] * matrix.ele[2][1] - matrix.ele[2][0] * matrix.ele[1][1])) / det;
+	this->ele[3][0] = -(matrix.ele[1][0] * (matrix.ele[2][1] * matrix.ele[3][2] - matrix.ele[3][1] * matrix.ele[2][2]) - matrix.ele[1][1] * (matrix.ele[2][0] * matrix.ele[3][2] - matrix.ele[3][0] * matrix.ele[2][2]) + matrix.ele[1][2] * (matrix.ele[2][0] * matrix.ele[3][1] - matrix.ele[3][0] * matrix.ele[2][1])) / det;
+	this->ele[3][1] = (matrix.ele[0][0] * (matrix.ele[2][1] * matrix.ele[3][2] - matrix.ele[3][1] * matrix.ele[2][2]) - matrix.ele[0][1] * (matrix.ele[2][0] * matrix.ele[3][2] - matrix.ele[3][0] * matrix.ele[2][2]) + matrix.ele[0][2] * (matrix.ele[2][0] * matrix.ele[3][1] - matrix.ele[3][0] * matrix.ele[2][1])) / det;
+	this->ele[3][2] = -(matrix.ele[0][0] * (matrix.ele[1][1] * matrix.ele[3][2] - matrix.ele[3][1] * matrix.ele[1][2]) - matrix.ele[0][1] * (matrix.ele[1][0] * matrix.ele[3][2] - matrix.ele[3][0] * matrix.ele[1][2]) + matrix.ele[0][2] * (matrix.ele[1][0] * matrix.ele[3][1] - matrix.ele[3][0] * matrix.ele[1][1])) / det;
+	this->ele[3][3] = (matrix.ele[0][0] * (matrix.ele[1][1] * matrix.ele[2][2] - matrix.ele[2][1] * matrix.ele[1][2]) - matrix.ele[0][1] * (matrix.ele[1][0] * matrix.ele[2][2] - matrix.ele[2][0] * matrix.ele[1][2]) + matrix.ele[0][2] * (matrix.ele[1][0] * matrix.ele[2][1] - matrix.ele[2][0] * matrix.ele[1][1])) / det;
+
+	return true;
 }
 
 double Matrix::Determinant() const
 {
-	return 0.0;
+	double det =
+		this->ele[0][0] * (
+			this->ele[1][1] * (
+				this->ele[2][2] * this->ele[3][3] - this->ele[3][2] * this->ele[2][3]
+			) - this->ele[1][2] * (
+				this->ele[2][1] * this->ele[3][3] - this->ele[3][1] * this->ele[2][3]
+			) + this->ele[1][3] * (
+				this->ele[2][1] * this->ele[3][2] - this->ele[3][1] * this->ele[2][2]
+			)
+		) - this->ele[0][1] * (
+			this->ele[1][0] * (
+				this->ele[2][2] * this->ele[3][3] - this->ele[3][2] * this->ele[2][3]
+			) - this->ele[1][2] * (
+				this->ele[2][0] * this->ele[3][3] - this->ele[3][0] * this->ele[2][3]
+			) + this->ele[1][3] * (
+				this->ele[2][0] * this->ele[3][2] - this->ele[3][0] * this->ele[2][2]
+			)
+		) + this->ele[0][2] * (
+			this->ele[1][0] * (
+				this->ele[2][1] * this->ele[3][3] - this->ele[3][1] * this->ele[2][3]
+			) - this->ele[1][1] * (
+				this->ele[2][0] * this->ele[3][3] - this->ele[3][0] * this->ele[2][3]
+			) + this->ele[1][3] * (
+				this->ele[2][0] * this->ele[3][1] - this->ele[3][0] * this->ele[2][1]
+			)
+		) - this->ele[0][3] * (
+			this->ele[1][0] * (
+				this->ele[2][1] * this->ele[3][2] - this->ele[3][1] * this->ele[2][2]
+			) - this->ele[1][1] * (
+				this->ele[2][0] * this->ele[3][2] - this->ele[3][0] * this->ele[2][2]
+			) + this->ele[1][2] * (
+				this->ele[2][0] * this->ele[3][1] - this->ele[3][0] * this->ele[2][1]
+			)
+		);
+
+	return det;
 }
 
 void Matrix::Rotation(const Vector& axis, double angle)
