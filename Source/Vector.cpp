@@ -140,7 +140,10 @@ bool Vector::Rotation(const Vector& vector, const Vector& axis, double angle)
 	Vector xAxis;
 	xAxis.Subtract(vector, projection);
 	if (!xAxis.Normalize())
-		return false;
+	{
+		*this = vector;
+		return true;
+	}
 
 	Vector yAxis;
 	yAxis.Cross(axis, xAxis);

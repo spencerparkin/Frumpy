@@ -217,8 +217,7 @@ void Image::RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const V
 			Vector trianglePoint = cameraPointA + rayDirection * lambda;
 
 			Pixel* pixelZ = depthBuffer.GetPixel(location);
-
-			if (trianglePoint.z < pixelZ->depth)	// TODO: Depth-testing optional?
+			if (pixelZ && trianglePoint.z < pixelZ->depth)	// TODO: Depth-testing optional?
 			{
 				pixelZ->depth = (float)trianglePoint.z;
 				Pixel* pixel = this->GetPixel(location);

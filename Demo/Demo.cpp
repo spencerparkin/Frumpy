@@ -8,6 +8,7 @@
 #include "Image.h"
 #include "Mesh.h"
 #include "Vertex.h"
+#include <time.h>
 
 Demo::Demo()
 {
@@ -21,6 +22,9 @@ Demo::Demo()
     this->scene = nullptr;
     this->camera = nullptr;
     this->image = nullptr;
+    this->mesh = nullptr;
+    this->rotationAngle = 0.0;
+    this->rotationRate = 60.0;
 }
 
 /*virtual*/ Demo::~Demo()
@@ -50,35 +54,35 @@ void Demo::UpdateFramebuffer()
 bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 {
     this->scene = new Frumpy::Scene();
-    this->scene->clearPixel.color.SetColor(255, 255, 255, 0);
+    this->scene->clearPixel.color.SetColor(0, 0, 0, 0);
 
     this->camera = new Frumpy::Camera();
     this->camera->LookAt(Frumpy::Vector(0.0, 0.0, 10.0), Frumpy::Vector(0.0, 0.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
 
-    Frumpy::Mesh* mesh = new Frumpy::Mesh();
+    this->mesh = new Frumpy::Mesh();
     
-    mesh->SetVertexBufferSize(4);
+    this->mesh->SetVertexBufferSize(4);
     
-    mesh->GetVertex(0)->objectSpacePoint.SetComponents(-1.0, -1.0, 0.0);
-    mesh->GetVertex(1)->objectSpacePoint.SetComponents(1.0, -1.0, 0.0);
-    mesh->GetVertex(2)->objectSpacePoint.SetComponents(1.0, 1.0, 0.0);
-    mesh->GetVertex(3)->objectSpacePoint.SetComponents(-1.0, 1.0, 0.0);
+    this->mesh->GetVertex(0)->objectSpacePoint.SetComponents(-1.0, -1.0, 0.0);
+    this->mesh->GetVertex(1)->objectSpacePoint.SetComponents(1.0, -1.0, 0.0);
+    this->mesh->GetVertex(2)->objectSpacePoint.SetComponents(1.0, 1.0, 0.0);
+    this->mesh->GetVertex(3)->objectSpacePoint.SetComponents(-1.0, 1.0, 0.0);
 
-    mesh->GetVertex(0)->color.SetComponents(1.0, 0.0, 0.0);
-    mesh->GetVertex(1)->color.SetComponents(0.0, 1.0, 0.0);
-    mesh->GetVertex(2)->color.SetComponents(0.0, 0.0, 1.0);
-    mesh->GetVertex(3)->color.SetComponents(1.0, 1.0, 0.0);
+    this->mesh->GetVertex(0)->color.SetComponents(1.0, 0.0, 0.0);
+    this->mesh->GetVertex(1)->color.SetComponents(0.0, 1.0, 0.0);
+    this->mesh->GetVertex(2)->color.SetComponents(0.0, 0.0, 1.0);
+    this->mesh->GetVertex(3)->color.SetComponents(1.0, 1.0, 0.0);
 
-    mesh->SetIndexBufferSize(6);
+    this->mesh->SetIndexBufferSize(6);
 
-    mesh->SetIndex(0, 0);
-    mesh->SetIndex(1, 1);
-    mesh->SetIndex(2, 2);
-    mesh->SetIndex(3, 0);
-    mesh->SetIndex(4, 2);
-    mesh->SetIndex(5, 3);
+    this->mesh->SetIndex(0, 0);
+    this->mesh->SetIndex(1, 1);
+    this->mesh->SetIndex(2, 2);
+    this->mesh->SetIndex(3, 0);
+    this->mesh->SetIndex(4, 2);
+    this->mesh->SetIndex(5, 3);
 
-    this->scene->objectList.AddTail(mesh);
+    this->scene->objectList.AddTail(this->mesh);
 
     this->hInst = hInstance;
     this->exitProgram = false;
@@ -126,6 +130,8 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
 void Demo::Run()
 {
+    clock_t lastTime = clock();
+
     while (!this->exitProgram)
     {
         // Flush the message queue as far as possible.
@@ -139,6 +145,17 @@ void Demo::Run()
             this->scene->Render(*this->camera, *this->image);
             this->UpdateFramebuffer();
         }
+
+        clock_t currentTime = clock();
+        clock_t deltaTime = currentTime - lastTime;
+        double deltaTimeSeconds = double(deltaTime) / double(CLOCKS_PER_SEC);
+        lastTime = currentTime;
+        
+        this->rotationAngle += this->rotationRate * deltaTimeSeconds;
+
+        //Frumpy::Vector axis(1.0, 0.0, 0.0);
+        Frumpy::Vector axis(0.0, 0.0, 1.0);
+        this->mesh->childToParent.Rotation(axis, FRUMPY_DEGS_TO_RADS(this->rotationAngle));
 
         // Ask windows to have us repaint our window.
         InvalidateRect(this->hWnd, NULL, FALSE);
