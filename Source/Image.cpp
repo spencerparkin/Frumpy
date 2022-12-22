@@ -1,5 +1,6 @@
 #include "Image.h"
 #include "Vertex.h"
+#include "Plane.h"
 #include <math.h>
 
 using namespace Frumpy;
@@ -160,6 +161,12 @@ void Image::RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const V
 	minRow = FRUMPY_MAX(minRow, 0);
 	maxRow = FRUMPY_MIN(maxRow, signed(this->height));
 
+	if (minRow >= maxRow)
+		return;
+
+	Plane planeOfTriangle;
+	planeOfTriangle.SetFromTriangle(vertexA.cameraSpacePoint, vertexB.cameraSpacePoint, vertexC.cameraSpacePoint);
+
 	for (int row = minRow; row <= maxRow; row++)
 	{
 		Edge* edges = (row < midRow) ? minEdges : maxEdges;
@@ -184,10 +191,32 @@ void Image::RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const V
 		for (int col = minCol; col <= maxCol; col++)
 		{
 			Location location{ unsigned(row), unsigned(col) };
-			Pixel* pixel = this->GetPixel(location);
-			// TODO: Fill in the scan-line here.  How do we interpolate the Z values?
 
-			//Vector triangleImagePoint(double(col), double(row), )
+			Vector imagePointA(double(col), double(row), 0.0);
+			Vector imagePointB(double(col), double(row), -1.0);
+			
+			Vector cameraPointA, cameraPointB;
+			
+			pipelineMatrices.imageToCamera.TransformPoint(imagePointA, cameraPointA);
+			pipelineMatrices.imageToCamera.TransformPoint(imagePointB, cameraPointB);
+			
+			Vector rayDirection = cameraPointB - cameraPointA;
+			double lambda = 0.0;
+			planeOfTriangle.RayCast(cameraPointA, rayDirection, lambda);
+			Vector trianglePoint = cameraPointA + rayDirection * lambda;
+
+			Pixel* pixelZ = depthBuffer.GetPixel(location);
+
+			if (trianglePoint.z < pixelZ->depth)	// TODO: Depth-testing optional?
+			{
+				pixelZ->depth = (float)trianglePoint.z;
+				Pixel* pixel = this->GetPixel(location);
+
+				// TODO: Are barycentric coordinates the right way to interpolate color and texture coordinates?
+
+				// TODO: For now, just do this until we know how to interpolate color.
+				pixel->color.SetColor(255, 0, 0, 0);
+			}
 		}
 	}
 }

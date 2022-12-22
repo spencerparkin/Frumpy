@@ -11,10 +11,11 @@ namespace Frumpy
 		Vertex();
 		virtual ~Vertex();
 
-		Vector point;		// TODO: How do we interpolate the depth values with perspective in mind?
-		Vector color;		// TODO: How do we interpolate color with perspective in mind?
-		Vector texCoords;	// TODO: How do we interpolate these with perspective in mind?
+		Vector objectSpacePoint;
+		Vector color;
+		Vector texCoords;
 
+		mutable Vector cameraSpacePoint;
 		mutable Vector imageSpacePoint;
 	};
 }

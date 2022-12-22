@@ -26,11 +26,13 @@ Mesh::Mesh()
 /*virtual*/ void Mesh::Render(const PipelineMatrices& pipelineMatrices, Image& image, Image& depthBuffer) const
 {
 	Matrix objectToImage = pipelineMatrices.worldToImage * this->objectToWorld;
+	Matrix objectToCamera = pipelineMatrices.worldToCamera * this->objectToWorld;
 
 	for (unsigned int i = 0; i < this->vertexBufferSize; i++)
 	{
 		const Vertex& vertex = this->vertexBuffer[i];
-		objectToImage.TransformPoint(vertex.point, vertex.imageSpacePoint);
+		objectToImage.TransformPoint(vertex.objectSpacePoint, vertex.imageSpacePoint);
+		objectToCamera.TransformPoint(vertex.objectSpacePoint, vertex.cameraSpacePoint);
 	}
 
 	for (unsigned int i = 0; i < this->indexBufferSize; i += 3)

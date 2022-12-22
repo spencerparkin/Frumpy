@@ -36,6 +36,13 @@ bool Plane::GetToPointAndVector(Vector& point, Vector& normal) const
 	return true;
 }
 
+void Plane::SetFromTriangle(const Vector& vertexA, const Vector& vertexB, const Vector& vertexC)
+{
+	Vector normal;
+	normal.Cross(vertexB - vertexA, vertexC - vertexA);
+	this->SetFromPointAndVector(vertexA, normal);
+}
+
 double Plane::SignedDistanceToPoint(const Vector& point) const
 {
 	return Vector::Dot(point, this->unitNormal) - this->distance;
@@ -45,4 +52,14 @@ bool Plane::ContainsPoint(const Vector& point, double planeThickness) const
 {
 	double distance = this->SignedDistanceToPoint(point);
 	return fabs(distance) <= planeThickness;
+}
+
+bool Plane::RayCast(const Vector& rayOrigin, const Vector& rayDirection, double& lambda) const
+{
+	double numer = this->distance - Vector::Dot(rayOrigin, this->unitNormal);
+	double denom = Vector::Dot(rayDirection, this->unitNormal);
+	lambda = numer / denom;
+	if (lambda != lambda)
+		return false;
+	return true;
 }

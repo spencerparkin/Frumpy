@@ -59,10 +59,10 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     
     mesh->SetVertexBufferSize(4);
     
-    mesh->GetVertex(0)->point.SetComponents(-1.0, -1.0, 0.0);
-    mesh->GetVertex(1)->point.SetComponents(1.0, -1.0, 0.0);
-    mesh->GetVertex(2)->point.SetComponents(1.0, 1.0, 0.0);
-    mesh->GetVertex(3)->point.SetComponents(-1.0, 1.0, 0.0);
+    mesh->GetVertex(0)->objectSpacePoint.SetComponents(-1.0, -1.0, 0.0);
+    mesh->GetVertex(1)->objectSpacePoint.SetComponents(1.0, -1.0, 0.0);
+    mesh->GetVertex(2)->objectSpacePoint.SetComponents(1.0, 1.0, 0.0);
+    mesh->GetVertex(3)->objectSpacePoint.SetComponents(-1.0, 1.0, 0.0);
 
     mesh->GetVertex(0)->color.SetComponents(1.0, 0.0, 0.0);
     mesh->GetVertex(1)->color.SetComponents(0.0, 1.0, 0.0);
