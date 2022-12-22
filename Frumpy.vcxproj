@@ -27,6 +27,7 @@
     <ClInclude Include="Source\Mesh.h" />
     <ClInclude Include="Source\Plane.h" />
     <ClInclude Include="Source\Scene.h" />
+    <ClInclude Include="Source\Triangle.h" />
     <ClInclude Include="Source\Vector.h" />
     <ClInclude Include="Source\Vertex.h" />
   </ItemGroup>
@@ -37,6 +38,7 @@
     <ClCompile Include="Source\Mesh.cpp" />
     <ClCompile Include="Source\Plane.cpp" />
     <ClCompile Include="Source\Scene.cpp" />
+    <ClCompile Include="Source\Triangle.cpp" />
     <ClCompile Include="Source\Vector.cpp" />
     <ClCompile Include="Source\Vertex.cpp" />
   </ItemGroup>

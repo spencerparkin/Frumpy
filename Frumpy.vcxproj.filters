@@ -37,6 +37,9 @@
     <ClInclude Include="Source\Vertex.h">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Triangle.h">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Scene.cpp">
@@ -61,6 +64,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Vertex.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Triangle.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

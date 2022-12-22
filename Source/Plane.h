@@ -5,6 +5,8 @@
 
 namespace Frumpy
 {
+	class Triangle;
+
 	class FRUMPY_API Plane
 	{
 	public:
@@ -14,7 +16,7 @@ namespace Frumpy
 
 		bool SetFromPointAndVector(const Vector& point, const Vector& normal);
 		bool GetToPointAndVector(Vector& point, Vector& normal) const;
-		void SetFromTriangle(const Vector& vertexA, const Vector& vertexB, const Vector& vertexC);
+		void SetFromTriangle(const Triangle& triangle);
 		double SignedDistanceToPoint(const Vector& point) const;
 		bool ContainsPoint(const Vector& point, double planeThickness) const;
 		bool RayCast(const Vector& rayOrigin, const Vector& rayDirection, double& lambda) const;

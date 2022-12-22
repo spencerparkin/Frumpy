@@ -1,6 +1,7 @@
 #include "Image.h"
 #include "Vertex.h"
 #include "Plane.h"
+#include "Triangle.h"
 #include <math.h>
 
 using namespace Frumpy;
@@ -164,8 +165,13 @@ void Image::RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const V
 	if (minRow >= maxRow)
 		return;
 
+	Triangle triangle;
+	triangle.vertex[0] = vertexA.cameraSpacePoint;
+	triangle.vertex[1] = vertexB.cameraSpacePoint;
+	triangle.vertex[2] = vertexC.cameraSpacePoint;
+
 	Plane planeOfTriangle;
-	planeOfTriangle.SetFromTriangle(vertexA.cameraSpacePoint, vertexB.cameraSpacePoint, vertexC.cameraSpacePoint);
+	planeOfTriangle.SetFromTriangle(triangle);
 
 	for (int row = minRow; row <= maxRow; row++)
 	{
@@ -174,9 +180,14 @@ void Image::RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const V
 		double y = double(row);
 		
 		double t0 = (y - edges[0].vertexB->y) / (edges[0].vertexA->y - edges[0].vertexB->y);
-		double x0 = edges[0].vertexA->x * t0 + edges[0].vertexB->x * (1.0 - t0);
-		
+		if (t0 != t0 || isinf(t0))
+			continue;
+
 		double t1 = (y - edges[1].vertexB->y) / (edges[1].vertexA->y - edges[1].vertexB->y);
+		if (t1 != t1 || isinf(t1))
+			continue;
+
+		double x0 = edges[0].vertexA->x * t0 + edges[0].vertexB->x * (1.0 - t0);
 		double x1 = edges[1].vertexA->x * t1 + edges[1].vertexB->x * (1.0 - t1);
 		
 		double minX = FRUMPY_MIN(x0, x1);
@@ -212,10 +223,24 @@ void Image::RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const V
 				pixelZ->depth = (float)trianglePoint.z;
 				Pixel* pixel = this->GetPixel(location);
 
-				// TODO: Are barycentric coordinates the right way to interpolate color and texture coordinates?
+				Vector baryCoords;
+				triangle.CalcBarycentricCoordinates(trianglePoint, baryCoords);
 
-				// TODO: For now, just do this until we know how to interpolate color.
-				pixel->color.SetColor(255, 0, 0, 0);
+				Vector interpolatedColor =
+					vertexA.color * baryCoords.x +
+					vertexB.color * baryCoords.y +
+					vertexC.color * baryCoords.z;
+
+				Vector interpolatedTexCoords =
+					vertexA.texCoords * baryCoords.x +
+					vertexB.texCoords * baryCoords.y +
+					vertexC.texCoords * baryCoords.z;	// TODO: Do something with this.  Will it looks correct?
+
+				pixel->color.SetColor(
+					unsigned char(interpolatedColor.x * 255.0),
+					unsigned char(interpolatedColor.y * 255.0),
+					unsigned char(interpolatedColor.z * 255.0),
+					0);
 			}
 		}
 	}

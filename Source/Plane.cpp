@@ -1,5 +1,6 @@
 #include "Plane.h"
 #include "Vector.h"
+#include "Triangle.h"
 #include <math.h>
 
 using namespace Frumpy;
@@ -36,11 +37,11 @@ bool Plane::GetToPointAndVector(Vector& point, Vector& normal) const
 	return true;
 }
 
-void Plane::SetFromTriangle(const Vector& vertexA, const Vector& vertexB, const Vector& vertexC)
+void Plane::SetFromTriangle(const Triangle& triangle)
 {
 	Vector normal;
-	normal.Cross(vertexB - vertexA, vertexC - vertexA);
-	this->SetFromPointAndVector(vertexA, normal);
+	normal.Cross(triangle.vertex[1] - triangle.vertex[0], triangle.vertex[2] - triangle.vertex[0]);
+	this->SetFromPointAndVector(triangle.vertex[0], normal);
 }
 
 double Plane::SignedDistanceToPoint(const Vector& point) const
