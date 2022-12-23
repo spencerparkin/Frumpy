@@ -73,8 +73,8 @@ namespace Frumpy
 		Pixel* GetPixel(const Location& location);
 		const Pixel* GetPixel(const Location& location) const;
 
-		void RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const Vertex& vertexC, const PipelineMatrices& pipelineMatrices, Image& depthBuffer);
-
+		// TODO: Support load/save of PPM format?
+		
 	private:
 
 		Pixel* pixelData;

@@ -1,5 +1,6 @@
 #include "Mesh.h"
 #include "Vertex.h"
+#include "Renderer.h"
 
 using namespace Frumpy;
 
@@ -23,10 +24,10 @@ Mesh::Mesh()
 	return true;
 }
 
-/*virtual*/ void Mesh::Render(const PipelineMatrices& pipelineMatrices, Image& image, Image& depthBuffer) const
+/*virtual*/ void Mesh::Render(Renderer& renderer) const
 {
-	Matrix objectToImage = pipelineMatrices.worldToImage * this->objectToWorld;
-	Matrix objectToCamera = pipelineMatrices.worldToCamera * this->objectToWorld;
+	Matrix objectToImage = renderer.pipelineMatrices.worldToImage * this->objectToWorld;
+	Matrix objectToCamera = renderer.pipelineMatrices.worldToCamera * this->objectToWorld;
 
 	for (unsigned int i = 0; i < this->vertexBufferSize; i++)
 	{
@@ -64,7 +65,12 @@ Mesh::Mesh()
 		if (triangleNorm.z < 0.0)
 			continue;
 
-		image.RenderTriangle(vertexA, vertexB, vertexC, pipelineMatrices, depthBuffer);
+		// Render by submitting a job to the renderer.
+		Renderer::TriangleRenderJob* job = new Renderer::TriangleRenderJob();
+		job->vertex[0] = &vertexA;
+		job->vertex[1] = &vertexB;
+		job->vertex[2] = &vertexC;
+		renderer.SubmitJob(job);
 	}
 }
 

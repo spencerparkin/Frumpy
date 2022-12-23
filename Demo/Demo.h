@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "Image.h"
 #include "Mesh.h"
+#include "Renderer.h"
 
 #define MAX_LOADSTRING 100
 
@@ -41,7 +42,9 @@ private:
 	Frumpy::Scene* scene;
 	Frumpy::Camera* camera;
 	Frumpy::Image* image;
+	Frumpy::Image* depthBuffer;
 	Frumpy::Mesh* mesh;
+	Frumpy::Renderer* renderer;
 	double rotationAngle;
 	double rotationRate;
 };

@@ -25,7 +25,9 @@ Demo::Demo()
     this->scene = nullptr;
     this->camera = nullptr;
     this->image = nullptr;
+    this->depthBuffer = nullptr;
     this->mesh = nullptr;
+    this->renderer = nullptr;
     this->rotationAngle = 0.0;
     this->rotationRate = 20.0;
 }
@@ -151,10 +153,10 @@ void Demo::Run()
             DispatchMessage(&this->msg);
 
         // Render a frame.
-        if (this->image && this->camera && this->scene)
+        if (this->renderer && this->camera && this->scene)
         {
             // TODO: We could save a step by rendering directly into the windows bitmap.
-            this->scene->Render(*this->camera, *this->image);
+            this->scene->Render(*this->camera, *this->renderer);
             this->UpdateFramebuffer();
         }
 
@@ -198,6 +200,13 @@ int Demo::Shutdown()
         this->frameBitmapHandle = NULL;
     }
 
+    if (this->renderer)
+    {
+        this->renderer->Shutdown();
+        delete this->renderer;
+        this->renderer = nullptr;
+    }
+
     if (this->scene)
     {
         delete this->scene;
@@ -214,6 +223,12 @@ int Demo::Shutdown()
     {
         delete this->image;
         this->image = nullptr;
+    }
+
+    if (this->depthBuffer)
+    {
+        delete this->depthBuffer;
+        this->depthBuffer = nullptr;
     }
 
     return this->msg.wParam;
@@ -281,14 +296,31 @@ LRESULT Demo::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
             // TODO: Perform error handling.
             SelectObject(this->frameDCHandle, this->frameBitmapHandle);
 
+            // TODO: Why would this interfere with the renderer?  We're not using it right now.
+
             if (!this->image || this->image->GetWidth() != this->frameBitmapInfo.bmiHeader.biWidth || this->image->GetHeight() != this->frameBitmapInfo.bmiHeader.biHeight)
             {
                 delete this->image;
                 this->image = new Frumpy::Image(this->frameBitmapInfo.bmiHeader.biWidth, this->frameBitmapInfo.bmiHeader.biHeight);
             }
 
+            if (!this->depthBuffer || this->depthBuffer->GetWidth() != this->image->GetWidth() || this->depthBuffer->GetHeight() != this->image->GetHeight())
+            {
+                delete this->depthBuffer;
+                this->depthBuffer = new Frumpy::Image(this->image->GetWidth(), this->image->GetHeight());
+            }
+
             double aspectRatio = this->image->GetAspectRatio();
             this->camera->frustum.AdjustVFoviForAspectRatio(aspectRatio);
+
+            if (!this->renderer)
+            {
+                this->renderer = new Frumpy::Renderer();
+                this->renderer->Startup(10);
+            }
+
+            this->renderer->SetImage(this->image);
+            this->renderer->SetDepthBuffer(this->depthBuffer);
 
             SendMessage(this->hWndStatusBar, WM_SIZE, 0, 0);
 

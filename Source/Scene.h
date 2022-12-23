@@ -3,13 +3,13 @@
 #include "Defines.h"
 #include "Matrix.h"
 #include "List.h"
-#include "Camera.h"
 #include "Image.h"
+#include "Camera.h"
 #include <functional>
 
 namespace Frumpy
 {
-	class Image;
+	class Renderer;
 
 	// This defines the scene as a hierarchy of scene objects.
 	class FRUMPY_API Scene
@@ -21,7 +21,7 @@ namespace Frumpy
 		// This is it!  This is the main entry-point into Frumpy.  Frumpy is just
 		// a bare-bones, simple-as-possible, software renderer.  That's all it is.
 		// That's all it does.  You want fancy-pants to the max?  Use DX12 or Volkan.
-		virtual void Render(const Camera& camera, Image& image) const;
+		virtual void Render(const Camera& camera, Renderer& renderer) const;
 
 		class Object;
 		typedef List<Object*> ObjectList;
@@ -35,7 +35,7 @@ namespace Frumpy
 
 			virtual void CalculateWorldTransform(const Matrix& parentToWorld) const;
 			virtual bool IntersectsFrustum(const List<Plane>& frustumPlanesList) const;
-			virtual void Render(const PipelineMatrices& pipelineMatrices, Image& image, Image& depthBuffer) const;
+			virtual void Render(Renderer& renderer) const;
 
 			Matrix childToParent;
 			mutable Matrix objectToWorld;
@@ -47,8 +47,5 @@ namespace Frumpy
 		ObjectList objectList;
 		Image::Pixel clearPixel;
 		// TODO: Add list of lights?  How would we cast shadows?
-
-	protected:
-		mutable Image depthBuffer;
 	};
 }

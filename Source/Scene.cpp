@@ -1,5 +1,7 @@
 #include "Scene.h"
 #include "Camera.h"
+#include "Renderer.h"
+#include "Image.h"
 
 using namespace Frumpy;
 
@@ -13,7 +15,7 @@ Scene::Scene()
 	this->objectList.Delete();
 }
 
-/*virtual*/ void Scene::Render(const Camera& camera, Image& image) const
+/*virtual*/ void Scene::Render(const Camera& camera, Renderer& renderer) const
 {
 	// First, resolve the object-to-world transform for each object in the scene hierarchy.
 	Matrix parentToWorld;
@@ -25,12 +27,16 @@ Scene::Scene()
 	}
 
 	// Calculate the other matrices we'll need.
-	PipelineMatrices pipelineMatrices;
-	camera.frustum.CalcProjectionMatrix(pipelineMatrices.cameraToProjection);
-	pipelineMatrices.worldToCamera.Invert(camera.worldTransform);
-	image.CalcImageMatrix(pipelineMatrices.projectionToImage);
-	pipelineMatrices.worldToImage = pipelineMatrices.projectionToImage * pipelineMatrices.cameraToProjection * pipelineMatrices.worldToCamera;
-	pipelineMatrices.imageToCamera.Invert(pipelineMatrices.projectionToImage * pipelineMatrices.cameraToProjection);
+	camera.frustum.CalcProjectionMatrix(renderer.pipelineMatrices.cameraToProjection);
+	renderer.pipelineMatrices.worldToCamera.Invert(camera.worldTransform);
+	renderer.GetImage()->CalcImageMatrix(renderer.pipelineMatrices.projectionToImage);
+	renderer.pipelineMatrices.worldToImage =
+		renderer.pipelineMatrices.projectionToImage *
+		renderer.pipelineMatrices.cameraToProjection *
+		renderer.pipelineMatrices.worldToCamera;
+	renderer.pipelineMatrices.imageToCamera.Invert(
+		renderer.pipelineMatrices.projectionToImage *
+		renderer.pipelineMatrices.cameraToProjection);
 
 	// Next, go determine the list of objects visible to the viewing frustum.  This, of course,
 	// does not account for any kind of occlusion that may be taking place.  The depth buffer will
@@ -44,21 +50,23 @@ Scene::Scene()
 		return true;
 	});
 
-	// Before we can go render, we need a depth buffer.  Make sure we have one now.
-	this->depthBuffer.SetWidthAndHeight(image.GetWidth(), image.GetHeight());
+	// Clear the depth buffer before we start using it.
 	Image::Pixel pixel;
 	pixel.depth = (float)camera.frustum._far;
-	this->depthBuffer.Clear(pixel);
+	renderer.GetDepthBuffer()->Clear(pixel);
 
-	// Also, clear the given image buffer before we start rasterizing to it.
-	image.Clear(this->clearPixel);
+	// Clear the image buffer before we start rasterizing to it.
+	renderer.GetImage()->Clear(this->clearPixel);
 
 	// Finally, go render the list of objects we think are visible.
 	for (ObjectList::Node* node = visibleObjectList.GetHead(); node; node = node->GetNext())
 	{
 		const Object* object = node->value;
-		object->Render(pipelineMatrices, image, depthBuffer);
+		object->Render(renderer);
 	}
+
+	// We're done rendering when all render jobs complete.
+	renderer.WaitForAllJobCompletion();
 }
 
 void Scene::ForAllObjects(std::function<bool(Object*)> lambda)
@@ -100,7 +108,7 @@ Scene::Object::Object()
 	}
 }
 
-/*virtual*/ void Scene::Object::Render(const PipelineMatrices& pipelineMatrices, Image& image, Image& depthBuffer) const
+/*virtual*/ void Scene::Object::Render(Renderer& renderer) const
 {
 	// This method must be overridden for anything to actually get rendered.
 }
