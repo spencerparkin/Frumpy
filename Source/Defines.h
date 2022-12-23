@@ -13,3 +13,4 @@
 #define FRUMPY_RADS_TO_DEGS(x)			((x) * (180.0 / FRUMPY_PI))
 #define FRUMPY_MIN(x,y)					((x) < (y) ? (x) : (y))
 #define FRUMPY_MAX(x,y)					((x) > (y) ? (x) : (y))
+#define FRUMPY_CLAMP(x,a,b)				FRUMPY_MIN(FRUMPY_MAX(x,a),b)

@@ -179,13 +179,24 @@ void Image::RenderTriangle(const Vertex& vertexA, const Vertex& vertexB, const V
 		
 		double y = double(row);
 		
-		double t0 = (y - edges[0].vertexB->y) / (edges[0].vertexA->y - edges[0].vertexB->y);
-		if (t0 != t0 || isinf(t0))
+		double d0 = edges[0].vertexA->y - edges[0].vertexB->y;
+		if (d0 == 0.0)
 			continue;
 
-		double t1 = (y - edges[1].vertexB->y) / (edges[1].vertexA->y - edges[1].vertexB->y);
-		if (t1 != t1 || isinf(t1))
+		double t0 = (y - edges[0].vertexB->y) / d0;
+		if (isinf(t0) || isnan(t0))
 			continue;
+
+		double d1 = edges[1].vertexA->y - edges[1].vertexB->y;
+		if (d1 == 0.0)
+			continue;
+
+		double t1 = (y - edges[1].vertexB->y) / d1;
+		if (isinf(t1) || isnan(t1))
+			continue;
+
+		t0 = FRUMPY_CLAMP(t0, 0.0, 1.0);
+		t1 = FRUMPY_CLAMP(t1, 0.0, 1.0);
 
 		double x0 = edges[0].vertexA->x * t0 + edges[0].vertexB->x * (1.0 - t0);
 		double x1 = edges[1].vertexA->x * t1 + edges[1].vertexB->x * (1.0 - t1);

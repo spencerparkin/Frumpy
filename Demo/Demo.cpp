@@ -1,7 +1,9 @@
 // Demo.cpp : Defines the entry point for the application.
 //
 
-// Helpful resource used here: https://www.youtube.com/watch?v=q1fMa8Hufmg
+// Helpful resources:
+// - https://www.youtube.com/watch?v=q1fMa8Hufmg
+// - http://www.winprog.org/tutorial/
 
 #include "framework.h"
 #include "Demo.h"
@@ -25,7 +27,7 @@ Demo::Demo()
     this->image = nullptr;
     this->mesh = nullptr;
     this->rotationAngle = 0.0;
-    this->rotationRate = 60.0;
+    this->rotationRate = 20.0;
 }
 
 /*virtual*/ Demo::~Demo()
@@ -164,7 +166,9 @@ void Demo::Run()
         totalElapsedTimeSeconds += deltaTimeSeconds;
         
         // Animate our mesh by rotating it at a desired rate.
-        this->rotationAngle += this->rotationRate * deltaTimeSeconds;
+        static bool rotate = true;
+        if (rotate)
+            this->rotationAngle += this->rotationRate * deltaTimeSeconds;
         //Frumpy::Vector axis(1.0, 0.0, 0.0);
         Frumpy::Vector axis(0.0, 0.0, 1.0);
         this->mesh->childToParent.Rotation(axis, FRUMPY_DEGS_TO_RADS(this->rotationAngle));

@@ -38,9 +38,9 @@ bool Triangle::CalcBarycentricCoordinates(const Vector& interiorPoint, Vector& b
 	double alpha = (px * vy - py * vx) / det;
 	double beta = (-px * uy + py * ux) / det;
 
-	baryCoords.x = 1.0 - alpha - beta;
-	baryCoords.y = alpha;
-	baryCoords.z = beta;
+	baryCoords.x = FRUMPY_CLAMP(1.0 - alpha - beta, 0.0, 1.0);
+	baryCoords.y = FRUMPY_CLAMP(alpha, 0.0, 1.0);
+	baryCoords.z = FRUMPY_CLAMP(beta, 0.0, 1.0);
 
 	return true;
 }
