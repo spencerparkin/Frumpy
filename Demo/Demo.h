@@ -29,9 +29,10 @@ private:
 
 	MSG msg;
 	HINSTANCE hInst;
-	WCHAR szTitle[MAX_LOADSTRING];
-	WCHAR szWindowClass[MAX_LOADSTRING];
-	HWND hWnd = NULL;
+	TCHAR szTitle[MAX_LOADSTRING];
+	TCHAR szWindowClass[MAX_LOADSTRING];
+	HWND hWnd;
+	HWND hWndStatusBar;
 	BITMAPINFO frameBitmapInfo;
 	HBITMAP frameBitmapHandle;
 	HDC frameDCHandle;

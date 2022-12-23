@@ -15,6 +15,7 @@ Demo::Demo()
     this->szTitle[0] = '\0';
     this->szWindowClass[0] = '\0';
     this->hWnd = NULL;
+    this->hWndStatusBar = NULL;
     this->frameBitmapHandle = nullptr;
     this->frameDCHandle = nullptr;
     this->framePixelBuffer = nullptr;
@@ -95,30 +96,35 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->frameDCHandle = CreateCompatibleDC(NULL);
     // TODO: Error handling.
 
-    LoadStringW(this->hInst, IDS_APP_TITLE, this->szTitle, MAX_LOADSTRING);
-    LoadStringW(this->hInst, IDC_DEMO, this->szWindowClass, MAX_LOADSTRING);
+    LoadString(this->hInst, IDS_APP_TITLE, this->szTitle, MAX_LOADSTRING);
+    LoadString(this->hInst, IDC_DEMO, this->szWindowClass, MAX_LOADSTRING);
 
-    WNDCLASSEXW wcex;
-    wcex.cbSize = sizeof(WNDCLASSEX);
-    wcex.style = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc = &Demo::WndProc;
-    wcex.cbClsExtra = 0;
-    wcex.cbWndExtra = sizeof(Demo*);
-    wcex.hInstance = this->hInst;
-    wcex.hIcon = LoadIcon(this->hInst, MAKEINTRESOURCE(IDI_DEMO));
-    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_DEMO);
-    wcex.lpszClassName = szWindowClass;
-    wcex.hIconSm = LoadIcon(this->hInst, MAKEINTRESOURCE(IDI_SMALL));
-    ATOM atom = RegisterClassExW(&wcex);
+    WNDCLASSEX winClass;
+    winClass.cbSize = sizeof(WNDCLASSEX);
+    winClass.style = CS_HREDRAW | CS_VREDRAW;
+    winClass.lpfnWndProc = &Demo::WndProc;
+    winClass.cbClsExtra = 0;
+    winClass.cbWndExtra = sizeof(Demo*);
+    winClass.hInstance = this->hInst;
+    winClass.hIcon = LoadIcon(this->hInst, MAKEINTRESOURCE(IDI_DEMO));
+    winClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    winClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    winClass.lpszMenuName = MAKEINTRESOURCE(IDC_DEMO);
+    winClass.lpszClassName = szWindowClass;
+    winClass.hIconSm = LoadIcon(this->hInst, MAKEINTRESOURCE(IDI_SMALL));
+    ATOM atom = RegisterClassEx(&winClass);
     // TODO: Error handling.
 
-    this->hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, this->hInst, nullptr);
+    this->hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, this->hInst, nullptr);
     if (!this->hWnd)
         return false;
 
     SetWindowLongPtr(this->hWnd, 0, (LONG)this);
+
+    InitCommonControls();
+
+    HMENU hMenu = LoadMenu(this->hInst, winClass.lpszMenuName);
+    this->hWndStatusBar = CreateWindowEx(0, STATUSCLASSNAME, (PCTSTR)NULL, SBARS_SIZEGRIP | WS_CHILD | WS_VISIBLE, 0, 0, 0, 0, this->hWnd, hMenu, this->hInst, NULL);
 
     ShowWindow(this->hWnd, nCmdShow);
     UpdateWindow(this->hWnd);
@@ -131,6 +137,10 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 void Demo::Run()
 {
     clock_t lastTime = clock();
+
+    int frameCount = 0;
+    int frameFPSCalcFrequency = 10;
+    double totalElapsedTimeSeconds = 0.0;
 
     while (!this->exitProgram)
     {
@@ -146,13 +156,15 @@ void Demo::Run()
             this->UpdateFramebuffer();
         }
 
+        // Keep track of time taken per loop iteration.
         clock_t currentTime = clock();
         clock_t deltaTime = currentTime - lastTime;
         double deltaTimeSeconds = double(deltaTime) / double(CLOCKS_PER_SEC);
         lastTime = currentTime;
+        totalElapsedTimeSeconds += deltaTimeSeconds;
         
+        // Animate our mesh by rotating it at a desired rate.
         this->rotationAngle += this->rotationRate * deltaTimeSeconds;
-
         //Frumpy::Vector axis(1.0, 0.0, 0.0);
         Frumpy::Vector axis(0.0, 0.0, 1.0);
         this->mesh->childToParent.Rotation(axis, FRUMPY_DEGS_TO_RADS(this->rotationAngle));
@@ -160,6 +172,17 @@ void Demo::Run()
         // Ask windows to have us repaint our window.
         InvalidateRect(this->hWnd, NULL, FALSE);
         UpdateWindow(this->hWnd);
+
+        // Periodically show are framerate.
+        frameCount++;
+        if (frameCount % frameFPSCalcFrequency == 0)
+        {
+            double fps = double(frameFPSCalcFrequency) / totalElapsedTimeSeconds;
+            static char fpsMessage[256];
+            sprintf_s(fpsMessage, sizeof(fpsMessage), "Image Size: %d x %d; FPS: %f", this->image->GetWidth(), this->image->GetHeight(), fps);
+            SendMessage(this->hWndStatusBar, SB_SETTEXT, 0, (LPARAM)fpsMessage);
+            totalElapsedTimeSeconds = 0.0;
+        }
     }
 }
 
@@ -262,6 +285,8 @@ LRESULT Demo::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
             double aspectRatio = this->image->GetAspectRatio();
             this->camera->frustum.AdjustVFoviForAspectRatio(aspectRatio);
+
+            SendMessage(this->hWndStatusBar, WM_SIZE, 0, 0);
 
             break;
         }
