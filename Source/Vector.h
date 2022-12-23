@@ -24,6 +24,8 @@ namespace Frumpy
 		void Cross(const Vector& leftVector, const Vector& rightVector);
 		static double Dot(const Vector& leftVector, const Vector& rightVector);
 
+		static double AngleBetween(const Vector& vectorA, const Vector& vectorB);
+
 		double Length() const;
 		void Scale(double scalar);
 

@@ -20,6 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Camera.h" />
+    <ClInclude Include="Source\FileFormat.h" />
+    <ClInclude Include="Source\FileFormats\OBJFormat.h" />
+    <ClInclude Include="Source\FileFormats\PPMFormat.h" />
     <ClInclude Include="Source\Image.h" />
     <ClInclude Include="Source\Defines.h" />
     <ClInclude Include="Source\List.h" />
@@ -34,6 +37,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Camera.cpp" />
+    <ClCompile Include="Source\FileFormat.cpp" />
+    <ClCompile Include="Source\FileFormats\OBJFormat.cpp" />
+    <ClCompile Include="Source\FileFormats\PPMFormat.cpp" />
     <ClCompile Include="Source\Image.cpp" />
     <ClCompile Include="Source\Matrix.cpp" />
     <ClCompile Include="Source\Mesh.cpp" />

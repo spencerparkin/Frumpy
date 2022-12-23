@@ -10,6 +10,7 @@
 #include "Image.h"
 #include "Mesh.h"
 #include "Vertex.h"
+#include "FileFormats/OBJFormat.h"
 #include <time.h>
 
 Demo::Demo()
@@ -62,32 +63,26 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->scene->clearPixel.color.SetColor(0, 0, 0, 0);
 
     this->camera = new Frumpy::Camera();
-    this->camera->LookAt(Frumpy::Vector(0.0, 0.0, 10.0), Frumpy::Vector(0.0, 0.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
+    this->camera->LookAt(Frumpy::Vector(0.0, 0.0, 60.0), Frumpy::Vector(0.0, 0.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
 
-    this->mesh = new Frumpy::Mesh();
-    
-    this->mesh->SetVertexBufferSize(4);
-    
-    this->mesh->GetVertex(0)->objectSpacePoint.SetComponents(-1.0, -1.0, 0.0);
-    this->mesh->GetVertex(1)->objectSpacePoint.SetComponents(1.0, -1.0, 0.0);
-    this->mesh->GetVertex(2)->objectSpacePoint.SetComponents(1.0, 1.0, 0.0);
-    this->mesh->GetVertex(3)->objectSpacePoint.SetComponents(-1.0, 1.0, 0.0);
+    Frumpy::List<Frumpy::FileFormat::Asset*> assetList;
+    Frumpy::OBJFormat objFormat;
+    if (!objFormat.LoadAssets("Meshes/Teapot.obj", assetList) || assetList.GetCount() != 1)
+        return false;
 
-    this->mesh->GetVertex(0)->color.SetComponents(1.0, 0.0, 0.0);
-    this->mesh->GetVertex(1)->color.SetComponents(0.0, 1.0, 0.0);
-    this->mesh->GetVertex(2)->color.SetComponents(0.0, 0.0, 1.0);
-    this->mesh->GetVertex(3)->color.SetComponents(1.0, 1.0, 0.0);
-
-    this->mesh->SetIndexBufferSize(6);
-
-    this->mesh->SetIndex(0, 0);
-    this->mesh->SetIndex(1, 1);
-    this->mesh->SetIndex(2, 2);
-    this->mesh->SetIndex(3, 0);
-    this->mesh->SetIndex(4, 2);
-    this->mesh->SetIndex(5, 3);
-
+    this->mesh = dynamic_cast<Frumpy::Mesh*>(assetList.GetHead()->value);
     this->scene->objectList.AddTail(this->mesh);
+
+    srand(0);
+    for (unsigned int i = 0; i < this->mesh->GetVertexBufferSize(); i++)
+    {
+        Frumpy::Vertex* vertex = this->mesh->GetVertex(i);
+        vertex->color.x = FRUMPY_CLAMP(double(rand()) / double(RAND_MAX), 0.0, 1.0);
+        vertex->color.y = FRUMPY_CLAMP(double(rand()) / double(RAND_MAX), 0.0, 1.0);
+        vertex->color.z = FRUMPY_CLAMP(double(rand()) / double(RAND_MAX), 0.0, 1.0);
+    }
+
+    assetList.Clear();
 
     this->hInst = hInstance;
     this->exitProgram = false;
@@ -122,6 +117,8 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, this->hInst, nullptr);
     if (!this->hWnd)
         return false;
+
+    SetWindowPos(this->hWnd, HWND_TOP, 0, 0, 512, 512, SWP_NOMOVE);
 
     SetWindowLongPtr(this->hWnd, 0, (LONG)this);
 
@@ -171,8 +168,7 @@ void Demo::Run()
         static bool rotate = true;
         if (rotate)
             this->rotationAngle += this->rotationRate * deltaTimeSeconds;
-        //Frumpy::Vector axis(1.0, 0.0, 0.0);
-        Frumpy::Vector axis(0.0, 0.0, 1.0);
+        Frumpy::Vector axis(0.0, 1.0, 0.0);
         this->mesh->childToParent.Rotation(axis, FRUMPY_DEGS_TO_RADS(this->rotationAngle));
 
         // Ask windows to have us repaint our window.

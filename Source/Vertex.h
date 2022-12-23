@@ -2,6 +2,7 @@
 
 #include "Defines.h"
 #include "Vector.h"
+#include <string>
 
 namespace Frumpy
 {
@@ -12,10 +13,13 @@ namespace Frumpy
 		virtual ~Vertex();
 
 		Vector objectSpacePoint;
+		Vector objectSpaceNormal;
 		Vector color;
 		Vector texCoords;
 
 		mutable Vector cameraSpacePoint;
 		mutable Vector imageSpacePoint;
+
+		std::string MakeKey() const;
 	};
 }

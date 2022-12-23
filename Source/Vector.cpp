@@ -80,6 +80,17 @@ void Vector::Cross(const Vector& leftVector, const Vector& rightVector)
 	return dot;
 }
 
+/*static*/ double Vector::AngleBetween(const Vector& vectorA, const Vector& vectorB)
+{
+	Vector unitVectorA = vectorA;
+	Vector unitVectorB = vectorB;
+
+	unitVectorA.Normalize();
+	unitVectorB.Normalize();
+
+	return acos(Vector::Dot(unitVectorA, unitVectorB));
+}
+
 double Vector::Length() const
 {
 	return sqrt(Dot(*this, *this));

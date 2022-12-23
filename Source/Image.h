@@ -2,6 +2,7 @@
 
 #include "Defines.h"
 #include "Matrix.h"
+#include "FileFormat.h"
 
 namespace Frumpy
 {
@@ -12,7 +13,7 @@ namespace Frumpy
 	// The goal of Frumpy is simply to render into one of these images.
 	// It is up to the host application to get the image displayed on the screen,
 	// or to do any kind of double-buffering.
-	class FRUMPY_API Image
+	class FRUMPY_API Image : public FileFormat::Asset
 	{
 	public:
 		Image();
@@ -72,8 +73,6 @@ namespace Frumpy
 
 		Pixel* GetPixel(const Location& location);
 		const Pixel* GetPixel(const Location& location) const;
-
-		// TODO: Support load/save of PPM format?
 		
 	private:
 

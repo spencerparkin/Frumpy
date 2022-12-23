@@ -1,4 +1,5 @@
 #include "Triangle.h"
+#include <float.h>
 
 using namespace Frumpy;
 
@@ -43,4 +44,28 @@ bool Triangle::CalcBarycentricCoordinates(const Vector& interiorPoint, Vector& b
 	baryCoords.z = FRUMPY_CLAMP(beta, 0.0, 1.0);
 
 	return true;
+}
+
+double Triangle::Area() const
+{
+	Vector product;
+	product.Cross(this->vertex[1] - this->vertex[0], this->vertex[2] - this->vertex[0]);
+	return product.Length() / 2.0;
+}
+
+double Triangle::SmallestInteriorAngle() const
+{
+	double smallestAngle = FLT_MAX;
+	for (int i = 0; i < 3; i++)
+	{
+		const Vector& vertexA = this->vertex[i];
+		const Vector& vertexB = this->vertex[(i + 1) % 3];
+		const Vector& vertexC = this->vertex[(i + 2) % 3];
+
+		double angle = Vector::AngleBetween(vertexB - vertexA, vertexC - vertexA);
+		if (angle < smallestAngle)
+			smallestAngle = angle;
+	}
+
+	return smallestAngle;
 }

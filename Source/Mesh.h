@@ -2,6 +2,7 @@
 
 #include "Scene.h"
 #include "Vector.h"
+#include "FileFormat.h"
 
 namespace Frumpy
 {
@@ -9,13 +10,11 @@ namespace Frumpy
 	class Image;
 
 	// These are triangle meshes.
-	class FRUMPY_API Mesh : public Scene::Object
+	class FRUMPY_API Mesh : public Scene::Object, public FileFormat::Asset
 	{
 	public:
 		Mesh();
 		virtual ~Mesh();
-
-		// TODO: Add load/save for .OBJ file format?
 
 		virtual bool IntersectsFrustum(const List<Plane>& frustumPlanesList) const override;
 		virtual void Render(Renderer& renderer) const override;

@@ -14,6 +14,9 @@ namespace Frumpy
 		// Assuming the given point is on this triangle, calculate its barycentric coordinates.
 		bool CalcBarycentricCoordinates(const Vector& interiorPoint, Vector& baryCoords) const;
 
+		double Area() const;
+		double SmallestInteriorAngle() const;
+
 		Vector vertex[3];
 	};
 }
