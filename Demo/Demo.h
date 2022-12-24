@@ -22,8 +22,6 @@ public:
 
 private:
 
-	void UpdateFramebuffer();
-
 	LRESULT HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -49,7 +47,6 @@ private:
 	double rotationAngle;
 	double rotationRate;
 	TimingStat frumpyRenderTime;
-	TimingStat demoUpSampleTime;
 	TimingStat demoBlitTime;
 	TimingStat demoMessageTime;
 };

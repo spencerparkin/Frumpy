@@ -38,33 +38,52 @@ Demo::Demo()
 {
 }
 
-void Demo::UpdateFramebuffer()
-{
-    Frumpy::Vector texCoords(0.0, 0.0, 0.0);
-
-    // Up-sample from the Frumpy image to the BMP image.
-    for (unsigned int i = 0; i < (unsigned)this->frameBitmapInfo.bmiHeader.biHeight; i++)
-    {
-        texCoords.y = double(i) / double(this->frameBitmapInfo.bmiHeader.biHeight);
-
-        for (unsigned int j = 0; j < (unsigned)this->frameBitmapInfo.bmiHeader.biWidth; j++)
-        {
-            texCoords.x = double(j) / double(this->frameBitmapInfo.bmiHeader.biWidth);
-
-            unsigned char* dstPixel = (unsigned char*)&this->framePixelBuffer[i * this->frameBitmapInfo.bmiHeader.biWidth + j];
-            const Frumpy::Image::Pixel* srcPixel = this->image->GetPixel(texCoords);
-                
-            dstPixel[0] = srcPixel->color.blue;
-            dstPixel[1] = srcPixel->color.green;
-            dstPixel[2] = srcPixel->color.red;
-            dstPixel[4] = 0x00;        // alpha?
-        }
-    }
-}
-
 bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 {
-    this->image = new Frumpy::Image(300, 300);
+    this->hInst = hInstance;
+    this->exitProgram = false;
+
+    this->frameBitmapInfo.bmiHeader.biSize = sizeof(frameBitmapInfo.bmiHeader);
+    this->frameBitmapInfo.bmiHeader.biPlanes = 1;
+    this->frameBitmapInfo.bmiHeader.biBitCount = 32;
+    this->frameBitmapInfo.bmiHeader.biCompression = BI_RGB;
+    this->frameBitmapInfo.bmiHeader.biWidth = 300;
+    this->frameBitmapInfo.bmiHeader.biHeight = 300;
+
+    this->frameDCHandle = CreateCompatibleDC(NULL);
+    // TODO: Error handling.
+
+    this->frameBitmapHandle = CreateDIBSection(NULL, &this->frameBitmapInfo, DIB_RGB_COLORS, (void**)&this->framePixelBuffer, NULL, 0);
+    // TODO: Perform error handling.
+
+    for (unsigned int i = 0; i < (unsigned)this->frameBitmapInfo.bmiHeader.biHeight; i++)
+    {
+        for (unsigned int j = 0; j < (unsigned)this->frameBitmapInfo.bmiHeader.biWidth; j++)
+        {
+            unsigned char* pixel = (unsigned char*)&this->framePixelBuffer[i * this->frameBitmapInfo.bmiHeader.biWidth + j];
+            pixel[0] = unsigned char(255.0 * (double(i) / double(this->frameBitmapInfo.bmiHeader.biHeight)));
+            pixel[1] = unsigned char(255.0 * (double(i) / double(this->frameBitmapInfo.bmiHeader.biHeight)));
+            pixel[2] = unsigned char(255.0 * (double(i) / double(this->frameBitmapInfo.bmiHeader.biHeight)));
+            pixel[3] = 0;
+        }
+    }
+
+    SelectObject(this->frameDCHandle, this->frameBitmapHandle);
+
+    Frumpy::Image::Format format;
+    format.bShift = 0;
+    format.gShift = 8;
+    format.rShift = 16;
+    format.aShift = 24;
+
+    this->image = new Frumpy::Image();
+    this->image->SetRawPixelBuffer(this->framePixelBuffer, this->frameBitmapInfo.bmiHeader.biWidth, this->frameBitmapInfo.bmiHeader.biHeight);
+    this->image->SetFormat(format);
+
+    Frumpy::Image::Pixel pixel;
+    pixel.color = this->image->MakeColor(255, 0, 0, 0);
+    this->image->Clear(pixel);
+
     this->depthBuffer = new Frumpy::Image(this->image->GetWidth(), this->image->GetHeight());
 
     this->renderer = new Frumpy::Renderer();
@@ -73,7 +92,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->renderer->Startup(10);
 
     this->scene = new Frumpy::Scene();
-    this->scene->clearPixel.color.SetColor(0, 0, 0, 0);
+    this->scene->clearPixel.color = 0;
 
     this->camera = new Frumpy::Camera();
     this->camera->LookAt(Frumpy::Vector(0.0, 0.0, 60.0), Frumpy::Vector(0.0, 0.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
@@ -96,17 +115,6 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     }
 
     assetList.Clear();
-
-    this->hInst = hInstance;
-    this->exitProgram = false;
-
-    this->frameBitmapInfo.bmiHeader.biSize = sizeof(frameBitmapInfo.bmiHeader);
-    this->frameBitmapInfo.bmiHeader.biPlanes = 1;
-    this->frameBitmapInfo.bmiHeader.biBitCount = 32;
-    this->frameBitmapInfo.bmiHeader.biCompression = BI_RGB;
-
-    this->frameDCHandle = CreateCompatibleDC(NULL);
-    // TODO: Error handling.
 
     LoadString(this->hInst, IDS_APP_TITLE, this->szTitle, MAX_LOADSTRING);
     LoadString(this->hInst, IDC_DEMO, this->szWindowClass, MAX_LOADSTRING);
@@ -165,20 +173,11 @@ void Demo::Run()
                 DispatchMessage(&this->msg);
         }
 
-        // Render a frame.
+        // Render a frame directly into the windows BMP memory.
         if (this->renderer && this->camera && this->scene)
         {
-            // Have frumpy render into our image.
-            {
-                ProfileBlock profileBlock(&this->frumpyRenderTime);
-                this->scene->Render(*this->camera, *this->renderer);
-            }
-
-            // Up-sample the frumpy image into the windows BMP.
-            {
-                ProfileBlock profileBlock(&this->demoUpSampleTime);
-                this->UpdateFramebuffer();
-            }
+            ProfileBlock profileBlock(&this->frumpyRenderTime);
+            this->scene->Render(*this->camera, *this->renderer);
         }
 
         // Keep track of time taken per loop iteration.
@@ -205,14 +204,13 @@ void Demo::Run()
         {
             double fps = double(frameFPSCalcFrequency) / totalElapsedTimeSeconds;
             static char fpsMessage[256];
-            sprintf_s(fpsMessage, sizeof(fpsMessage), "Image Size: %d x %d; FPS: %2.4f; Render: %2.4f; Blit: %2.4f; Msg: %2.4f; Up-sample: %2.4f",
+            sprintf_s(fpsMessage, sizeof(fpsMessage), "Image Size: %d x %d; FPS: %2.4f; Render: %2.4f; Blit: %2.4f; Msg: %2.4f",
                 this->image->GetWidth(),
                 this->image->GetHeight(),
                 fps,
                 this->frumpyRenderTime.GetAverageMilliseconds(),
                 this->demoBlitTime.GetAverageMilliseconds(),
-                this->demoMessageTime.GetAverageMilliseconds(),
-                this->demoUpSampleTime.GetAverageMilliseconds());
+                this->demoMessageTime.GetAverageMilliseconds());
             SendMessage(this->hWndStatusBar, SB_SETTEXT, 0, (LPARAM)fpsMessage);
             totalElapsedTimeSeconds = 0.0;
         }
@@ -303,31 +301,24 @@ LRESULT Demo::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
 
-            // TODO: Render directly from Frompy into windows BMP and then replace this with StretchDIBits?
-            BitBlt(hdc, ps.rcPaint.left, ps.rcPaint.top,
-                ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top,
-                this->frameDCHandle, ps.rcPaint.left, ps.rcPaint.top, SRCCOPY);
+            RECT statusBarRect;
+            GetWindowRect(this->hWndStatusBar, &statusBarRect);
+            DWORD statBarHeight = statusBarRect.bottom - statusBarRect.top;
+
+            int result = StretchDIBits(hdc, ps.rcPaint.left, ps.rcPaint.top,
+                ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top - statBarHeight,
+                0, 0, this->frameBitmapInfo.bmiHeader.biWidth, this->frameBitmapInfo.bmiHeader.biHeight,
+                this->framePixelBuffer, &this->frameBitmapInfo, DIB_RGB_COLORS, SRCCOPY);
 
             EndPaint(hWnd, &ps);
             break;
         }
         case WM_SIZE:
         {
-            this->frameBitmapInfo.bmiHeader.biWidth = LOWORD(lParam);
-            this->frameBitmapInfo.bmiHeader.biHeight = HIWORD(lParam);
+            DWORD width = LOWORD(lParam);
+            DWORD height = HIWORD(lParam);
 
-            if (this->frameBitmapHandle != NULL)
-            {
-                DeleteObject(this->frameBitmapHandle);
-                this->frameBitmapHandle = NULL;
-            }
-
-            this->frameBitmapHandle = CreateDIBSection(NULL, &this->frameBitmapInfo, DIB_RGB_COLORS, (void**)&this->framePixelBuffer, NULL, 0);
-            // TODO: Perform error handling.
-
-            SelectObject(this->frameDCHandle, this->frameBitmapHandle);
-
-            double aspectRatio = double(this->frameBitmapInfo.bmiHeader.biWidth) / double(this->frameBitmapInfo.bmiHeader.biHeight);
+            double aspectRatio = double(width) / double(height);
             this->camera->frustum.AdjustVFoviForAspectRatio(aspectRatio);
 
             SendMessage(this->hWndStatusBar, WM_SIZE, 0, 0);

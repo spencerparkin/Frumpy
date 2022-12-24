@@ -275,7 +275,6 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 			if (pixelZ && trianglePoint.z < pixelZ->depth)	// TODO: Depth-testing optional?
 			{
 				pixelZ->depth = (float)trianglePoint.z;
-				Image::Pixel* pixel = image->GetPixel(location);
 
 				Vector baryCoords;
 				triangle.CalcBarycentricCoordinates(trianglePoint, baryCoords);
@@ -290,11 +289,11 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 					vertexB.texCoords * baryCoords.y +
 					vertexC.texCoords * baryCoords.z;	// TODO: Do something with this.  Will it look correct?
 
-				pixel->color.SetColor(
+				image->SetPixel(location, image->MakeColor(
 					unsigned char(interpolatedColor.x * 255.0),
 					unsigned char(interpolatedColor.y * 255.0),
 					unsigned char(interpolatedColor.z * 255.0),
-					0);	// TODO: What about alpha here?
+					0));	// TODO: What about alpha here?
 			}
 		}
 	}

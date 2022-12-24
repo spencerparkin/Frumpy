@@ -5,27 +5,65 @@ using namespace Frumpy;
 
 Image::Image()
 {
+	this->ownsMemory = false;
 	this->pixelData = nullptr;
 	this->width = 0;
 	this->height = 0;
+	this->format.rShift = 0;
+	this->format.gShift = 8;
+	this->format.bShift = 16;
+	this->format.aShift = 24;
 }
 
 Image::Image(unsigned int width, unsigned int height)
 {
+	this->ownsMemory = false;
 	this->pixelData = nullptr;
+	this->format.rShift = 0;
+	this->format.gShift = 8;
+	this->format.bShift = 16;
+	this->format.aShift = 24;
 	this->SetWidthAndHeight(width, height);
 }
 
 /*virtual*/ Image::~Image()
 {
-	delete[] this->pixelData;
+	if (this->ownsMemory)
+		delete[] this->pixelData;
+}
+
+void Image::SetRawPixelBuffer(void* buffer, unsigned int width, unsigned int height)
+{
+	if (this->ownsMemory)
+		delete[] this->pixelData;
+
+	this->pixelData = (Pixel*)buffer;
+	this->ownsMemory = false;
+	this->width = width;
+	this->height = height;
+}
+
+bool Image::SetPixel(const Location& location, uint32_t color)
+{
+	Pixel* pixel = this->GetPixel(location);
+	if (!pixel)
+		return false;
+
+	pixel->color = color;
+	return true;
+}
+
+uint32_t Image::MakeColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a)
+{
+	return (r << this->format.rShift) | (g << this->format.gShift) | (b << this->format.bShift) | (a << this->format.aShift);
 }
 
 void Image::SetWidthAndHeight(unsigned int width, unsigned int height)
 {
 	if (width != this->width || height != this->height)
 	{
-		delete[] this->pixelData;
+		if (this->ownsMemory)
+			delete[] this->pixelData;
 		this->pixelData = nullptr;
 		this->width = width;
 		this->height = height;
@@ -34,13 +72,14 @@ void Image::SetWidthAndHeight(unsigned int width, unsigned int height)
 		{
 			unsigned int pixelDataSize = this->GetRawPixelBufferSize();
 			this->pixelData = new Pixel[pixelDataSize];
+			this->ownsMemory = true;
 		}
 	}
 }
 
 void Image::Clear(const Pixel& pixel)
 {
-	for (unsigned int i = 0; i < this->GetRawPixelBufferSize(); i++)
+	for (unsigned int i = 0; i < this->GetNumPixels(); i++)
 		this->pixelData[i] = pixel;
 }
 

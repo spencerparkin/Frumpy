@@ -3,6 +3,7 @@
 #include "Defines.h"
 #include "Matrix.h"
 #include "FileFormat.h"
+#include <stdint.h>
 
 namespace Frumpy
 {
@@ -27,9 +28,16 @@ namespace Frumpy
 			return reinterpret_cast<unsigned char*>(pixelData);
 		}
 
+		void SetRawPixelBuffer(void* buffer, unsigned int width, unsigned int height);
+
+		unsigned int GetNumPixels() const
+		{
+			return this->width * this->height;
+		}
+
 		unsigned int GetRawPixelBufferSize() const
 		{
-			return this->width * this->height * sizeof(Pixel);
+			return this->GetNumPixels() * sizeof(Pixel);
 		}
 
 		unsigned int GetWidth() const { return this->width; }
@@ -39,24 +47,19 @@ namespace Frumpy
 
 		void CalcImageMatrix(Matrix& imageMatrix) const;
 
-		struct Color
+		struct Format
 		{
-			unsigned char red, green, blue, alpha;
-
-			void SetColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
-			{
-				this->red = red;
-				this->green = green;
-				this->blue = blue;
-				this->alpha = alpha;
-			}
+			unsigned int rShift, gShift, bShift, aShift;
 		};
+
+		void SetFormat(const Format& format) { this->format = format; }
+		Format GetFormat() const { return this->format; }
 
 		struct Pixel
 		{
 			union
 			{
-				Color color;
+				uint32_t color;
 				float depth;
 			};
 		};
@@ -76,11 +79,16 @@ namespace Frumpy
 
 		Pixel* GetPixel(const Vector& texCoords);
 		const Pixel* GetPixel(const Vector& texCoords) const;
-		
+
+		bool SetPixel(const Location& location, uint32_t color);
+		uint32_t MakeColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a);
+
 	private:
 
 		Pixel* pixelData;
 		unsigned int width;
 		unsigned int height;
+		bool ownsMemory;
+		Format format;
 	};
 }
