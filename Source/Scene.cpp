@@ -7,7 +7,7 @@ using namespace Frumpy;
 
 Scene::Scene()
 {
-	this->clearPixel.color.SetColor(0, 0, 0, 0);
+	this->clearPixel.color = 0;
 }
 
 /*virtual*/ Scene::~Scene()

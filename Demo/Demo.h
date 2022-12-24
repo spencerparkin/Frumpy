@@ -6,6 +6,7 @@
 #include "Image.h"
 #include "Mesh.h"
 #include "Renderer.h"
+#include "ProfileBlock.h"
 
 #define MAX_LOADSTRING 100
 
@@ -20,8 +21,6 @@ public:
 	void Run();
 
 private:
-
-	void UpdateFramebuffer();
 
 	LRESULT HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -47,4 +46,7 @@ private:
 	Frumpy::Renderer* renderer;
 	double rotationAngle;
 	double rotationRate;
+	TimingStat frumpyRenderTime;
+	TimingStat demoBlitTime;
+	TimingStat demoMessageTime;
 };

@@ -157,12 +157,16 @@
   <ItemGroup>
     <ClInclude Include="Demo.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="ProfileBlock.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TimePoint.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="ProfileBlock.cpp" />
+    <ClCompile Include="TimePoint.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Demo.rc" />
