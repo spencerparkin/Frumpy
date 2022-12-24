@@ -39,26 +39,38 @@ Demo::Demo()
 
 void Demo::UpdateFramebuffer()
 {
-    if (this->image && this->image->GetWidth() == this->frameBitmapInfo.bmiHeader.biWidth && this->image->GetHeight() == this->frameBitmapInfo.bmiHeader.biHeight)
+    Frumpy::Vector texCoords(0.0, 0.0, 0.0);
+
+    // Up-sample from the Frumpy image to the BMP image.
+    for (unsigned int i = 0; i < (unsigned)this->frameBitmapInfo.bmiHeader.biHeight; i++)
     {
-        for (unsigned int i = 0; i < (unsigned)this->frameBitmapInfo.bmiHeader.biHeight; i++)
+        texCoords.y = double(i) / double(this->frameBitmapInfo.bmiHeader.biHeight);
+
+        for (unsigned int j = 0; j < (unsigned)this->frameBitmapInfo.bmiHeader.biWidth; j++)
         {
-            for (unsigned int j = 0; j < (unsigned)this->frameBitmapInfo.bmiHeader.biWidth; j++)
-            {
-                unsigned char* dstPixel = (unsigned char*)&this->framePixelBuffer[i * this->frameBitmapInfo.bmiHeader.biWidth + j];
-                const Frumpy::Image::Pixel* srcPixel = this->image->GetPixel(Frumpy::Image::Location{ i, j });
+            texCoords.x = double(j) / double(this->frameBitmapInfo.bmiHeader.biWidth);
+
+            unsigned char* dstPixel = (unsigned char*)&this->framePixelBuffer[i * this->frameBitmapInfo.bmiHeader.biWidth + j];
+            const Frumpy::Image::Pixel* srcPixel = this->image->GetPixel(texCoords);
                 
-                dstPixel[0] = srcPixel->color.blue;
-                dstPixel[1] = srcPixel->color.green;
-                dstPixel[2] = srcPixel->color.red;
-                dstPixel[4] = 0x00;        // alpha?
-            }
+            dstPixel[0] = srcPixel->color.blue;
+            dstPixel[1] = srcPixel->color.green;
+            dstPixel[2] = srcPixel->color.red;
+            dstPixel[4] = 0x00;        // alpha?
         }
     }
 }
 
 bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 {
+    this->image = new Frumpy::Image(300, 300);
+    this->depthBuffer = new Frumpy::Image(this->image->GetWidth(), this->image->GetHeight());
+
+    this->renderer = new Frumpy::Renderer();
+    this->renderer->SetImage(this->image);
+    this->renderer->SetDepthBuffer(this->depthBuffer);
+    this->renderer->Startup(10);
+
     this->scene = new Frumpy::Scene();
     this->scene->clearPixel.color.SetColor(0, 0, 0, 0);
 
@@ -290,33 +302,11 @@ LRESULT Demo::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
             this->frameBitmapHandle = CreateDIBSection(NULL, &this->frameBitmapInfo, DIB_RGB_COLORS, (void**)&this->framePixelBuffer, NULL, 0);
             // TODO: Perform error handling.
+
             SelectObject(this->frameDCHandle, this->frameBitmapHandle);
 
-            // TODO: Why would this interfere with the renderer?  We're not using it right now.
-
-            if (!this->image || this->image->GetWidth() != this->frameBitmapInfo.bmiHeader.biWidth || this->image->GetHeight() != this->frameBitmapInfo.bmiHeader.biHeight)
-            {
-                delete this->image;
-                this->image = new Frumpy::Image(this->frameBitmapInfo.bmiHeader.biWidth, this->frameBitmapInfo.bmiHeader.biHeight);
-            }
-
-            if (!this->depthBuffer || this->depthBuffer->GetWidth() != this->image->GetWidth() || this->depthBuffer->GetHeight() != this->image->GetHeight())
-            {
-                delete this->depthBuffer;
-                this->depthBuffer = new Frumpy::Image(this->image->GetWidth(), this->image->GetHeight());
-            }
-
-            double aspectRatio = this->image->GetAspectRatio();
+            double aspectRatio = double(this->frameBitmapInfo.bmiHeader.biWidth) / double(this->frameBitmapInfo.bmiHeader.biHeight);
             this->camera->frustum.AdjustVFoviForAspectRatio(aspectRatio);
-
-            if (!this->renderer)
-            {
-                this->renderer = new Frumpy::Renderer();
-                this->renderer->Startup(10);
-            }
-
-            this->renderer->SetImage(this->image);
-            this->renderer->SetDepthBuffer(this->depthBuffer);
 
             SendMessage(this->hWndStatusBar, WM_SIZE, 0, 0);
 

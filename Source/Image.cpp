@@ -1,4 +1,5 @@
 #include "Image.h"
+#include "Vector.h"
 
 using namespace Frumpy;
 
@@ -65,6 +66,19 @@ Image::Pixel* Image::GetPixel(const Location& location)
 const Image::Pixel* Image::GetPixel(const Location& location) const
 {
 	return const_cast<Image*>(this)->GetPixel(location);
+}
+
+Image::Pixel* Image::GetPixel(const Vector& texCoords)
+{
+	Location location;
+	location.row = FRUMPY_CLAMP(unsigned int(texCoords.y * double(this->height - 1)), 0, this->height - 1);
+	location.col = FRUMPY_CLAMP(unsigned int(texCoords.x * double(this->width - 1)), 0, this->width - 1);
+	return this->GetPixel(location);
+}
+
+const Image::Pixel* Image::GetPixel(const Vector& texCoords) const
+{
+	return const_cast<Image*>(this)->GetPixel(texCoords);
 }
 
 void Image::CalcImageMatrix(Matrix& imageMatrix) const

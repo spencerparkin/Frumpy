@@ -73,6 +73,9 @@ namespace Frumpy
 
 		Pixel* GetPixel(const Location& location);
 		const Pixel* GetPixel(const Location& location) const;
+
+		Pixel* GetPixel(const Vector& texCoords);
+		const Pixel* GetPixel(const Vector& texCoords) const;
 		
 	private:
 
