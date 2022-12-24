@@ -11,6 +11,7 @@
 #include "Mesh.h"
 #include "Vertex.h"
 #include "FileFormats/OBJFormat.h"
+#include "ProfileBlock.h"
 #include <time.h>
 
 Demo::Demo()
@@ -158,15 +159,26 @@ void Demo::Run()
     while (!this->exitProgram)
     {
         // Flush the message queue as far as possible.
-        while (PeekMessage(&this->msg, NULL, 0, 0, PM_REMOVE))
-            DispatchMessage(&this->msg);
+        {
+            ProfileBlock profileBlock(&this->demoMessageTime);
+            while (PeekMessage(&this->msg, NULL, 0, 0, PM_REMOVE))
+                DispatchMessage(&this->msg);
+        }
 
         // Render a frame.
         if (this->renderer && this->camera && this->scene)
         {
-            // TODO: We could save a step by rendering directly into the windows bitmap.
-            this->scene->Render(*this->camera, *this->renderer);
-            this->UpdateFramebuffer();
+            // Have frumpy render into our image.
+            {
+                ProfileBlock profileBlock(&this->frumpyRenderTime);
+                this->scene->Render(*this->camera, *this->renderer);
+            }
+
+            // Up-sample the frumpy image into the windows BMP.
+            {
+                ProfileBlock profileBlock(&this->demoUpSampleTime);
+                this->UpdateFramebuffer();
+            }
         }
 
         // Keep track of time taken per loop iteration.
@@ -193,7 +205,14 @@ void Demo::Run()
         {
             double fps = double(frameFPSCalcFrequency) / totalElapsedTimeSeconds;
             static char fpsMessage[256];
-            sprintf_s(fpsMessage, sizeof(fpsMessage), "Image Size: %d x %d; FPS: %f", this->image->GetWidth(), this->image->GetHeight(), fps);
+            sprintf_s(fpsMessage, sizeof(fpsMessage), "Image Size: %d x %d; FPS: %2.4f; Render: %2.4f; Blit: %2.4f; Msg: %2.4f; Up-sample: %2.4f",
+                this->image->GetWidth(),
+                this->image->GetHeight(),
+                fps,
+                this->frumpyRenderTime.GetAverageMilliseconds(),
+                this->demoBlitTime.GetAverageMilliseconds(),
+                this->demoMessageTime.GetAverageMilliseconds(),
+                this->demoUpSampleTime.GetAverageMilliseconds());
             SendMessage(this->hWndStatusBar, SB_SETTEXT, 0, (LPARAM)fpsMessage);
             totalElapsedTimeSeconds = 0.0;
         }
@@ -279,9 +298,12 @@ LRESULT Demo::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         }
         case WM_PAINT:
         {
+            ProfileBlock profileBlock(&this->demoBlitTime);
+
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
 
+            // TODO: Render directly from Frompy into windows BMP and then replace this with StretchDIBits?
             BitBlt(hdc, ps.rcPaint.left, ps.rcPaint.top,
                 ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top,
                 this->frameDCHandle, ps.rcPaint.left, ps.rcPaint.top, SRCCOPY);
