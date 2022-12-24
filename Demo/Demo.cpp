@@ -47,26 +47,14 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->frameBitmapInfo.bmiHeader.biPlanes = 1;
     this->frameBitmapInfo.bmiHeader.biBitCount = 32;
     this->frameBitmapInfo.bmiHeader.biCompression = BI_RGB;
-    this->frameBitmapInfo.bmiHeader.biWidth = 300;
-    this->frameBitmapInfo.bmiHeader.biHeight = 300;
+    this->frameBitmapInfo.bmiHeader.biWidth = 500;
+    this->frameBitmapInfo.bmiHeader.biHeight = 500;
 
     this->frameDCHandle = CreateCompatibleDC(NULL);
     // TODO: Error handling.
 
     this->frameBitmapHandle = CreateDIBSection(NULL, &this->frameBitmapInfo, DIB_RGB_COLORS, (void**)&this->framePixelBuffer, NULL, 0);
     // TODO: Perform error handling.
-
-    for (unsigned int i = 0; i < (unsigned)this->frameBitmapInfo.bmiHeader.biHeight; i++)
-    {
-        for (unsigned int j = 0; j < (unsigned)this->frameBitmapInfo.bmiHeader.biWidth; j++)
-        {
-            unsigned char* pixel = (unsigned char*)&this->framePixelBuffer[i * this->frameBitmapInfo.bmiHeader.biWidth + j];
-            pixel[0] = unsigned char(255.0 * (double(i) / double(this->frameBitmapInfo.bmiHeader.biHeight)));
-            pixel[1] = unsigned char(255.0 * (double(i) / double(this->frameBitmapInfo.bmiHeader.biHeight)));
-            pixel[2] = unsigned char(255.0 * (double(i) / double(this->frameBitmapInfo.bmiHeader.biHeight)));
-            pixel[3] = 0;
-        }
-    }
 
     SelectObject(this->frameDCHandle, this->frameBitmapHandle);
 
@@ -79,10 +67,6 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->image = new Frumpy::Image();
     this->image->SetRawPixelBuffer(this->framePixelBuffer, this->frameBitmapInfo.bmiHeader.biWidth, this->frameBitmapInfo.bmiHeader.biHeight);
     this->image->SetFormat(format);
-
-    Frumpy::Image::Pixel pixel;
-    pixel.color = this->image->MakeColor(255, 0, 0, 0);
-    this->image->Clear(pixel);
 
     this->depthBuffer = new Frumpy::Image(this->image->GetWidth(), this->image->GetHeight());
 
@@ -139,7 +123,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     if (!this->hWnd)
         return false;
 
-    SetWindowPos(this->hWnd, HWND_TOP, 0, 0, 512, 512, SWP_NOMOVE);
+    //SetWindowPos(this->hWnd, HWND_TOP, 0, 0, 512, 512, SWP_NOMOVE);
 
     SetWindowLongPtr(this->hWnd, 0, (LONG)this);
 
