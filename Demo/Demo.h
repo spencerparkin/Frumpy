@@ -3,8 +3,8 @@
 #include "resource.h"
 #include "Scene.h"
 #include "Camera.h"
-#include "Image.h"
-#include "Mesh.h"
+#include "FileAssets/Image.h"
+#include "FileAssets/Mesh.h"
 #include "Renderer.h"
 #include "ProfileBlock.h"
 
@@ -42,8 +42,8 @@ private:
 	Frumpy::Camera* camera;
 	Frumpy::Image* image;
 	Frumpy::Image* depthBuffer;
-	Frumpy::Mesh* mesh;
 	Frumpy::Renderer* renderer;
+	Frumpy::List<Frumpy::FileFormat::Asset*> assetList;
 	double rotationAngle;
 	double rotationRate;
 	TimingStat frumpyRenderTime;

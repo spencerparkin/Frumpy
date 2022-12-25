@@ -20,32 +20,34 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Camera.h" />
+    <ClInclude Include="Source\FileAssets\Image.h" />
+    <ClInclude Include="Source\FileAssets\Mesh.h" />
     <ClInclude Include="Source\FileFormat.h" />
     <ClInclude Include="Source\FileFormats\OBJFormat.h" />
     <ClInclude Include="Source\FileFormats\PPMFormat.h" />
-    <ClInclude Include="Source\Image.h" />
     <ClInclude Include="Source\Defines.h" />
     <ClInclude Include="Source\List.h" />
     <ClInclude Include="Source\Matrix.h" />
-    <ClInclude Include="Source\Mesh.h" />
     <ClInclude Include="Source\Plane.h" />
     <ClInclude Include="Source\Renderer.h" />
     <ClInclude Include="Source\Scene.h" />
+    <ClInclude Include="Source\SceneObjects\MeshObject.h" />
     <ClInclude Include="Source\Triangle.h" />
     <ClInclude Include="Source\Vector.h" />
     <ClInclude Include="Source\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Camera.cpp" />
+    <ClCompile Include="Source\FileAssets\Image.cpp" />
+    <ClCompile Include="Source\FileAssets\Mesh.cpp" />
     <ClCompile Include="Source\FileFormat.cpp" />
     <ClCompile Include="Source\FileFormats\OBJFormat.cpp" />
     <ClCompile Include="Source\FileFormats\PPMFormat.cpp" />
-    <ClCompile Include="Source\Image.cpp" />
     <ClCompile Include="Source\Matrix.cpp" />
-    <ClCompile Include="Source\Mesh.cpp" />
     <ClCompile Include="Source\Plane.cpp" />
     <ClCompile Include="Source\Renderer.cpp" />
     <ClCompile Include="Source\Scene.cpp" />
+    <ClCompile Include="Source\SceneObjects\MeshObject.cpp" />
     <ClCompile Include="Source\Triangle.cpp" />
     <ClCompile Include="Source\Vector.cpp" />
     <ClCompile Include="Source\Vertex.cpp" />

@@ -1,5 +1,5 @@
 #include "Image.h"
-#include "Vector.h"
+#include "../Vector.h"
 
 using namespace Frumpy;
 

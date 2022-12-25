@@ -12,6 +12,7 @@ namespace Frumpy
 		FileFormat();
 		virtual ~FileFormat();
 
+		// Derivatives of this are anything that can be saved/loaded to/from disk.
 		class FRUMPY_API Asset
 		{
 		public:

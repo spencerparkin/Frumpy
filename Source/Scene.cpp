@@ -1,7 +1,7 @@
 #include "Scene.h"
 #include "Camera.h"
 #include "Renderer.h"
-#include "Image.h"
+#include "FileAssets/Image.h"
 
 using namespace Frumpy;
 
@@ -52,7 +52,7 @@ Scene::Scene()
 
 	// Clear the depth buffer before we start using it.
 	Image::Pixel pixel;
-	pixel.depth = (float)camera.frustum._far;
+	pixel.depth = -(float)camera.frustum._far;
 	renderer.GetDepthBuffer()->Clear(pixel);
 
 	// Clear the image buffer before we start rasterizing to it.
@@ -67,6 +67,20 @@ Scene::Scene()
 
 	// We're done rendering when all render jobs complete.
 	renderer.WaitForAllJobCompletion();
+}
+
+Scene::Object* Scene::FindObjectByName(const char* name)
+{
+	Object* foundObject = nullptr;
+	this->ForAllObjects([name, &foundObject](Object* object) -> bool {
+		if (0 == strcmp(name, object->name))
+		{
+			foundObject = object;
+			return false;
+		}
+		return true;
+	});
+	return foundObject;
 }
 
 void Scene::ForAllObjects(std::function<bool(Object*)> lambda)
@@ -90,6 +104,7 @@ void Scene::ForAllObjects(std::function<bool(Object*)> lambda)
 
 Scene::Object::Object()
 {
+	this->name[0] = '\0';
 }
 
 /*virtual*/ Scene::Object::~Object()

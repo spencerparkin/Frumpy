@@ -1,6 +1,6 @@
 #include "Renderer.h"
 #include "Vector.h"
-#include "Image.h"
+#include "FileAssets/Image.h"
 #include "Vertex.h"
 #include "Triangle.h"
 #include "Plane.h"
@@ -51,6 +51,25 @@ void Renderer::Shutdown()
 
 void Renderer::SubmitJob(RenderJob* job)
 {
+	// TODO: There is a problem with the Z-buffer when using multiple threads to render a scene.
+	//       The Z-buffer is a shared resource across all the threads, and all threads need both
+	//       read and write access to it.  Consequently, some form of synchronization is required
+	//       if two threads need to access the same region of the Z-buffer at the same time.  One
+	//       idea was to use an atomic compare and exchange operation, but I don't know how to do
+	//       that, and it might be too slow anyway.  Another idea is to simply control access to
+	//       the Z-buffer using a mutex.  This, however, doesn't work, I believe, because of CPU
+	//       cache write-back latency.  As possible evidence of this, if I widen the mutex lock
+	//       for the Z-buffer enough, the problem fixes itself, probably because the extra lock
+	//       time has the CPU eventually writing cache back to memory so that other threads get the
+	//       Z-buffer change, but the extra lock time, of course, slows everything down.  So, perhaps
+	//       a better idea than all that, is to simply be smarter about how we distribute the work-
+	//       load to all the threads.  I don't want to carve up the frame-buffer by region and
+	//       assign each region to each thread, because triangles can strattle regions.  Rather,
+	//       why not just make sure that no two threads are ever rendering a triangle that overlaps?
+	//       I'll have to give this some thought.  It sounds quite non-trivial.  No, the more I think
+	//       about this, the carving up idea must be the answer.  Each thread gets its own sub-region
+	//       of the image.  The rasterizer will know to clip against the region boundaries.
+
 	Thread* bestThread = nullptr;
 	for (List<Thread*>::Node* node = this->threadList.GetHead(); node; node = node->GetNext())
 	{
@@ -270,12 +289,11 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 			planeOfTriangle.RayCast(cameraPointA, rayDirection, lambda);
 			Vector trianglePoint = cameraPointA + rayDirection * lambda;
 
-			// TODO: How do we do atomic read-compare-writes to the depth buffer?  Would that be too expensive?
 			Image::Pixel* pixelZ = depthBuffer->GetPixel(location);
-			if (pixelZ && trianglePoint.z < pixelZ->depth)	// TODO: Depth-testing optional?
+			if (trianglePoint.z > pixelZ->depth)	// TODO: Depth-testing optional?
 			{
 				pixelZ->depth = (float)trianglePoint.z;
-
+			
 				Vector baryCoords;
 				triangle.CalcBarycentricCoordinates(trianglePoint, baryCoords);
 

@@ -8,6 +8,12 @@
     <Filter Include="Source\FileFormats">
       <UniqueIdentifier>{14d44ee7-0751-4d00-9574-50cf6a77fb31}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\SceneObjects">
+      <UniqueIdentifier>{fed6c2f7-e70c-4a21-9a6e-ff88031d9358}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\FileAssets">
+      <UniqueIdentifier>{1076f09d-675d-4985-bd2b-e5b0c651b934}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Defines.h">
@@ -22,9 +28,6 @@
     <ClInclude Include="Source\Vector.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Image.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="Source\List.h">
       <Filter>Source</Filter>
     </ClInclude>
@@ -32,9 +35,6 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\Plane.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Mesh.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\Vertex.h">
@@ -55,12 +55,18 @@
     <ClInclude Include="Source\FileFormats\PPMFormat.h">
       <Filter>Source\FileFormats</Filter>
     </ClInclude>
+    <ClInclude Include="Source\FileAssets\Mesh.h">
+      <Filter>Source\FileAssets</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SceneObjects\MeshObject.h">
+      <Filter>Source\SceneObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FileAssets\Image.h">
+      <Filter>Source\FileAssets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Scene.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Image.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Matrix.cpp">
@@ -73,9 +79,6 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Plane.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Mesh.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Vertex.cpp">
@@ -95,6 +98,15 @@
     </ClCompile>
     <ClCompile Include="Source\FileFormats\PPMFormat.cpp">
       <Filter>Source\FileFormats</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FileAssets\Mesh.cpp">
+      <Filter>Source\FileAssets</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\SceneObjects\MeshObject.cpp">
+      <Filter>Source\SceneObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FileAssets\Image.cpp">
+      <Filter>Source\FileAssets</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

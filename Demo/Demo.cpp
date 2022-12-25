@@ -7,10 +7,9 @@
 
 #include "framework.h"
 #include "Demo.h"
-#include "Image.h"
-#include "Mesh.h"
 #include "Vertex.h"
 #include "FileFormats/OBJFormat.h"
+#include "SceneObjects/MeshObject.h"
 #include "ProfileBlock.h"
 #include <time.h>
 
@@ -28,7 +27,6 @@ Demo::Demo()
     this->camera = nullptr;
     this->image = nullptr;
     this->depthBuffer = nullptr;
-    this->mesh = nullptr;
     this->renderer = nullptr;
     this->rotationAngle = 0.0;
     this->rotationRate = 20.0;
@@ -73,7 +71,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->renderer = new Frumpy::Renderer();
     this->renderer->SetImage(this->image);
     this->renderer->SetDepthBuffer(this->depthBuffer);
-    this->renderer->Startup(10);
+    this->renderer->Startup(1);
 
     this->scene = new Frumpy::Scene();
     this->scene->clearPixel.color = 0;
@@ -81,24 +79,30 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->camera = new Frumpy::Camera();
     this->camera->LookAt(Frumpy::Vector(0.0, 0.0, 60.0), Frumpy::Vector(0.0, 0.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
 
-    Frumpy::List<Frumpy::FileFormat::Asset*> assetList;
+    // Load the mesh twice.
     Frumpy::OBJFormat objFormat;
-    if (!objFormat.LoadAssets("Meshes/Teapot.obj", assetList) || assetList.GetCount() != 1)
+    if (!objFormat.LoadAssets("Meshes/Plane.obj", this->assetList))
+        return false;
+    if (!objFormat.LoadAssets("Meshes/Plane.obj", this->assetList))
         return false;
 
-    this->mesh = dynamic_cast<Frumpy::Mesh*>(assetList.GetHead()->value);
-    this->scene->objectList.AddTail(this->mesh);
+    Frumpy::MeshObject* meshA = new Frumpy::MeshObject();
+    Frumpy::MeshObject* meshB = new Frumpy::MeshObject();
 
-    srand(0);
-    for (unsigned int i = 0; i < this->mesh->GetVertexBufferSize(); i++)
-    {
-        Frumpy::Vertex* vertex = this->mesh->GetVertex(i);
-        vertex->color.x = FRUMPY_CLAMP(double(rand()) / double(RAND_MAX), 0.0, 1.0);
-        vertex->color.y = FRUMPY_CLAMP(double(rand()) / double(RAND_MAX), 0.0, 1.0);
-        vertex->color.z = FRUMPY_CLAMP(double(rand()) / double(RAND_MAX), 0.0, 1.0);
-    }
+    meshA->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetList.GetHead()->value));
+    meshB->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetList.GetTail()->value));
 
-    assetList.Clear();
+    meshA->GetMesh()->SetColor(Frumpy::Vector(1.0, 0.0, 0.0));
+    meshB->GetMesh()->SetColor(Frumpy::Vector(0.0, 1.0, 0.0));
+
+    meshA->childToParent.RigidBodyMotion(Frumpy::Vector(0.0, 1.0, 0.0), FRUMPY_DEGS_TO_RADS(30.0), Frumpy::Vector(0.0, 0.0, 0.0));
+    meshB->childToParent.RigidBodyMotion(Frumpy::Vector(0.0, 1.0, 0.0), FRUMPY_DEGS_TO_RADS(-30.0), Frumpy::Vector(0.0, 0.0, 0.0));
+
+    strcpy_s(meshA->name, "meshA");
+    strcpy_s(meshB->name, "meshB");
+
+    this->scene->objectList.AddTail(meshA);
+    this->scene->objectList.AddTail(meshB);
 
     LoadString(this->hInst, IDS_APP_TITLE, this->szTitle, MAX_LOADSTRING);
     LoadString(this->hInst, IDC_DEMO, this->szWindowClass, MAX_LOADSTRING);
@@ -172,11 +176,10 @@ void Demo::Run()
         totalElapsedTimeSeconds += deltaTimeSeconds;
         
         // Animate our mesh by rotating it at a desired rate.
-        static bool rotate = true;
-        if (rotate)
-            this->rotationAngle += this->rotationRate * deltaTimeSeconds;
-        Frumpy::Vector axis(0.0, 1.0, 0.0);
-        this->mesh->childToParent.Rotation(axis, FRUMPY_DEGS_TO_RADS(this->rotationAngle));
+        Frumpy::MeshObject* meshObject = (Frumpy::MeshObject*)this->scene->FindObjectByName("meshA");
+        this->rotationAngle += this->rotationRate * deltaTimeSeconds;
+        Frumpy::Vector axis(1.0, 0.0, 0.0);
+        meshObject->childToParent.Rotation(axis, FRUMPY_DEGS_TO_RADS(this->rotationAngle));
 
         // Ask windows to have us repaint our window.
         InvalidateRect(this->hWnd, NULL, FALSE);
@@ -239,6 +242,8 @@ int Demo::Shutdown()
         delete this->depthBuffer;
         this->depthBuffer = nullptr;
     }
+
+    this->assetList.Delete();
 
     return this->msg.wParam;
 }

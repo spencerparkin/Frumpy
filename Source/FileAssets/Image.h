@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Defines.h"
-#include "Matrix.h"
-#include "FileFormat.h"
+#include "../Defines.h"
+#include "../Matrix.h"
+#include "../FileFormat.h"
 #include <stdint.h>
 
 namespace Frumpy
@@ -60,7 +60,7 @@ namespace Frumpy
 			union
 			{
 				uint32_t color;
-				float depth;
+				volatile float depth;
 			};
 		};
 

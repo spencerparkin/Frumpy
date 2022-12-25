@@ -3,7 +3,7 @@
 #include "Defines.h"
 #include "Matrix.h"
 #include "List.h"
-#include "Image.h"
+#include "FileAssets/Image.h"
 #include "Camera.h"
 #include <functional>
 
@@ -18,7 +18,7 @@ namespace Frumpy
 		Scene();
 		virtual ~Scene();
 
-		// This is it!  This is the main entry-point into Frumpy.  Frumpy is just
+		// This is it!  This is the main entry-point to Frumpy.  Frumpy is just
 		// a bare-bones, simple-as-possible, software renderer.  That's all it is.
 		// That's all it does.  You want fancy-pants to the max?  Use DX12 or Volkan.
 		virtual void Render(const Camera& camera, Renderer& renderer) const;
@@ -26,7 +26,9 @@ namespace Frumpy
 		class Object;
 		typedef List<Object*> ObjectList;
 
-		// This is anything that might get rendered in the scene.
+		Object* FindObjectByName(const char* name);
+
+		// Derivatives of this are anything that might get rendered in the scene.
 		class FRUMPY_API Object
 		{
 		public:
@@ -37,6 +39,7 @@ namespace Frumpy
 			virtual bool IntersectsFrustum(const List<Plane>& frustumPlanesList) const;
 			virtual void Render(Renderer& renderer) const;
 
+			char name[128];
 			Matrix childToParent;
 			mutable Matrix objectToWorld;
 			ObjectList childObjectList;

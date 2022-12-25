@@ -31,6 +31,7 @@ namespace Frumpy
 
 		void Rotation(const Vector& axis, double angle);
 		void Translation(const Vector& delta);
+		void RigidBodyMotion(const Vector& axis, double angle, const Vector& delta);
 		void Projection(double hfovi, double vfovi, double near, double far);
 
 		void operator=(const Matrix& matrix);

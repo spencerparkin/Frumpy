@@ -225,6 +225,17 @@ void Matrix::Translation(const Vector& delta)
 	this->ele[2][3] = delta.z;
 }
 
+void Matrix::RigidBodyMotion(const Vector& axis, double angle, const Vector& delta)
+{
+	Matrix rotation;
+	rotation.Rotation(axis, angle);
+
+	Matrix translation;
+	translation.Translation(delta);
+
+	*this = translation * rotation;
+}
+
 void Matrix::Projection(double hfovi, double vfovi, double near, double far)
 {
 	this->Identity();

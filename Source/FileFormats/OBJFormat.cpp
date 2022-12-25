@@ -1,5 +1,5 @@
 #include "OBJFormat.h"
-#include "../Mesh.h"
+#include "../FileAssets/Mesh.h"
 #include "../Triangle.h"
 #include <map>
 
