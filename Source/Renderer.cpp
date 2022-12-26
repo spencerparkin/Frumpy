@@ -10,7 +10,7 @@ using namespace Frumpy;
 
 Renderer::Renderer()
 {
-	this->image = nullptr;
+	this->frameBuffer = nullptr;
 	this->depthBuffer = nullptr;
 	this->jobCount = new std::atomic<unsigned int>(0);
 }
@@ -51,11 +51,6 @@ void Renderer::Shutdown()
 
 void Renderer::SubmitJob(RenderJob* job)
 {
-	// TODO: Before any job submission for the frame, give each thread a clone of the framebuffer and z-buffer.
-	//       Each thread then renders independently and we'll composite all the clones into one at the end.
-	//       I think this might be a good solution to the z-buffer problem, and possibly other related problems
-	//       we may have, like alpha-blending.
-
 	Thread* bestThread = nullptr;
 	for (List<Thread*>::Node* node = this->threadList.GetHead(); node; node = node->GetNext())
 	{
@@ -68,12 +63,52 @@ void Renderer::SubmitJob(RenderJob* job)
 		bestThread->SubmitJob(job);
 }
 
+// TODO: We'll need an opaque pass and a translucency pass.
 void Renderer::BeginRenderPass()
 {
-	// TODO: Clone the framebufer and z-buffer to all threads.  Have them use their own clone instead of the master copy.
+	// Each thread works with their own copy of the framebuffer and z-buffer.
+	// Trying to synchronize shared access to a single framebuffer/z-buffer is not practical as far as I can see.
+	// So what we do is let each thread work independently and then composite the final framebuffer/z-buffer at the end of the pass.
+	for (List<Thread*>::Node* node = this->threadList.GetHead(); node; node = node->GetNext())
+	{
+		Thread* thread = node->value;
+		if (!thread->frameBuffer)
+			thread->frameBuffer = (Image*)this->frameBuffer->Clone();
+		else
+			thread->frameBuffer->SetAsCopyOf(this->frameBuffer);
+
+		if (!thread->depthBuffer)
+			thread->depthBuffer = (Image*)this->depthBuffer->Clone();
+		else
+			thread->depthBuffer->SetAsCopyOf(this->depthBuffer);
+	}
 }
 
 void Renderer::EndRenderPass()
+{
+	this->WaitForAllJobCompletion();
+
+	for (unsigned int i = 0; i < this->frameBuffer->GetNumPixels(); i++)
+	{
+		Image::Pixel* pixel = this->frameBuffer->GetPixel(i);
+		Image::Pixel* pixelZ = this->depthBuffer->GetPixel(i);
+
+		for (List<Thread*>::Node* node = this->threadList.GetHead(); node; node = node->GetNext())
+		{
+			Thread* thread = node->value;
+			Image::Pixel* threadPixelZ = thread->depthBuffer->GetPixel(i);
+			if (threadPixelZ->depth > pixelZ->depth)
+			{
+				Image::Pixel* threadPixel = thread->frameBuffer->GetPixel(i);
+
+				pixelZ->depth = threadPixelZ->depth;
+				pixel->color = threadPixel->color;
+			}
+		}
+	}
+}
+
+void Renderer::WaitForAllJobCompletion()
 {
 	// TODO: How can we do this without busy-waiting?
 	// First, wait for all jobs to complete.
@@ -82,8 +117,6 @@ void Renderer::EndRenderPass()
 		using namespace std::chrono_literals;
 		std::this_thread::sleep_for(1ms);
 	}
-
-	// TODO: Composite all thread frame-buffers and z-buffers into one frame-buffer and z-buffer here.
 }
 
 //-------------------------- Renderer::RenderJob --------------------------
@@ -128,10 +161,10 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 {
 	const PipelineMatrices& pipelineMatrices = thread->renderer->pipelineMatrices;
 
-	Image* image = thread->renderer->image;
-	Image* depthBuffer = thread->renderer->depthBuffer;
+	Image* frameBuffer = thread->frameBuffer;
+	Image* depthBuffer = thread->depthBuffer;
 	
-	if (!image || !depthBuffer)
+	if (!frameBuffer || !depthBuffer)
 		return;
 
 	const Vertex& vertexA = *this->vertex[0];
@@ -216,7 +249,7 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 	int midRow = int(round(midY));
 
 	minRow = FRUMPY_MAX(minRow, 0);
-	maxRow = FRUMPY_MIN(maxRow, signed(image->GetHeight() - 1));
+	maxRow = FRUMPY_MIN(maxRow, signed(frameBuffer->GetHeight() - 1));
 
 	if (minRow >= maxRow)
 		return;
@@ -264,7 +297,7 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 		int maxCol = int(ceil(maxX));
 
 		minCol = FRUMPY_MAX(minCol, 0);
-		maxCol = FRUMPY_MIN(maxCol, signed(image->GetWidth() - 1));
+		maxCol = FRUMPY_MIN(maxCol, signed(frameBuffer->GetWidth() - 1));
 
 		for (int col = minCol; col <= maxCol; col++)
 		{
@@ -301,11 +334,12 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 					vertexB.texCoords * baryCoords.y +
 					vertexC.texCoords * baryCoords.z;	// TODO: Do something with this.  Will it look correct?
 
-				image->SetPixel(location, image->MakeColor(
-					unsigned char(interpolatedColor.x * 255.0),
-					unsigned char(interpolatedColor.y * 255.0),
-					unsigned char(interpolatedColor.z * 255.0),
-					0));	// TODO: What about alpha here?
+				unsigned char r = (unsigned char)FRUMPY_CLAMP(int(interpolatedColor.x * 255.0), 0, 255);
+				unsigned char g = (unsigned char)FRUMPY_CLAMP(int(interpolatedColor.y * 255.0), 0, 255);
+				unsigned char b = (unsigned char)FRUMPY_CLAMP(int(interpolatedColor.z * 255.0), 0, 255);
+
+				uint32_t color = frameBuffer->MakeColor(r, g, b, 0);	// TODO: What about alpha here?
+				frameBuffer->SetPixel(location, color);
 			}
 		}
 	}
@@ -317,12 +351,16 @@ Renderer::Thread::Thread(Renderer* renderer) : renderJobQueueSemaphore(0)
 {
 	this->renderer = renderer;
 	this->exitSignaled = false;
+	this->frameBuffer = nullptr;
+	this->depthBuffer = nullptr;
 	this->thread = new std::thread([=]() { this->Run(); });
 }
 
 /*virtual*/ Renderer::Thread::~Thread()
 {
 	delete this->thread;
+	delete this->frameBuffer;
+	delete this->depthBuffer;
 }
 
 void Renderer::Thread::SubmitJob(RenderJob* job)

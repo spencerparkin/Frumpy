@@ -29,7 +29,7 @@ Scene::Scene()
 	// Calculate the other matrices we'll need.
 	camera.frustum.CalcProjectionMatrix(renderer.pipelineMatrices.cameraToProjection);
 	renderer.pipelineMatrices.worldToCamera.Invert(camera.worldTransform);
-	renderer.GetImage()->CalcImageMatrix(renderer.pipelineMatrices.projectionToImage);
+	renderer.GetFramebuffer()->CalcImageMatrix(renderer.pipelineMatrices.projectionToImage);
 	renderer.pipelineMatrices.worldToImage =
 		renderer.pipelineMatrices.projectionToImage *
 		renderer.pipelineMatrices.cameraToProjection *
@@ -56,7 +56,7 @@ Scene::Scene()
 	renderer.GetDepthBuffer()->Clear(pixel);
 
 	// Clear the image buffer before we start rasterizing to it.
-	renderer.GetImage()->Clear(this->clearPixel);
+	renderer.GetFramebuffer()->Clear(this->clearPixel);
 
 	// This must be called before doing any job submission.
 	renderer.BeginRenderPass();

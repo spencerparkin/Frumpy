@@ -70,11 +70,24 @@ void Image::SetWidthAndHeight(unsigned int width, unsigned int height)
 
 		if (this->width > 0 && this->height > 0)
 		{
-			unsigned int pixelDataSize = this->GetRawPixelBufferSize();
+			unsigned int pixelDataSize = this->GetNumPixels();
 			this->pixelData = new Pixel[pixelDataSize];
 			this->ownsMemory = true;
 		}
 	}
+}
+
+/*virtual*/ FileFormat::Asset* Image::Clone() const
+{
+	Image* image = new Image();
+	image->SetAsCopyOf(this);
+	return image;
+}
+
+void Image::SetAsCopyOf(const Image* image)
+{
+	this->SetWidthAndHeight(image->GetWidth(), image->GetHeight());
+	memcpy(this->pixelData, image->pixelData, this->GetRawPixelBufferSize());
 }
 
 void Image::Clear(const Pixel& pixel)

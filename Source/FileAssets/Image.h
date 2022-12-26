@@ -21,11 +21,20 @@ namespace Frumpy
 		Image(unsigned int width, unsigned int height);
 		virtual ~Image();
 
+		virtual Asset* Clone() const override;
+
+		struct Pixel;
+
 		void SetWidthAndHeight(unsigned int width, unsigned int height);
 
 		const unsigned char* GetRawPixelBuffer() const
 		{
 			return reinterpret_cast<unsigned char*>(pixelData);
+		}
+
+		Pixel* GetRawPixelBuffer()
+		{
+			return this->pixelData;
 		}
 
 		void SetRawPixelBuffer(void* buffer, unsigned int width, unsigned int height);
@@ -47,6 +56,8 @@ namespace Frumpy
 
 		void CalcImageMatrix(Matrix& imageMatrix) const;
 
+		void SetAsCopyOf(const Image* image);
+
 		struct Format
 		{
 			unsigned int rShift, gShift, bShift, aShift;
@@ -60,7 +71,7 @@ namespace Frumpy
 			union
 			{
 				uint32_t color;
-				volatile float depth;
+				float depth;
 			};
 		};
 
@@ -82,6 +93,11 @@ namespace Frumpy
 
 		bool SetPixel(const Location& location, uint32_t color);
 		uint32_t MakeColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a);
+
+		Pixel* GetPixel(unsigned int i)
+		{
+			return &this->pixelData[i];
+		}
 
 	private:
 

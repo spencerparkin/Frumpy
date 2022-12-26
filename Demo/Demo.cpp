@@ -45,8 +45,8 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->frameBitmapInfo.bmiHeader.biPlanes = 1;
     this->frameBitmapInfo.bmiHeader.biBitCount = 32;
     this->frameBitmapInfo.bmiHeader.biCompression = BI_RGB;
-    this->frameBitmapInfo.bmiHeader.biWidth = 500;
-    this->frameBitmapInfo.bmiHeader.biHeight = 500;
+    this->frameBitmapInfo.bmiHeader.biWidth = 400;
+    this->frameBitmapInfo.bmiHeader.biHeight = 400;
 
     this->frameDCHandle = CreateCompatibleDC(NULL);
     // TODO: Error handling.
@@ -69,9 +69,9 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->depthBuffer = new Frumpy::Image(this->image->GetWidth(), this->image->GetHeight());
 
     this->renderer = new Frumpy::Renderer();
-    this->renderer->SetImage(this->image);
+    this->renderer->SetFramebuffer(this->image);
     this->renderer->SetDepthBuffer(this->depthBuffer);
-    this->renderer->Startup(1);
+    this->renderer->Startup(10);
 
     this->scene = new Frumpy::Scene();
     this->scene->clearPixel.color = 0;

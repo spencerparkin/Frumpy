@@ -15,8 +15,6 @@ namespace Frumpy
 
 	class FRUMPY_API Renderer
 	{
-		friend class Thread;
-
 	public:
 		Renderer();
 		virtual ~Renderer();
@@ -60,8 +58,8 @@ namespace Frumpy
 			const Vertex* vertex[3];
 		};
 
-		void SetImage(Image* image) { this->image = image; }
-		Image* GetImage() { return this->image; }
+		void SetFramebuffer(Image* frameBuffer) { this->frameBuffer = frameBuffer; }
+		Image* GetFramebuffer() { return this->frameBuffer; }
 
 		void SetDepthBuffer(Image* depthBuffer) { this->depthBuffer = depthBuffer; }
 		Image* GetDepthBuffer() { return this->depthBuffer; }
@@ -83,12 +81,16 @@ namespace Frumpy
 			std::thread* thread;
 			bool exitSignaled;
 			Renderer* renderer;
+			Image* frameBuffer;
+			Image* depthBuffer;
 		};
 
 	private:
 
+		void WaitForAllJobCompletion();
+
 		List<Thread*> threadList;
-		Image* image;
+		Image* frameBuffer;
 		Image* depthBuffer;
 		std::atomic<unsigned int>* jobCount;
 	};
