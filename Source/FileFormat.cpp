@@ -19,3 +19,8 @@ FileFormat::Asset::Asset()
 {
 	delete this->name;
 }
+
+/*virtual*/ FileFormat::Asset* FileFormat::Asset::Clone() const
+{
+	return nullptr;
+}

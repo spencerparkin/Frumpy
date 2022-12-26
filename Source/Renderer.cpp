@@ -51,24 +51,10 @@ void Renderer::Shutdown()
 
 void Renderer::SubmitJob(RenderJob* job)
 {
-	// TODO: There is a problem with the Z-buffer when using multiple threads to render a scene.
-	//       The Z-buffer is a shared resource across all the threads, and all threads need both
-	//       read and write access to it.  Consequently, some form of synchronization is required
-	//       if two threads need to access the same region of the Z-buffer at the same time.  One
-	//       idea was to use an atomic compare and exchange operation, but I don't know how to do
-	//       that, and it might be too slow anyway.  Another idea is to simply control access to
-	//       the Z-buffer using a mutex.  This, however, doesn't work, I believe, because of CPU
-	//       cache write-back latency.  As possible evidence of this, if I widen the mutex lock
-	//       for the Z-buffer enough, the problem fixes itself, probably because the extra lock
-	//       time has the CPU eventually writing cache back to memory so that other threads get the
-	//       Z-buffer change, but the extra lock time, of course, slows everything down.  So, perhaps
-	//       a better idea than all that, is to simply be smarter about how we distribute the work-
-	//       load to all the threads.  I don't want to carve up the frame-buffer by region and
-	//       assign each region to each thread, because triangles can strattle regions.  Rather,
-	//       why not just make sure that no two threads are ever rendering a triangle that overlaps?
-	//       I'll have to give this some thought.  It sounds quite non-trivial.  No, the more I think
-	//       about this, the carving up idea must be the answer.  Each thread gets its own sub-region
-	//       of the image.  The rasterizer will know to clip against the region boundaries.
+	// TODO: Before any job submission for the frame, give each thread a clone of the framebuffer and z-buffer.
+	//       Each thread then renders independently and we'll composite all the clones into one at the end.
+	//       I think this might be a good solution to the z-buffer problem, and possibly other related problems
+	//       we may have, like alpha-blending.
 
 	Thread* bestThread = nullptr;
 	for (List<Thread*>::Node* node = this->threadList.GetHead(); node; node = node->GetNext())
@@ -82,14 +68,22 @@ void Renderer::SubmitJob(RenderJob* job)
 		bestThread->SubmitJob(job);
 }
 
-void Renderer::WaitForAllJobCompletion()
+void Renderer::BeginRenderPass()
+{
+	// TODO: Clone the framebufer and z-buffer to all threads.  Have them use their own clone instead of the master copy.
+}
+
+void Renderer::EndRenderPass()
 {
 	// TODO: How can we do this without busy-waiting?
+	// First, wait for all jobs to complete.
 	while (*this->jobCount > 0)
 	{
 		using namespace std::chrono_literals;
 		std::this_thread::sleep_for(1ms);
 	}
+
+	// TODO: Composite all thread frame-buffers and z-buffers into one frame-buffer and z-buffer here.
 }
 
 //-------------------------- Renderer::RenderJob --------------------------

@@ -28,7 +28,8 @@ namespace Frumpy
 		class Thread;
 
 		void SubmitJob(RenderJob* job);
-		void WaitForAllJobCompletion();
+		void BeginRenderPass();
+		void EndRenderPass();
 
 		class RenderJob
 		{

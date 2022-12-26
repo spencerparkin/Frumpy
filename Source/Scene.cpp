@@ -58,6 +58,9 @@ Scene::Scene()
 	// Clear the image buffer before we start rasterizing to it.
 	renderer.GetImage()->Clear(this->clearPixel);
 
+	// This must be called before doing any job submission.
+	renderer.BeginRenderPass();
+
 	// Finally, go render the list of objects we think are visible.
 	for (ObjectList::Node* node = visibleObjectList.GetHead(); node; node = node->GetNext())
 	{
@@ -65,8 +68,8 @@ Scene::Scene()
 		object->Render(renderer);
 	}
 
-	// We're done rendering when all render jobs complete.
-	renderer.WaitForAllJobCompletion();
+	// This waits for the render jobs to complete, then composites the final frame.
+	renderer.EndRenderPass();
 }
 
 Scene::Object* Scene::FindObjectByName(const char* name)

@@ -19,6 +19,8 @@ namespace Frumpy
 			Asset();
 			virtual ~Asset();
 
+			virtual Asset* Clone() const;
+
 			std::string* name;
 		};
 
