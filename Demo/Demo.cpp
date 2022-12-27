@@ -73,6 +73,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->directionLight = new Frumpy::DirectionalLight();
     this->directionLight->directionWorldSpace.SetComponents(-0.5, -1.0, 0.0);
     this->directionLight->directionWorldSpace.Normalize();
+    this->directionLight->ambientIntensity = 0.1;
 
     this->renderer = new Frumpy::Renderer();
     this->renderer->SetFramebuffer(this->image);
