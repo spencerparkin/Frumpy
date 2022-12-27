@@ -28,6 +28,7 @@ Demo::Demo()
     this->image = nullptr;
     this->depthBuffer = nullptr;
     this->renderer = nullptr;
+    this->directionLight = nullptr;
     this->rotationAngle = 0.0;
     this->rotationRate = 20.0;
     this->lastMouseMove = -1;
@@ -69,9 +70,14 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     this->depthBuffer = new Frumpy::Image(this->image->GetWidth(), this->image->GetHeight());
 
+    this->directionLight = new Frumpy::DirectionalLight();
+    this->directionLight->directionWorldSpace.SetComponents(-0.5, -1.0, 0.0);
+    this->directionLight->directionWorldSpace.Normalize();
+
     this->renderer = new Frumpy::Renderer();
     this->renderer->SetFramebuffer(this->image);
     this->renderer->SetDepthBuffer(this->depthBuffer);
+    this->renderer->SetLightSource(this->directionLight);
     this->renderer->Startup(10);
 
     this->scene = new Frumpy::Scene();
@@ -156,7 +162,7 @@ void Demo::Run()
 
         // Let the user control the camera.
         this->HandleKeyboardInput(deltaTimeSeconds);
-
+#if 0
         // Animate our mesh by rotating it at a desired rate.
         Frumpy::MeshObject* teapotObject = (Frumpy::MeshObject*)this->scene->FindObjectByName("teapot");
         if (teapotObject)
@@ -165,7 +171,7 @@ void Demo::Run()
             Frumpy::Vector axis(0.0, 1.0, 0.0);
             teapotObject->childToParent.Rotation(axis, FRUMPY_DEGS_TO_RADS(this->rotationAngle));
         }
-
+#endif
         // Render a frame directly into the windows BMP memory.
         if (this->renderer && this->camera && this->scene)
         {
@@ -233,6 +239,12 @@ int Demo::Shutdown()
     {
         delete this->depthBuffer;
         this->depthBuffer = nullptr;
+    }
+
+    if (this->directionLight)
+    {
+        delete this->directionLight;
+        this->directionLight = nullptr;
     }
 
     this->assetList.Delete();

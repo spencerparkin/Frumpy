@@ -14,6 +14,9 @@
     <Filter Include="Source\FileAssets">
       <UniqueIdentifier>{1076f09d-675d-4985-bd2b-e5b0c651b934}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\LightSources">
+      <UniqueIdentifier>{5a722af7-bc3e-4e41-8097-bacb43746e65}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Defines.h">
@@ -64,6 +67,18 @@
     <ClInclude Include="Source\FileAssets\Image.h">
       <Filter>Source\FileAssets</Filter>
     </ClInclude>
+    <ClInclude Include="Source\LightSource.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\LightSources\DirectionalLight.h">
+      <Filter>Source\LightSources</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\LightSources\SpotLight.h">
+      <Filter>Source\LightSources</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\LightSources\AmbientLight.h">
+      <Filter>Source\LightSources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Scene.cpp">
@@ -107,6 +122,18 @@
     </ClCompile>
     <ClCompile Include="Source\FileAssets\Image.cpp">
       <Filter>Source\FileAssets</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\LightSource.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\LightSources\DirectionalLight.cpp">
+      <Filter>Source\LightSources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\LightSources\SpotLight.cpp">
+      <Filter>Source\LightSources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\LightSources\AmbientLight.cpp">
+      <Filter>Source\LightSources</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

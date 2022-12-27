@@ -3,6 +3,7 @@
 #include "Defines.h"
 #include "List.h"
 #include "Matrix.h"
+#include "LightSources/AmbientLight.h"
 #include <mutex>
 #include <thread>
 #include <semaphore>
@@ -12,6 +13,7 @@ namespace Frumpy
 {
 	class Vertex;
 	class Image;
+	class LightSource;
 
 	class FRUMPY_API Renderer
 	{
@@ -77,13 +79,16 @@ namespace Frumpy
 
 			List<RenderJob*> renderJobQueue;
 			std::mutex renderJobQueueMutex;
-			std::counting_semaphore<1000> renderJobQueueSemaphore;
+			std::counting_semaphore<7000> renderJobQueueSemaphore;
 			std::thread* thread;
 			bool exitSignaled;
 			Renderer* renderer;
 			Image* frameBuffer;
 			Image* depthBuffer;
 		};
+
+		void SetLightSource(LightSource* lightSource) { this->lightSource = lightSource; }
+		LightSource* GeLightSource() { return this->lightSource; }
 
 	private:
 
@@ -93,5 +98,7 @@ namespace Frumpy
 		Image* frameBuffer;
 		Image* depthBuffer;
 		std::atomic<unsigned int>* jobCount;
+		LightSource* lightSource;
+		AmbientLight defaultLightSource;
 	};
 }

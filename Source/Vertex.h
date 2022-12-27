@@ -19,6 +19,7 @@ namespace Frumpy
 
 		mutable Vector cameraSpacePoint;
 		mutable Vector imageSpacePoint;
+		mutable Vector cameraSpaceNormal;
 
 		std::string MakeKey() const;
 	};

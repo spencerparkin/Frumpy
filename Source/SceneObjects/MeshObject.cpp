@@ -32,6 +32,7 @@ MeshObject::MeshObject()
 		const Vertex& vertex = *this->mesh->GetVertex(i);
 		objectToImage.TransformPoint(vertex.objectSpacePoint, vertex.imageSpacePoint);
 		objectToCamera.TransformPoint(vertex.objectSpacePoint, vertex.cameraSpacePoint);
+		objectToCamera.TransformVector(vertex.objectSpaceNormal, vertex.cameraSpaceNormal);
 	}
 
 	for (unsigned int i = 0; i < this->mesh->GetIndexBufferSize(); i += 3)

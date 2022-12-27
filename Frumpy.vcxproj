@@ -26,6 +26,10 @@
     <ClInclude Include="Source\FileFormats\OBJFormat.h" />
     <ClInclude Include="Source\FileFormats\PPMFormat.h" />
     <ClInclude Include="Source\Defines.h" />
+    <ClInclude Include="Source\LightSource.h" />
+    <ClInclude Include="Source\LightSources\AmbientLight.h" />
+    <ClInclude Include="Source\LightSources\DirectionalLight.h" />
+    <ClInclude Include="Source\LightSources\SpotLight.h" />
     <ClInclude Include="Source\List.h" />
     <ClInclude Include="Source\Matrix.h" />
     <ClInclude Include="Source\Plane.h" />
@@ -43,6 +47,10 @@
     <ClCompile Include="Source\FileFormat.cpp" />
     <ClCompile Include="Source\FileFormats\OBJFormat.cpp" />
     <ClCompile Include="Source\FileFormats\PPMFormat.cpp" />
+    <ClCompile Include="Source\LightSource.cpp" />
+    <ClCompile Include="Source\LightSources\AmbientLight.cpp" />
+    <ClCompile Include="Source\LightSources\DirectionalLight.cpp" />
+    <ClCompile Include="Source\LightSources\SpotLight.cpp" />
     <ClCompile Include="Source\Matrix.cpp" />
     <ClCompile Include="Source\Plane.cpp" />
     <ClCompile Include="Source\Renderer.cpp" />

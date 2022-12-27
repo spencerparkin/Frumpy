@@ -7,4 +7,4 @@ only concerns itself with generating the pixel data.  Following is the latest sc
 
 ![snapshot](https://github.com/spencerparkin/Frumpy/blob/master/Screenshot.png?raw=true)
 
-As you can see, there is much work to be done, such as lighting and texturing.
+As you can see, it looks like crap and renders really slow.

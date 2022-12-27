@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include "Vector.h"
 #include "FileAssets/Image.h"
+#include "LightSource.h"
 #include "Vertex.h"
 #include "Triangle.h"
 #include "Plane.h"
@@ -13,6 +14,7 @@ Renderer::Renderer()
 	this->frameBuffer = nullptr;
 	this->depthBuffer = nullptr;
 	this->jobCount = new std::atomic<unsigned int>(0);
+	this->lightSource = &this->defaultLightSource;
 }
 
 /*virtual*/ Renderer::~Renderer()
@@ -66,6 +68,8 @@ void Renderer::SubmitJob(RenderJob* job)
 // TODO: We'll need an opaque pass and a translucency pass.
 void Renderer::BeginRenderPass()
 {
+	this->lightSource->PrepareForRender(this->pipelineMatrices);
+
 	// Each thread works with their own copy of the framebuffer and z-buffer.
 	// Trying to synchronize shared access to a single framebuffer/z-buffer is not practical as far as I can see.
 	// So what we do is let each thread work independently and then composite the final framebuffer/z-buffer at the end of the pass.
@@ -324,19 +328,33 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 				Vector baryCoords;
 				triangle.CalcBarycentricCoordinates(trianglePoint, baryCoords);
 
-				Vector interpolatedColor =
-					vertexA.color * baryCoords.x +
-					vertexB.color * baryCoords.y +
-					vertexC.color * baryCoords.z;
-
+				LightSource::SurfaceProperties surfaceProperties;
+#if 0
 				Vector interpolatedTexCoords =
 					vertexA.texCoords * baryCoords.x +
 					vertexB.texCoords * baryCoords.y +
-					vertexC.texCoords * baryCoords.z;	// TODO: Do something with this.  Will it look correct?
+					vertexC.texCoords * baryCoords.z;
 
-				unsigned char r = (unsigned char)FRUMPY_CLAMP(int(interpolatedColor.x * 255.0), 0, 255);
-				unsigned char g = (unsigned char)FRUMPY_CLAMP(int(interpolatedColor.y * 255.0), 0, 255);
-				unsigned char b = (unsigned char)FRUMPY_CLAMP(int(interpolatedColor.z * 255.0), 0, 255);
+				surfaceProperties.diffuseColor = TODO: Sample from texture here.
+#else
+				surfaceProperties.diffuseColor =
+					vertexA.color * baryCoords.x +
+					vertexB.color * baryCoords.y +
+					vertexC.color * baryCoords.z;
+#endif
+				surfaceProperties.normal =
+					vertexA.cameraSpaceNormal * baryCoords.x +
+					vertexB.cameraSpaceNormal * baryCoords.y +
+					vertexC.cameraSpaceNormal * baryCoords.z;
+
+				surfaceProperties.normal.Normalize();
+
+				Vector surfaceColor;
+				thread->renderer->lightSource->CalcSurfaceColor(surfaceProperties, surfaceColor);
+
+				unsigned char r = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.x * 255.0), 0, 255);
+				unsigned char g = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.y * 255.0), 0, 255);
+				unsigned char b = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.z * 255.0), 0, 255);
 
 				uint32_t color = frameBuffer->MakeColor(r, g, b, 0);	// TODO: What about alpha here?
 				frameBuffer->SetPixel(location, color);
