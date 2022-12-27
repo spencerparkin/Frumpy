@@ -88,6 +88,7 @@ void Image::SetAsCopyOf(const Image* image)
 {
 	this->SetWidthAndHeight(image->GetWidth(), image->GetHeight());
 	memcpy(this->pixelData, image->pixelData, this->GetRawPixelBufferSize());
+	this->format = image->format;
 }
 
 void Image::Clear(const Pixel& pixel)

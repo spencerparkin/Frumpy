@@ -78,32 +78,17 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->scene->clearPixel.color = 0;
 
     this->camera = new Frumpy::Camera();
-    this->camera->LookAt(Frumpy::Vector(0.0, 0.0, 60.0), Frumpy::Vector(0.0, 0.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
+    this->camera->LookAt(Frumpy::Vector(0.0, 0.0, 100.0), Frumpy::Vector(0.0, 0.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
 
-    // Load the mesh twice.
     Frumpy::OBJFormat objFormat;
-    if (!objFormat.LoadAssets("Meshes/Plane.obj", this->assetList))
-        return false;
-    if (!objFormat.LoadAssets("Meshes/Plane.obj", this->assetList))
+    if (!objFormat.LoadAssets("Meshes/Teapot.obj", this->assetList))
         return false;
 
-    Frumpy::MeshObject* meshA = new Frumpy::MeshObject();
-    Frumpy::MeshObject* meshB = new Frumpy::MeshObject();
-
-    meshA->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetList.GetHead()->value));
-    meshB->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetList.GetTail()->value));
-
-    meshA->GetMesh()->SetColor(Frumpy::Vector(1.0, 0.0, 0.0));
-    meshB->GetMesh()->SetColor(Frumpy::Vector(0.0, 1.0, 0.0));
-
-    meshA->childToParent.RigidBodyMotion(Frumpy::Vector(0.0, 1.0, 0.0), FRUMPY_DEGS_TO_RADS(30.0), Frumpy::Vector(0.0, 0.0, 0.0));
-    meshB->childToParent.RigidBodyMotion(Frumpy::Vector(0.0, 1.0, 0.0), FRUMPY_DEGS_TO_RADS(-30.0), Frumpy::Vector(0.0, 0.0, 0.0));
-
-    strcpy_s(meshA->name, "meshA");
-    strcpy_s(meshB->name, "meshB");
-
-    this->scene->objectList.AddTail(meshA);
-    this->scene->objectList.AddTail(meshB);
+    Frumpy::MeshObject* teapotObject = new Frumpy::MeshObject();
+    teapotObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetList.GetTail()->value));
+    teapotObject->GetMesh()->SetColor(Frumpy::Vector(1.0, 0.0, 0.0));
+    strcpy_s(teapotObject->name, "teapot");
+    this->scene->objectList.AddTail(teapotObject);
 
     LoadString(this->hInst, IDS_APP_TITLE, this->szTitle, MAX_LOADSTRING);
     LoadString(this->hInst, IDC_DEMO, this->szWindowClass, MAX_LOADSTRING);
@@ -173,10 +158,13 @@ void Demo::Run()
         this->HandleKeyboardInput(deltaTimeSeconds);
 
         // Animate our mesh by rotating it at a desired rate.
-        Frumpy::MeshObject* meshObject = (Frumpy::MeshObject*)this->scene->FindObjectByName("meshA");
-        this->rotationAngle += this->rotationRate * deltaTimeSeconds;
-        Frumpy::Vector axis(1.0, 0.0, 0.0);
-        meshObject->childToParent.Rotation(axis, FRUMPY_DEGS_TO_RADS(this->rotationAngle));
+        Frumpy::MeshObject* teapotObject = (Frumpy::MeshObject*)this->scene->FindObjectByName("teapot");
+        if (teapotObject)
+        {
+            this->rotationAngle += this->rotationRate * deltaTimeSeconds;
+            Frumpy::Vector axis(0.0, 1.0, 0.0);
+            teapotObject->childToParent.Rotation(axis, FRUMPY_DEGS_TO_RADS(this->rotationAngle));
+        }
 
         // Render a frame directly into the windows BMP memory.
         if (this->renderer && this->camera && this->scene)

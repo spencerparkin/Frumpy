@@ -57,13 +57,11 @@ MeshObject::MeshObject()
 
 		// TODO: Frustum-cull individual triangles?
 
-#if 0
 		// Perform back-face culling in image space.
 		Vector triangleNorm;
 		triangleNorm.Cross(pointB - pointA, pointC - pointA);
 		if (triangleNorm.z < 0.0)
 			continue;
-#endif
 
 		// Render by submitting a job to the renderer.
 		Renderer::TriangleRenderJob* job = new Renderer::TriangleRenderJob();
