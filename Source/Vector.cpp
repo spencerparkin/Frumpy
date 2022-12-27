@@ -49,6 +49,34 @@ void Vector::operator=(const Vector& vector)
 	this->z = vector.z;
 }
 
+void Vector::operator+=(const Vector& vector)
+{
+	this->x += vector.x;
+	this->y += vector.y;
+	this->z += vector.z;
+}
+
+void Vector::operator-=(const Vector& vector)
+{
+	this->x -= vector.x;
+	this->y -= vector.y;
+	this->z -= vector.z;
+}
+
+void Vector::operator*=(double scalar)
+{
+	this->x *= scalar;
+	this->y *= scalar;
+	this->z *= scalar;
+}
+
+void Vector::operator/=(double scalar)
+{
+	this->x /= scalar;
+	this->y /= scalar;
+	this->z /= scalar;
+}
+
 void Vector::Add(const Vector& leftVector, const Vector& rightVector)
 {
 	this->x = leftVector.x + rightVector.x;
@@ -144,28 +172,26 @@ bool Vector::Rotation(const Vector& vector, const Vector& axis, double angle)
 	if (!unitAxis.Normalize())
 		return false;
 
-	Vector projection;
-	if (!projection.Projection(vector, axis))
-		return false;
-
-	Vector xAxis;
-	xAxis.Subtract(vector, projection);
-	if (!xAxis.Normalize())
+	Vector projection = unitAxis * Vector::Dot(vector, unitAxis);
+	Vector rejection = vector - projection;
+	double length = rejection.Length();
+	if(length == 0.0)
 	{
 		*this = vector;
 		return true;
 	}
+
+	Vector xAxis(rejection);
+	if (!xAxis.Normalize())
+		return false;
 
 	Vector yAxis;
 	yAxis.Cross(axis, xAxis);
 	if (!yAxis.Normalize())
 		return false;
 
-	double length = vector.Length();
-	Vector rejection = length * (xAxis * cos(angle) + yAxis * sin(angle));
-
+	rejection = length * (xAxis * cos(angle) + yAxis * sin(angle));
 	this->Add(projection, rejection);
-
 	return true;
 }
 

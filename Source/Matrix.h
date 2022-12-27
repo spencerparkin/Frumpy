@@ -19,6 +19,9 @@ namespace Frumpy
 		bool SetCol(int col, const Vector& vector);
 		bool GetCol(int col, Vector& vector) const;
 
+		void GetAxes(Vector& xAxis, Vector& yAxis, Vector& zAxis) const;
+		void SetAxes(const Vector& xAxis, const Vector& yAxis, const Vector& zAxis);
+
 		void TransformVector(const Vector& vector, Vector& vectorTransformed) const;
 		void TransformPoint(const Vector& point, Vector& pointTransformed) const;
 
@@ -33,6 +36,8 @@ namespace Frumpy
 		void Translation(const Vector& delta);
 		void RigidBodyMotion(const Vector& axis, double angle, const Vector& delta);
 		void Projection(double hfovi, double vfovi, double near, double far);
+
+		bool OrthonormalizeOrientation();
 
 		void operator=(const Matrix& matrix);
 

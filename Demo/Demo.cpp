@@ -30,6 +30,7 @@ Demo::Demo()
     this->renderer = nullptr;
     this->rotationAngle = 0.0;
     this->rotationRate = 20.0;
+    this->lastMouseMove = -1;
 }
 
 /*virtual*/ Demo::~Demo()
@@ -161,25 +162,28 @@ void Demo::Run()
                 DispatchMessage(&this->msg);
         }
 
-        // Render a frame directly into the windows BMP memory.
-        if (this->renderer && this->camera && this->scene)
-        {
-            ProfileBlock profileBlock(&this->frumpyRenderTime);
-            this->scene->Render(*this->camera, *this->renderer);
-        }
-
         // Keep track of time taken per loop iteration.
         clock_t currentTime = clock();
         clock_t deltaTime = currentTime - lastTime;
         double deltaTimeSeconds = double(deltaTime) / double(CLOCKS_PER_SEC);
         lastTime = currentTime;
         totalElapsedTimeSeconds += deltaTimeSeconds;
-        
+
+        // Let the user control the camera.
+        this->HandleKeyboardInput(deltaTimeSeconds);
+
         // Animate our mesh by rotating it at a desired rate.
         Frumpy::MeshObject* meshObject = (Frumpy::MeshObject*)this->scene->FindObjectByName("meshA");
         this->rotationAngle += this->rotationRate * deltaTimeSeconds;
         Frumpy::Vector axis(1.0, 0.0, 0.0);
         meshObject->childToParent.Rotation(axis, FRUMPY_DEGS_TO_RADS(this->rotationAngle));
+
+        // Render a frame directly into the windows BMP memory.
+        if (this->renderer && this->camera && this->scene)
+        {
+            ProfileBlock profileBlock(&this->frumpyRenderTime);
+            this->scene->Render(*this->camera, *this->renderer);
+        }
 
         // Ask windows to have us repaint our window.
         InvalidateRect(this->hWnd, NULL, FALSE);
@@ -246,6 +250,30 @@ int Demo::Shutdown()
     this->assetList.Delete();
 
     return this->msg.wParam;
+}
+
+void Demo::HandleKeyboardInput(double deltaTimeSeconds)
+{
+    Frumpy::Vector cameraRight, cameraForward, cameraUp;
+    this->camera->worldTransform.GetAxes(cameraRight, cameraUp, cameraForward);
+    cameraForward *= -1.0;
+
+    Frumpy::Vector cameraVelocity;
+    double cameraSpeed = 20.0;
+    
+    if ((GetAsyncKeyState('E') & 0x8000) != 0x0000)
+        cameraVelocity += cameraForward * cameraSpeed;
+    if ((GetAsyncKeyState('D') & 0x8000) != 0x0000)
+        cameraVelocity -= cameraForward * cameraSpeed;
+    if ((GetAsyncKeyState('S') & 0x8000) != 0x0000)
+        cameraVelocity -= cameraRight * cameraSpeed;
+    if ((GetAsyncKeyState('F') & 0x8000) != 0x0000)
+        cameraVelocity += cameraRight * cameraSpeed;
+
+    Frumpy::Vector cameraPosition;
+    this->camera->worldTransform.GetCol(3, cameraPosition);
+    cameraPosition += cameraVelocity * deltaTimeSeconds;
+    this->camera->worldTransform.SetCol(3, cameraPosition);
 }
 
 /*static*/ LRESULT CALLBACK Demo::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -323,6 +351,53 @@ LRESULT Demo::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         case WM_QUIT:   // Not sure why we don't get this.
         {
             this->exitProgram = true;
+            break;
+        }
+        case WM_LBUTTONUP:
+        {
+            this->lastMouseMove = -1;
+            break;
+        }
+        case WM_MOUSEMOVE:
+        {
+            if ((wParam & MK_LBUTTON) != 0)
+            {
+                DWORD mouseMove = lParam;
+                
+                if (this->lastMouseMove != -1)
+                {
+                    int currentMouseX = (mouseMove & 0x0000FFFF) >> 0;
+                    int currentMouseY = (mouseMove & 0xFFFF0000) >> 16;
+
+                    int lastMouseX = (this->lastMouseMove & 0x0000FFFF) >> 0;
+                    int lastMouseY = (this->lastMouseMove & 0xFFFF0000) >> 16;
+
+                    double deltaX = currentMouseX - lastMouseX;
+                    double deltaY = currentMouseY - lastMouseY;
+
+                    double mouseSensativity = 0.002;
+
+                    double yawDelta = -deltaX * mouseSensativity;
+                    double pitchDelta = -deltaY * mouseSensativity;
+
+                    Frumpy::Vector cameraRight, cameraUp, cameraForward;
+                    this->camera->worldTransform.GetAxes(cameraRight, cameraUp, cameraForward);
+
+                    Frumpy::Vector upVector(0.0, 1.0, 0.0);
+                    cameraRight.Rotation(cameraRight, upVector, yawDelta);
+                    cameraUp.Rotation(cameraUp, upVector, yawDelta);
+                    cameraForward.Rotation(cameraForward, upVector, yawDelta);
+
+                    cameraUp.Rotation(cameraUp, cameraRight, pitchDelta);
+                    cameraForward.Rotation(cameraForward, cameraRight, pitchDelta);
+
+                    this->camera->worldTransform.SetAxes(cameraRight, cameraUp, cameraForward);
+                    this->camera->worldTransform.OrthonormalizeOrientation();
+                }
+
+                this->lastMouseMove = mouseMove;
+            }
+
             break;
         }
         default:

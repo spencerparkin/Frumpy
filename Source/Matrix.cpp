@@ -56,43 +56,49 @@ bool Matrix::GetCol(int col, Vector& vector) const
 	return true;
 }
 
+void Matrix::GetAxes(Vector& xAxis, Vector& yAxis, Vector& zAxis) const
+{
+	this->GetCol(0, xAxis);
+	this->GetCol(1, yAxis);
+	this->GetCol(2, zAxis);
+}
+
+void Matrix::SetAxes(const Vector& xAxis, const Vector& yAxis, const Vector& zAxis)
+{
+	this->SetCol(0, xAxis);
+	this->SetCol(1, yAxis);
+	this->SetCol(2, zAxis);
+}
+
 void Matrix::TransformVector(const Vector& vector, Vector& vectorTransformed) const
 {
-	vectorTransformed.x =
+	vectorTransformed.SetComponents(
 		vector.x * this->ele[0][0] +
 		vector.y * this->ele[0][1] +
-		vector.z * this->ele[0][2];
-
-	vectorTransformed.y =
+		vector.z * this->ele[0][2],
 		vector.x * this->ele[1][0] +
 		vector.y * this->ele[1][1] +
-		vector.z * this->ele[1][2];
-
-	vectorTransformed.z =
+		vector.z * this->ele[1][2],
 		vector.x * this->ele[2][0] +
 		vector.y * this->ele[2][1] +
-		vector.z * this->ele[2][2];
+		vector.z * this->ele[2][2]);
 }
 
 void Matrix::TransformPoint(const Vector& point, Vector& pointTransformed) const
 {
-	pointTransformed.x =
+	pointTransformed.SetComponents(
 		point.x * this->ele[0][0] +
 		point.y * this->ele[0][1] +
 		point.z * this->ele[0][2] +
-		this->ele[0][3];
-
-	pointTransformed.y =
+		this->ele[0][3],
 		point.x * this->ele[1][0] +
 		point.y * this->ele[1][1] +
 		point.z * this->ele[1][2] +
-		this->ele[1][3];
-
-	pointTransformed.z =
+		this->ele[1][3],
 		point.x * this->ele[2][0] +
 		point.y * this->ele[2][1] +
 		point.z * this->ele[2][2] +
-		this->ele[2][3];
+		this->ele[2][3]);
 
 	double w = 
 		point.x * this->ele[3][0] +
@@ -245,6 +251,27 @@ void Matrix::Projection(double hfovi, double vfovi, double near, double far)
 	this->ele[3][3] = 0.0;
 	this->ele[2][3] = far * near / (far - near);
 	this->ele[3][2] = -1.0;
+}
+
+bool Matrix::OrthonormalizeOrientation()
+{
+	Vector xAxis, yAxis, zAxis;
+	this->GetAxes(xAxis, yAxis, zAxis);
+
+	if (!xAxis.Normalize())
+		return false;
+
+	if (!yAxis.Rejection(yAxis, xAxis))
+		return false;
+
+	if (!yAxis.Normalize())
+		return false;
+
+	zAxis.Cross(xAxis, yAxis);
+	zAxis.Normalize();
+
+	this->SetAxes(xAxis, yAxis, zAxis);
+	return true;
 }
 
 namespace Frumpy

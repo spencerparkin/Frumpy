@@ -14,6 +14,10 @@ namespace Frumpy
 		virtual ~Vector();
 
 		void operator=(const Vector& vector);
+		void operator+=(const Vector& vector);
+		void operator-=(const Vector& vector);
+		void operator*=(double scalar);
+		void operator/=(double scalar);
 
 		void SetComponents(double x, double y, double z);
 		void GetComponents(double& x, double& y, double& z) const;

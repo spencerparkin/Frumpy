@@ -7,6 +7,7 @@
 #include "FileAssets/Mesh.h"
 #include "Renderer.h"
 #include "ProfileBlock.h"
+#include "Vector.h"
 
 #define MAX_LOADSTRING 100
 
@@ -23,6 +24,8 @@ public:
 private:
 
 	LRESULT HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+	void HandleKeyboardInput(double deltaTimeSeconds);
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	static INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
@@ -49,4 +52,5 @@ private:
 	TimingStat frumpyRenderTime;
 	TimingStat demoBlitTime;
 	TimingStat demoMessageTime;
+	DWORD lastMouseMove;
 };
