@@ -14,3 +14,4 @@
 #define FRUMPY_MIN(x,y)					((x) < (y) ? (x) : (y))
 #define FRUMPY_MAX(x,y)					((x) > (y) ? (x) : (y))
 #define FRUMPY_CLAMP(x,a,b)				FRUMPY_MIN(FRUMPY_MAX(x,a),b)
+#define FRUMPY_ENDIAN_SWAP4(x)			((((x) & 0xFF000000) >> 24) | (((x) & 0x00FF0000) >> 8) | (((x) & 0x0000FF00) << 8) | (((x) & 0x000000FF) << 24))

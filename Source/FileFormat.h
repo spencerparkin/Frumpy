@@ -28,5 +28,7 @@ namespace Frumpy
 
 		virtual bool LoadAssets(const char* filePath, List<Asset*>& assetList) = 0;
 		virtual bool SaveAssets(const char* filePath, const List<Asset*>& assetList) = 0;
+
+		char errorMessage[512];
 	};
 }

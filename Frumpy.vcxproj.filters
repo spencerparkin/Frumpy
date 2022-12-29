@@ -55,7 +55,7 @@
     <ClInclude Include="Source\FileFormats\OBJFormat.h">
       <Filter>Source\FileFormats</Filter>
     </ClInclude>
-    <ClInclude Include="Source\FileFormats\PPMFormat.h">
+    <ClInclude Include="Source\FileFormats\PNGFormat.h">
       <Filter>Source\FileFormats</Filter>
     </ClInclude>
     <ClInclude Include="Source\FileAssets\Mesh.h">
@@ -78,6 +78,9 @@
     </ClInclude>
     <ClInclude Include="Source\LightSources\AmbientLight.h">
       <Filter>Source\LightSources</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Stream.h">
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -111,7 +114,7 @@
     <ClCompile Include="Source\FileFormats\OBJFormat.cpp">
       <Filter>Source\FileFormats</Filter>
     </ClCompile>
-    <ClCompile Include="Source\FileFormats\PPMFormat.cpp">
+    <ClCompile Include="Source\FileFormats\PNGFormat.cpp">
       <Filter>Source\FileFormats</Filter>
     </ClCompile>
     <ClCompile Include="Source\FileAssets\Mesh.cpp">
@@ -134,6 +137,9 @@
     </ClCompile>
     <ClCompile Include="Source\LightSources\AmbientLight.cpp">
       <Filter>Source\LightSources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Stream.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

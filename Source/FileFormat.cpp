@@ -4,6 +4,7 @@ using namespace Frumpy;
 
 FileFormat::FileFormat()
 {
+	this->errorMessage[0] = '\0';
 }
 
 /*virtual*/ FileFormat::~FileFormat()

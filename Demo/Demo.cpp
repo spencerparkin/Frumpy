@@ -9,6 +9,7 @@
 #include "Demo.h"
 #include "Vertex.h"
 #include "FileFormats/OBJFormat.h"
+#include "FileFormats/PNGFormat.h"
 #include "SceneObjects/MeshObject.h"
 #include "ProfileBlock.h"
 #include <time.h>
@@ -42,6 +43,9 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 {
     this->hInst = hInstance;
     this->exitProgram = false;
+
+    Frumpy::PNGFormat pngFormat;
+    pngFormat.LoadAssets("Images/TeapotTexture.png", this->assetList);
 
     this->frameBitmapInfo.bmiHeader.biSize = sizeof(frameBitmapInfo.bmiHeader);
     this->frameBitmapInfo.bmiHeader.biPlanes = 1;
