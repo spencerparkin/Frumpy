@@ -7,4 +7,9 @@ only concerns itself with generating the pixel data.  Following is the latest sc
 
 ![snapshot](https://github.com/spencerparkin/Frumpy/blob/master/Screenshot.png?raw=true)
 
-As you can see, it looks like crap and renders really slow.
+Here I've compared what I'm rendering against what 3Ds Max renders.  As you can see, the Frumpy
+render looks like total crap in comparison.  I still have some bugs to work out, clearly.
+But it's getting there.
+
+You can also see that it renders at an abismal 9.5 frames per second with only 400x400 pixel resolution.
+I'm not sure how to get that to go faster at the moment.

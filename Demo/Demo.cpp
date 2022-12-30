@@ -46,7 +46,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     this->assetManager = new Frumpy::AssetManager();
     this->assetManager->LoadAssets("Images/texture.ppm");
-    this->assetManager->LoadAssets("Meshes/Cube.obj");
+    this->assetManager->LoadAssets("Meshes/Teapot.obj");
 
     this->frameBitmapInfo.bmiHeader.biSize = sizeof(frameBitmapInfo.bmiHeader);
     this->frameBitmapInfo.bmiHeader.biPlanes = 1;
@@ -93,7 +93,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->camera->LookAt(Frumpy::Vector(0.0, 0.0, 100.0), Frumpy::Vector(0.0, 0.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
 
     Frumpy::MeshObject* object = new Frumpy::MeshObject();
-    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Box001")));
+    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Teapot001")));
     object->GetMesh()->SetColor(Frumpy::Vector(1.0, 0.0, 0.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
     strcpy_s(object->name, "object");
