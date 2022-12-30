@@ -98,6 +98,11 @@ void Vector::Cross(const Vector& leftVector, const Vector& rightVector)
 	this->z = leftVector.x * rightVector.y - leftVector.y * rightVector.x;
 }
 
+bool Vector::IsEqualTo(const Vector& vector, double eps /*= 1e-4*/) const
+{
+	return fabs(this->x - vector.x) < eps && fabs(this->y - vector.y) < eps && fabs(this->z - vector.z) < eps;
+}
+
 /*static*/ double Vector::Dot(const Vector& leftVector, const Vector& rightVector)
 {
 	double dot =

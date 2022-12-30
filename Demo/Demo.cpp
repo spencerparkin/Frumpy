@@ -83,8 +83,8 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->renderer = new Frumpy::Renderer();
     this->renderer->SetFramebuffer(this->image);
     this->renderer->SetDepthBuffer(this->depthBuffer);
-    this->renderer->SetLightSource(this->directionLight);
-    this->renderer->Startup(10);
+    //this->renderer->SetLightSource(this->directionLight);
+    this->renderer->Startup(1);
 
     this->scene = new Frumpy::Scene();
     this->scene->clearPixel.color = 0;
@@ -261,26 +261,29 @@ int Demo::Shutdown()
 
 void Demo::HandleKeyboardInput(double deltaTimeSeconds)
 {
-    Frumpy::Vector cameraRight, cameraForward, cameraUp;
-    this->camera->worldTransform.GetAxes(cameraRight, cameraUp, cameraForward);
-    cameraForward *= -1.0;
+    if (this->hWnd == GetFocus())
+    {
+        Frumpy::Vector cameraRight, cameraForward, cameraUp;
+        this->camera->worldTransform.GetAxes(cameraRight, cameraUp, cameraForward);
+        cameraForward *= -1.0;
 
-    Frumpy::Vector cameraVelocity;
-    double cameraSpeed = 20.0;
-    
-    if ((GetAsyncKeyState('E') & 0x8000) != 0x0000)
-        cameraVelocity += cameraForward * cameraSpeed;
-    if ((GetAsyncKeyState('D') & 0x8000) != 0x0000)
-        cameraVelocity -= cameraForward * cameraSpeed;
-    if ((GetAsyncKeyState('S') & 0x8000) != 0x0000)
-        cameraVelocity -= cameraRight * cameraSpeed;
-    if ((GetAsyncKeyState('F') & 0x8000) != 0x0000)
-        cameraVelocity += cameraRight * cameraSpeed;
+        Frumpy::Vector cameraVelocity;
+        double cameraSpeed = 20.0;
 
-    Frumpy::Vector cameraPosition;
-    this->camera->worldTransform.GetCol(3, cameraPosition);
-    cameraPosition += cameraVelocity * deltaTimeSeconds;
-    this->camera->worldTransform.SetCol(3, cameraPosition);
+        if ((GetAsyncKeyState('E') & 0x8000) != 0x0000)
+            cameraVelocity += cameraForward * cameraSpeed;
+        if ((GetAsyncKeyState('D') & 0x8000) != 0x0000)
+            cameraVelocity -= cameraForward * cameraSpeed;
+        if ((GetAsyncKeyState('S') & 0x8000) != 0x0000)
+            cameraVelocity -= cameraRight * cameraSpeed;
+        if ((GetAsyncKeyState('F') & 0x8000) != 0x0000)
+            cameraVelocity += cameraRight * cameraSpeed;
+
+        Frumpy::Vector cameraPosition;
+        this->camera->worldTransform.GetCol(3, cameraPosition);
+        cameraPosition += cameraVelocity * deltaTimeSeconds;
+        this->camera->worldTransform.SetCol(3, cameraPosition);
+    }
 }
 
 /*static*/ LRESULT CALLBACK Demo::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

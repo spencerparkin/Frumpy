@@ -1,6 +1,7 @@
 #include "MeshObject.h"
 #include "../Renderer.h"
 #include "../FileAssets/Mesh.h"
+#include "../Triangle.h"
 
 using namespace Frumpy;
 
@@ -64,6 +65,21 @@ MeshObject::MeshObject()
 		triangleNorm.Cross(pointB - pointA, pointC - pointA);
 		if (triangleNorm.z < 0.0)
 			continue;
+
+		/*
+		Triangle debugTriangleA;
+		debugTriangleA.vertex[0].SetComponents(0.0000, 0.4875, 8.6445);
+		debugTriangleA.vertex[1].SetComponents(1.7499, 0.4875, 8.4727);
+		debugTriangleA.vertex[2].SetComponents(1.7058, 1.2930, 8.2606);
+
+		Triangle debugTriangleB;
+		debugTriangleB.vertex[0] = vertexA.objectSpacePoint;
+		debugTriangleB.vertex[1] = vertexB.objectSpacePoint;
+		debugTriangleB.vertex[2] = vertexC.objectSpacePoint;
+
+		if (!debugTriangleA.IsEqualTo(debugTriangleB))
+			continue;
+		*/
 
 		// Render by submitting a job to the renderer.
 		Renderer::TriangleRenderJob* job = new Renderer::TriangleRenderJob();

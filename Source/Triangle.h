@@ -17,6 +17,10 @@ namespace Frumpy
 		double Area() const;
 		double SmallestInteriorAngle() const;
 
+		bool CalcNormal(Vector& normal) const;
+
+		bool IsEqualTo(const Triangle& triangle, double eps = 1e-4) const;
+
 		Vector vertex[3];
 	};
 }

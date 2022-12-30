@@ -21,6 +21,9 @@ bool Triangle::CalcBarycentricCoordinates(const Vector& interiorPoint, Vector& b
 	if (!yAxis.Rejection(this->vertex[2] - this->vertex[0], xAxis))
 		return false;
 
+	if (!yAxis.Normalize())
+		return false;
+
 	Vector point = interiorPoint - this->vertex[0];
 	Vector edgeU = this->vertex[1] - this->vertex[0];
 	Vector edgeV = this->vertex[2] - this->vertex[0];
@@ -38,10 +41,12 @@ bool Triangle::CalcBarycentricCoordinates(const Vector& interiorPoint, Vector& b
 
 	double alpha = (px * vy - py * vx) / det;
 	double beta = (-px * uy + py * ux) / det;
+	if (alpha < 0.0 || alpha > 1.0 || beta < 0.0 || beta > 1.0)
+		return false;	// TODO: In this case, we need to perhaps just do an inverse-lerp between the appropriate edges of the triangle.
 
-	baryCoords.x = FRUMPY_CLAMP(1.0 - alpha - beta, 0.0, 1.0);
-	baryCoords.y = FRUMPY_CLAMP(alpha, 0.0, 1.0);
-	baryCoords.z = FRUMPY_CLAMP(beta, 0.0, 1.0);
+	baryCoords.y = alpha;
+	baryCoords.z = beta;
+	baryCoords.x = 1.0 - alpha - beta;
 
 	return true;
 }
@@ -68,4 +73,25 @@ double Triangle::SmallestInteriorAngle() const
 	}
 
 	return smallestAngle;
+}
+
+bool Triangle::CalcNormal(Vector& normal) const
+{
+	normal.Cross(this->vertex[1] - this->vertex[0], this->vertex[2] - this->vertex[0]);
+	return normal.Normalize();
+}
+
+bool Triangle::IsEqualTo(const Triangle& triangle, double eps /*= 1e-4*/) const
+{
+	for (int i = 0; i < 3; i++)
+	{
+		if (this->vertex[0].IsEqualTo(triangle.vertex[i], eps) &&
+			this->vertex[1].IsEqualTo(triangle.vertex[(i + 1) % 3], eps) &&
+			this->vertex[2].IsEqualTo(triangle.vertex[(i + 2) % 3], eps))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }

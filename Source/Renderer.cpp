@@ -249,9 +249,9 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 		maxEdges[1].vertexB = &vertexB.imageSpacePoint;
 	}
 
-	int minRow = int(floor(minY));
-	int maxRow = int(ceil(maxY));
-	int midRow = int(round(midY));
+	int minRow = int(minY);
+	int maxRow = int(maxY);
+	int midRow = int(midY);
 
 	minRow = FRUMPY_MAX(minRow, 0);
 	maxRow = FRUMPY_MIN(maxRow, signed(frameBuffer->GetHeight() - 1));
@@ -298,8 +298,8 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 		double minX = FRUMPY_MIN(x0, x1);
 		double maxX = FRUMPY_MAX(x0, x1);
 
-		int minCol = int(floor(minX));
-		int maxCol = int(ceil(maxX));
+		int minCol = int(minX);
+		int maxCol = int(maxX);
 
 		minCol = FRUMPY_MAX(minCol, 0);
 		maxCol = FRUMPY_MIN(maxCol, signed(frameBuffer->GetWidth() - 1));
@@ -322,13 +322,16 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 			Vector trianglePoint = cameraPointA + rayDirection * lambda;
 
 			Image::Pixel* pixelZ = depthBuffer->GetPixel(location);
-			if (trianglePoint.z > pixelZ->depth)	// TODO: Depth-testing optional?
-			{
-				pixelZ->depth = (float)trianglePoint.z;
+			if (trianglePoint.z <= pixelZ->depth)	// TODO: Depth-testing optional?
+				continue;
 			
-				Vector baryCoords;
-				triangle.CalcBarycentricCoordinates(trianglePoint, baryCoords);
+			pixelZ->depth = (float)trianglePoint.z;
+			
+			unsigned char r = 0xFF, g = 0x00, b = 0x00;
 
+			Vector baryCoords;
+			if (triangle.CalcBarycentricCoordinates(trianglePoint, baryCoords))
+			{
 				LightSource::SurfaceProperties surfaceProperties;
 
 				if (this->texture)
@@ -363,13 +366,13 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 				Vector surfaceColor;
 				thread->renderer->lightSource->CalcSurfaceColor(surfaceProperties, surfaceColor);
 
-				unsigned char r = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.x * 255.0), 0, 255);
-				unsigned char g = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.y * 255.0), 0, 255);
-				unsigned char b = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.z * 255.0), 0, 255);
-
-				uint32_t color = frameBuffer->MakeColor(r, g, b, 0);	// TODO: What about alpha here?
-				frameBuffer->SetPixel(location, color);
+				r = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.x * 255.0), 0, 255);
+				g = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.y * 255.0), 0, 255);
+				b = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.z * 255.0), 0, 255);
 			}
+
+			uint32_t color = frameBuffer->MakeColor(r, g, b, 0);	// TODO: What about alpha here?
+			frameBuffer->SetPixel(location, color);
 		}
 	}
 }
