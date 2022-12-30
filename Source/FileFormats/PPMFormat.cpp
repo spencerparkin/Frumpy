@@ -22,7 +22,7 @@ PPMFormat::PPMFormat()
 	Image* image = nullptr;
 
 	std::vector<Token> tokenArray;
-	std::vector<char> imageRaster;
+	std::vector<unsigned char> imageRaster;
 	FILE* file = nullptr;
 	fopen_s(&file, filePath, "rb");
 	if (file)
@@ -42,13 +42,13 @@ PPMFormat::PPMFormat()
 		if (0 == strcmp(ppmType, "P6") && imageRasterSize == width * height * 3 && maxVal == 255)
 		{
 			image = new Image(width, height);
-			const char* pixelData = imageRaster.data();
+			const unsigned char* pixelData = imageRaster.data();
 			for (unsigned int row = 0; row < height; row++)
 			{
 				for (unsigned int col = 0; col < width; col++)
 				{
 					Image::Pixel* dstPixel = image->GetPixel(Image::Location{ row, col });
-					const char* srcPixel = &pixelData[row * width * 3 + col * 3];
+					const unsigned char* srcPixel = &pixelData[row * width * 3 + col * 3];
 					dstPixel->color = image->MakeColor(srcPixel[0], srcPixel[1], srcPixel[2], 0);
 				}
 			}
@@ -81,7 +81,7 @@ PPMFormat::PPMFormat()
 	return image ? true : false;
 }
 
-void PPMFormat::Tokenize(FILE* file, std::vector<Token>& tokenArray, std::vector<char>& imageRaster)
+void PPMFormat::Tokenize(FILE* file, std::vector<Token>& tokenArray, std::vector<unsigned char>& imageRaster)
 {
 	tokenArray.clear();
 	imageRaster.clear();

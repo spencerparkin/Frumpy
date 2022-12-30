@@ -58,6 +58,7 @@ namespace Frumpy
 			virtual void Render(Thread* thread) override;
 
 			const Vertex* vertex[3];
+			const Image* texture;
 		};
 
 		void SetFramebuffer(Image* frameBuffer) { this->frameBuffer = frameBuffer; }

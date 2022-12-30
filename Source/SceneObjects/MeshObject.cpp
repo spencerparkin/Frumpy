@@ -7,6 +7,7 @@ using namespace Frumpy;
 MeshObject::MeshObject()
 {
 	this->mesh = nullptr;
+	this->texture = nullptr;
 }
 
 /*virtual*/ MeshObject::~MeshObject()
@@ -69,6 +70,7 @@ MeshObject::MeshObject()
 		job->vertex[0] = &vertexA;
 		job->vertex[1] = &vertexB;
 		job->vertex[2] = &vertexC;
+		job->texture = this->texture;
 		renderer.SubmitJob(job);
 	}
 }

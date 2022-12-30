@@ -73,6 +73,8 @@ namespace Frumpy
 				uint32_t color;
 				float depth;
 			};
+
+			void MakeColorVector(Vector& colorVector, const Image* image) const;
 		};
 
 		void Clear(const Pixel& pixel);

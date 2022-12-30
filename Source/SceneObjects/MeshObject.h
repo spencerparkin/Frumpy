@@ -5,6 +5,7 @@
 namespace Frumpy
 {
 	class Mesh;
+	class Image;
 
 	class FRUMPY_API MeshObject : public Scene::Object
 	{
@@ -18,8 +19,11 @@ namespace Frumpy
 		void SetMesh(Mesh* mesh) { this->mesh = mesh; }
 		Mesh* GetMesh() { return this->mesh; }
 
+		void SetTexture(Image* texture) { this->texture = texture; }
+		Image* GetTexture() { return this->texture; }
+
 	private:
 		Mesh* mesh;
-		// TODO: Also have pointer to material asset?
+		Image* texture;
 	};
 }

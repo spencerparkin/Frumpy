@@ -22,6 +22,6 @@ namespace Frumpy
 			std::vector<char> charArray;
 		};
 
-		void Tokenize(FILE* file, std::vector<Token>& tokenArray, std::vector<char>& imageRaster);
+		void Tokenize(FILE* file, std::vector<Token>& tokenArray, std::vector<unsigned char>& imageRaster);
 	};
 }

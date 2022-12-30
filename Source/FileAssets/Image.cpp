@@ -143,3 +143,14 @@ void Image::CalcImageMatrix(Matrix& imageMatrix) const
 	imageMatrix.ele[1][1] = double(this->height) / 2.0;
 	imageMatrix.ele[1][3] = double(this->height) / 2.0;
 }
+
+void Image::Pixel::MakeColorVector(Vector& colorVector, const Image* image) const
+{
+	unsigned int r = (this->color & (0xFF << image->format.rShift)) >> image->format.rShift;
+	unsigned int g = (this->color & (0xFF << image->format.gShift)) >> image->format.gShift;
+	unsigned int b = (this->color & (0xFF << image->format.bShift)) >> image->format.bShift;
+
+	colorVector.x = double(r) / 255.0;
+	colorVector.y = double(g) / 255.0;
+	colorVector.z = double(b) / 255.0;
+}

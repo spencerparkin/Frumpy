@@ -155,6 +155,7 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 	this->vertex[0] = nullptr;
 	this->vertex[1] = nullptr;
 	this->vertex[2] = nullptr;
+	this->texture = nullptr;
 }
 
 /*virtual*/ Renderer::TriangleRenderJob::~TriangleRenderJob()
@@ -329,19 +330,29 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 				triangle.CalcBarycentricCoordinates(trianglePoint, baryCoords);
 
 				LightSource::SurfaceProperties surfaceProperties;
-#if 0
-				Vector interpolatedTexCoords =
-					vertexA.texCoords * baryCoords.x +
-					vertexB.texCoords * baryCoords.y +
-					vertexC.texCoords * baryCoords.z;
 
-				surfaceProperties.diffuseColor = TODO: Sample from texture here.
-#else
-				surfaceProperties.diffuseColor =
-					vertexA.color * baryCoords.x +
-					vertexB.color * baryCoords.y +
-					vertexC.color * baryCoords.z;
-#endif
+				if (this->texture)
+				{
+					Vector interpolatedTexCoords =
+						vertexA.texCoords * baryCoords.x +
+						vertexB.texCoords * baryCoords.y +
+						vertexC.texCoords * baryCoords.z;
+
+					interpolatedTexCoords.x = FRUMPY_CLAMP(interpolatedTexCoords.x, 0.0, 1.0);
+					interpolatedTexCoords.y = FRUMPY_CLAMP(interpolatedTexCoords.y, 0.0, 1.0);
+					interpolatedTexCoords.z = FRUMPY_CLAMP(interpolatedTexCoords.z, 0.0, 1.0);
+
+					const Image::Pixel* texel = texture->GetPixel(interpolatedTexCoords);
+					texel->MakeColorVector(surfaceProperties.diffuseColor, texture);
+				}
+				else
+				{
+					surfaceProperties.diffuseColor =
+						vertexA.color * baryCoords.x +
+						vertexB.color * baryCoords.y +
+						vertexC.color * baryCoords.z;
+				}
+
 				surfaceProperties.normal =
 					vertexA.cameraSpaceNormal * baryCoords.x +
 					vertexB.cameraSpaceNormal * baryCoords.y +
