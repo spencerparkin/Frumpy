@@ -46,7 +46,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     this->assetManager = new Frumpy::AssetManager();
     this->assetManager->LoadAssets("Images/enterprise1701d.ppm");
-    this->assetManager->LoadAssets("Meshes/Teapot.obj");
+    this->assetManager->LoadAssets("Meshes/Cube.obj");
 
     this->frameBitmapInfo.bmiHeader.biSize = sizeof(frameBitmapInfo.bmiHeader);
     this->frameBitmapInfo.bmiHeader.biPlanes = 1;
@@ -93,9 +93,9 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->camera->LookAt(Frumpy::Vector(0.0, 0.0, 100.0), Frumpy::Vector(0.0, 0.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
 
     Frumpy::MeshObject* teapotObject = new Frumpy::MeshObject();
-    teapotObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Teapot001")));
+    teapotObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Box001")));
     teapotObject->GetMesh()->SetColor(Frumpy::Vector(1.0, 0.0, 0.0));
-    strcpy_s(teapotObject->name, "teapot");
+    strcpy_s(teapotObject->name, "object");
     this->scene->objectList.AddTail(teapotObject);
 
     LoadString(this->hInst, IDS_APP_TITLE, this->szTitle, MAX_LOADSTRING);
@@ -164,16 +164,16 @@ void Demo::Run()
 
         // Let the user control the camera.
         this->HandleKeyboardInput(deltaTimeSeconds);
-#if 0
+
         // Animate our mesh by rotating it at a desired rate.
-        Frumpy::MeshObject* teapotObject = (Frumpy::MeshObject*)this->scene->FindObjectByName("teapot");
-        if (teapotObject)
+        Frumpy::MeshObject* object = (Frumpy::MeshObject*)this->scene->FindObjectByName("object");
+        if (object)
         {
             this->rotationAngle += this->rotationRate * deltaTimeSeconds;
             Frumpy::Vector axis(0.0, 1.0, 0.0);
-            teapotObject->childToParent.Rotation(axis, FRUMPY_DEGS_TO_RADS(this->rotationAngle));
+            object->childToParent.Rotation(axis, FRUMPY_DEGS_TO_RADS(this->rotationAngle));
         }
-#endif
+
         // Render a frame directly into the windows BMP memory.
         if (this->renderer && this->camera && this->scene)
         {
