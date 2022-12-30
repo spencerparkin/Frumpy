@@ -1,5 +1,6 @@
 #include "Image.h"
 #include "../Vector.h"
+#include <string.h>
 
 using namespace Frumpy;
 
@@ -77,7 +78,7 @@ void Image::SetWidthAndHeight(unsigned int width, unsigned int height)
 	}
 }
 
-/*virtual*/ FileFormat::Asset* Image::Clone() const
+/*virtual*/ AssetManager::Asset* Image::Clone() const
 {
 	Image* image = new Image();
 	image->SetAsCopyOf(this);

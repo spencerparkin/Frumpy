@@ -49,13 +49,7 @@
     <ClInclude Include="Source\Renderer.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\FileFormat.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="Source\FileFormats\OBJFormat.h">
-      <Filter>Source\FileFormats</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\FileFormats\PNGFormat.h">
       <Filter>Source\FileFormats</Filter>
     </ClInclude>
     <ClInclude Include="Source\FileAssets\Mesh.h">
@@ -80,6 +74,15 @@
       <Filter>Source\LightSources</Filter>
     </ClInclude>
     <ClInclude Include="Source\Stream.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FileFormats\PPMFormat.h">
+      <Filter>Source\FileFormats</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\AssetManager.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Map.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
@@ -108,13 +111,7 @@
     <ClCompile Include="Source\Renderer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\FileFormat.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="Source\FileFormats\OBJFormat.cpp">
-      <Filter>Source\FileFormats</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\FileFormats\PNGFormat.cpp">
       <Filter>Source\FileFormats</Filter>
     </ClCompile>
     <ClCompile Include="Source\FileAssets\Mesh.cpp">
@@ -139,6 +136,12 @@
       <Filter>Source\LightSources</Filter>
     </ClCompile>
     <ClCompile Include="Source\Stream.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FileFormats\PPMFormat.cpp">
+      <Filter>Source\FileFormats</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\AssetManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

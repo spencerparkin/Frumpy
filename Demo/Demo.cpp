@@ -8,8 +8,7 @@
 #include "framework.h"
 #include "Demo.h"
 #include "Vertex.h"
-#include "FileFormats/OBJFormat.h"
-#include "FileFormats/PNGFormat.h"
+#include "AssetManager.h"
 #include "SceneObjects/MeshObject.h"
 #include "ProfileBlock.h"
 #include <time.h>
@@ -30,6 +29,7 @@ Demo::Demo()
     this->depthBuffer = nullptr;
     this->renderer = nullptr;
     this->directionLight = nullptr;
+    this->assetManager = nullptr;
     this->rotationAngle = 0.0;
     this->rotationRate = 20.0;
     this->lastMouseMove = -1;
@@ -44,8 +44,9 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->hInst = hInstance;
     this->exitProgram = false;
 
-    Frumpy::PNGFormat pngFormat;
-    pngFormat.LoadAssets("Images/TeapotTexture.png", this->assetList);
+    this->assetManager = new Frumpy::AssetManager();
+    this->assetManager->LoadAssets("Images/enterprise1701d.ppm");
+    this->assetManager->LoadAssets("Meshes/Teapot.obj");
 
     this->frameBitmapInfo.bmiHeader.biSize = sizeof(frameBitmapInfo.bmiHeader);
     this->frameBitmapInfo.bmiHeader.biPlanes = 1;
@@ -91,12 +92,8 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->camera = new Frumpy::Camera();
     this->camera->LookAt(Frumpy::Vector(0.0, 0.0, 100.0), Frumpy::Vector(0.0, 0.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
 
-    Frumpy::OBJFormat objFormat;
-    if (!objFormat.LoadAssets("Meshes/Teapot.obj", this->assetList))
-        return false;
-
     Frumpy::MeshObject* teapotObject = new Frumpy::MeshObject();
-    teapotObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetList.GetTail()->value));
+    teapotObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Teapot001")));
     teapotObject->GetMesh()->SetColor(Frumpy::Vector(1.0, 0.0, 0.0));
     strcpy_s(teapotObject->name, "teapot");
     this->scene->objectList.AddTail(teapotObject);
@@ -252,7 +249,11 @@ int Demo::Shutdown()
         this->directionLight = nullptr;
     }
 
-    this->assetList.Delete();
+    if (this->assetManager)
+    {
+        delete this->assetManager;
+        this->assetManager = nullptr;
+    }
 
     return this->msg.wParam;
 }

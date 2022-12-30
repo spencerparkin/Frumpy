@@ -2,7 +2,7 @@
 
 #include "../Defines.h"
 #include "../Matrix.h"
-#include "../FileFormat.h"
+#include "../AssetManager.h"
 #include <stdint.h>
 
 namespace Frumpy
@@ -14,14 +14,14 @@ namespace Frumpy
 	// The goal of Frumpy is simply to render into one of these images.
 	// It is up to the host application to get the image displayed on the screen,
 	// or to do any kind of double-buffering.
-	class FRUMPY_API Image : public FileFormat::Asset
+	class FRUMPY_API Image : public AssetManager::Asset
 	{
 	public:
 		Image();
 		Image(unsigned int width, unsigned int height);
 		virtual ~Image();
 
-		virtual Asset* Clone() const override;
+		virtual AssetManager::Asset* Clone() const override;
 
 		struct Pixel;
 

@@ -48,7 +48,7 @@ private:
 	Frumpy::Image* depthBuffer;
 	Frumpy::Renderer* renderer;
 	Frumpy::DirectionalLight* directionLight;
-	Frumpy::List<Frumpy::FileFormat::Asset*> assetList;
+	Frumpy::AssetManager* assetManager;
 	double rotationAngle;
 	double rotationRate;
 	TimingStat frumpyRenderTime;

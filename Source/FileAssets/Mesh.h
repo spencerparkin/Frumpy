@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../FileFormat.h"
+#include "../AssetManager.h"
 #include "../Vector.h"
 #include "../Vertex.h"
 
 namespace Frumpy
 {
-	class FRUMPY_API Mesh : public FileFormat::Asset
+	class FRUMPY_API Mesh : public AssetManager::Asset
 	{
 	public:
 		Mesh();

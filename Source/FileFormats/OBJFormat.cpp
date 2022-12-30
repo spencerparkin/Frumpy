@@ -22,7 +22,7 @@ OBJFormat::OBJFormat()
 	return "OBJ";
 }
 
-/*virtual*/ bool OBJFormat::LoadAssets(const char* filePath, List<Asset*>& assetList)
+/*virtual*/ bool OBJFormat::LoadAssets(const char* filePath, List<AssetManager::Asset*>& assetList)
 {
 	std::ifstream fileStream(filePath, std::ios::in);
 	if (fileStream.is_open())
@@ -59,7 +59,7 @@ void OBJFormat::TokenizeLine(const std::string& line, char delimeter, std::vecto
 			tokenArray.push_back(token);
 }
 
-void OBJFormat::ProcessTokenizedLine(const std::vector<std::string>& tokenArray, List<Asset*>& assetList)
+void OBJFormat::ProcessTokenizedLine(const std::vector<std::string>& tokenArray, List<AssetManager::Asset*>& assetList)
 {
 	if (tokenArray.size() == 0 || tokenArray[0] == "#")
 		return;
@@ -122,13 +122,13 @@ void OBJFormat::ProcessTokenizedLine(const std::vector<std::string>& tokenArray,
 	}
 }
 
-void OBJFormat::FlushMesh(List<Asset*>& assetList)
+void OBJFormat::FlushMesh(List<AssetManager::Asset*>& assetList)
 {
 	if (this->data->polygonArray.size() > 0)
 	{
 		// Create a named mesh asset.
 		Mesh* mesh = new Mesh();
-		*mesh->name = this->data->name;
+		strcpy_s(mesh->name, sizeof(mesh->name), this->data->name.c_str());
 		
 		// Convert the list of polygons to a list of triangles.
 		std::vector<ConvexPolygon> triangleArray;
@@ -247,7 +247,7 @@ void OBJFormat::ConvexPolygon::Tesselate(std::vector<ConvexPolygon>& triangleArr
 	}
 }
 
-/*virtual*/ bool OBJFormat::SaveAssets(const char* filePath, const List<Asset*>& assetList)
+/*virtual*/ bool OBJFormat::SaveAssets(const char* filePath, const List<AssetManager::Asset*>& assetList)
 {
 	std::ofstream fileStream(filePath);
 	if (!fileStream.is_open())
@@ -260,9 +260,9 @@ void OBJFormat::ConvexPolygon::Tesselate(std::vector<ConvexPolygon>& triangleArr
 	this->totalVertices = 0;
 	this->totalFaces = 0;
 
-	for (const List<Asset*>::Node* node = assetList.GetHead(); node; node = node->GetNext())
+	for (const List<AssetManager::Asset*>::Node* node = assetList.GetHead(); node; node = node->GetNext())
 	{
-		const Asset* asset = node->value;
+		const AssetManager::Asset* asset = node->value;
 
 		const Mesh* mesh = dynamic_cast<const Mesh*>(asset);
 		if (mesh)
@@ -308,7 +308,7 @@ void OBJFormat::DumpMesh(std::ofstream& fileStream, const Mesh* mesh)
 	}
 
 	fileStream << "\n";
-	fileStream << "g " << mesh->name->c_str() << "\n\n";
+	fileStream << "g " << mesh->name << "\n\n";
 
 	for (unsigned int i = 0; i < mesh->GetIndexBufferSize(); i += 3)
 	{
