@@ -83,7 +83,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->renderer = new Frumpy::Renderer();
     this->renderer->SetFramebuffer(this->image);
     this->renderer->SetDepthBuffer(this->depthBuffer);
-    //this->renderer->SetLightSource(this->directionLight);
+    this->renderer->SetLightSource(this->directionLight);
     this->renderer->Startup(1);
 
     this->scene = new Frumpy::Scene();

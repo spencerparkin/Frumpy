@@ -13,20 +13,21 @@ Triangle::Triangle()
 
 bool Triangle::CalcBarycentricCoordinates(const Vector& interiorPoint, Vector& baryCoords) const
 {
-	Vector xAxis = this->vertex[1] - this->vertex[0];
+	Vector edgeU = this->vertex[1] - this->vertex[0];
+	Vector edgeV = this->vertex[2] - this->vertex[0];
+	Vector point = interiorPoint - this->vertex[0];
+
+	Vector xAxis = edgeU;
 	if (!xAxis.Normalize())
 		return false;
 
-	Vector yAxis;
-	if (!yAxis.Rejection(this->vertex[2] - this->vertex[0], xAxis))
-		return false;
-
+	Vector yAxis = edgeV;
 	if (!yAxis.Normalize())
 		return false;
 
-	Vector point = interiorPoint - this->vertex[0];
-	Vector edgeU = this->vertex[1] - this->vertex[0];
-	Vector edgeV = this->vertex[2] - this->vertex[0];
+	yAxis = yAxis - xAxis * Vector::Dot(yAxis, xAxis);
+	if (!yAxis.Normalize())
+		return false;
 
 	double px = Vector::Dot(point, xAxis);
 	double py = Vector::Dot(point, yAxis);
@@ -41,8 +42,11 @@ bool Triangle::CalcBarycentricCoordinates(const Vector& interiorPoint, Vector& b
 
 	double alpha = (px * vy - py * vx) / det;
 	double beta = (-px * uy + py * ux) / det;
-	if (alpha < 0.0 || alpha > 1.0 || beta < 0.0 || beta > 1.0)
-		return false;	// TODO: In this case, we need to perhaps just do an inverse-lerp between the appropriate edges of the triangle.
+	//if (alpha < 0.0 || alpha > 1.0 || beta < 0.0 || beta > 1.0)
+	//	return false;
+
+	alpha = FRUMPY_CLAMP(alpha, 0.0, 1.0);
+	beta = FRUMPY_CLAMP(beta, 0.0, 1.0);
 
 	baryCoords.y = alpha;
 	baryCoords.z = beta;

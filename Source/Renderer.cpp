@@ -326,50 +326,47 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 				continue;
 			
 			pixelZ->depth = (float)trianglePoint.z;
-			
-			unsigned char r = 0xFF, g = 0x00, b = 0x00;
 
 			Vector baryCoords;
-			if (triangle.CalcBarycentricCoordinates(trianglePoint, baryCoords))
+			if (!triangle.CalcBarycentricCoordinates(trianglePoint, baryCoords))
+				continue;
+
+			LightSource::SurfaceProperties surfaceProperties;
+
+			if (this->texture)
 			{
-				LightSource::SurfaceProperties surfaceProperties;
+				Vector interpolatedTexCoords =
+					vertexA.texCoords * baryCoords.x +
+					vertexB.texCoords * baryCoords.y +
+					vertexC.texCoords * baryCoords.z;
 
-				if (this->texture)
-				{
-					Vector interpolatedTexCoords =
-						vertexA.texCoords * baryCoords.x +
-						vertexB.texCoords * baryCoords.y +
-						vertexC.texCoords * baryCoords.z;
+				interpolatedTexCoords.x = FRUMPY_CLAMP(interpolatedTexCoords.x, 0.0, 1.0);
+				interpolatedTexCoords.y = FRUMPY_CLAMP(interpolatedTexCoords.y, 0.0, 1.0);
+				interpolatedTexCoords.z = FRUMPY_CLAMP(interpolatedTexCoords.z, 0.0, 1.0);
 
-					interpolatedTexCoords.x = FRUMPY_CLAMP(interpolatedTexCoords.x, 0.0, 1.0);
-					interpolatedTexCoords.y = FRUMPY_CLAMP(interpolatedTexCoords.y, 0.0, 1.0);
-					interpolatedTexCoords.z = FRUMPY_CLAMP(interpolatedTexCoords.z, 0.0, 1.0);
-
-					const Image::Pixel* texel = texture->GetPixel(interpolatedTexCoords);
-					texel->MakeColorVector(surfaceProperties.diffuseColor, texture);
-				}
-				else
-				{
-					surfaceProperties.diffuseColor =
-						vertexA.color * baryCoords.x +
-						vertexB.color * baryCoords.y +
-						vertexC.color * baryCoords.z;
-				}
-
-				surfaceProperties.normal =
-					vertexA.cameraSpaceNormal * baryCoords.x +
-					vertexB.cameraSpaceNormal * baryCoords.y +
-					vertexC.cameraSpaceNormal * baryCoords.z;
-
-				surfaceProperties.normal.Normalize();
-
-				Vector surfaceColor;
-				thread->renderer->lightSource->CalcSurfaceColor(surfaceProperties, surfaceColor);
-
-				r = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.x * 255.0), 0, 255);
-				g = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.y * 255.0), 0, 255);
-				b = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.z * 255.0), 0, 255);
+				texture->SampleColorVector(surfaceProperties.diffuseColor, interpolatedTexCoords);
 			}
+			else
+			{
+				surfaceProperties.diffuseColor =
+					vertexA.color * baryCoords.x +
+					vertexB.color * baryCoords.y +
+					vertexC.color * baryCoords.z;
+			}
+
+			surfaceProperties.normal =
+				vertexA.cameraSpaceNormal * baryCoords.x +
+				vertexB.cameraSpaceNormal * baryCoords.y +
+				vertexC.cameraSpaceNormal * baryCoords.z;
+
+			surfaceProperties.normal.Normalize();
+
+			Vector surfaceColor;
+			thread->renderer->lightSource->CalcSurfaceColor(surfaceProperties, surfaceColor);
+
+			unsigned char r = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.x * 255.0), 0, 255);
+			unsigned char g = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.y * 255.0), 0, 255);
+			unsigned char b = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.z * 255.0), 0, 255);
 
 			uint32_t color = frameBuffer->MakeColor(r, g, b, 0);	// TODO: What about alpha here?
 			frameBuffer->SetPixel(location, color);

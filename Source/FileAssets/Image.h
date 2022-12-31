@@ -90,16 +90,17 @@ namespace Frumpy
 		Pixel* GetPixel(const Location& location);
 		const Pixel* GetPixel(const Location& location) const;
 
-		Pixel* GetPixel(const Vector& texCoords);
-		const Pixel* GetPixel(const Vector& texCoords) const;
-
 		bool SetPixel(const Location& location, uint32_t color);
+
 		uint32_t MakeColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a);
 
 		Pixel* GetPixel(unsigned int i)
 		{
 			return &this->pixelData[i];
 		}
+
+		void SampleColorVector(Vector& colorVector, const Vector& texCoords) const;
+		void SampleColorVector(Vector& colorVector, const Location& location) const;
 
 	private:
 
