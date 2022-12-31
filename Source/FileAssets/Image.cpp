@@ -123,44 +123,58 @@ const Image::Pixel* Image::GetPixel(const Location& location) const
 	return const_cast<Image*>(this)->GetPixel(location);
 }
 
-void Image::SampleColorVector(Vector& colorVector, const Vector& texCoords) const
+void Image::SampleColorVector(Vector& colorVector, const Vector& texCoords, SampleMethod sampleMethod) const
 {
-	double approxRow = texCoords.y * double(this->height - 1);
+	double approxRow = (1.0 - texCoords.y) * double(this->height - 1);
 	double approxCol = texCoords.x * double(this->width - 1);
-#if 0	// TODO: What's wrong with this code?  Or is it a problem with the given texture coordinates?
-	double minRow = floor(approxRow);
-	double maxRow = minRow + 1.0;
-	double minCol = floor(approxCol);
-	double maxCol = minCol + 1.0;
 
-	double area00 = (approxRow - minRow) * (approxCol - minCol);
-	double area01 = (approxRow - minRow) * (maxCol - approxCol);
-	double area10 = (maxRow - approxRow) * (approxCol - minCol);
-	double area11 = (maxRow - approxRow) * (maxCol - approxCol);
+	switch (sampleMethod)
+	{
+		case NEAREST:
+		{
+			unsigned int row = unsigned int(approxRow) % this->height;
+			unsigned int col = unsigned int(approxCol) % this->width;
+			this->SampleColorVector(colorVector, Location{ row, col });
+			break;
+		}
+		case BILINEAR:
+		{
+			double minRow = floor(approxRow);
+			double maxRow = minRow + 1.0;
+			double minCol = floor(approxCol);
+			double maxCol = minCol + 1.0;
 
-	unsigned int minRowInt = FRUMPY_CLAMP(unsigned int(minRow), 0, this->height - 1);
-	unsigned int maxRowInt = FRUMPY_CLAMP(unsigned int(maxRow), 0, this->height - 1);
-	unsigned int minColInt = FRUMPY_CLAMP(unsigned int(minCol), 0, this->width - 1);
-	unsigned int maxColInt = FRUMPY_CLAMP(unsigned int(maxCol), 0, this->width - 1);
+			double area00 = (approxRow - minRow) * (approxCol - minCol);
+			double area01 = (approxRow - minRow) * (maxCol - approxCol);
+			double area10 = (maxRow - approxRow) * (approxCol - minCol);
+			double area11 = (maxRow - approxRow) * (maxCol - approxCol);
 
-	Vector color00, color01, color10, color11;
+			unsigned int minRowInt = unsigned int(minRow) % this->height;
+			unsigned int maxRowInt = unsigned int(maxRow) % this->height;
+			unsigned int minColInt = unsigned int(minCol) % this->width;
+			unsigned int maxColInt = unsigned int(maxCol) % this->width;
 
-	this->SampleColorVector(color00, Location{ minRowInt, minColInt });
-	this->SampleColorVector(color01, Location{ minRowInt, maxColInt });
-	this->SampleColorVector(color10, Location{ maxRowInt, minColInt });
-	this->SampleColorVector(color11, Location{ maxRowInt, maxColInt });
+			Vector color00, color01, color10, color11;
 
-	colorVector =
-		color00 * area00 +
-		color01 * area01 +
-		color10 * area10 +
-		color11 * area11;
-#else
-	Location location;
-	location.row = FRUMPY_CLAMP(unsigned int(approxRow), 0, this->height - 1);
-	location.col = FRUMPY_CLAMP(unsigned int(approxCol), 0, this->width - 1);
-	this->SampleColorVector(colorVector, location);
-#endif
+			this->SampleColorVector(color00, Location{ minRowInt, minColInt });
+			this->SampleColorVector(color01, Location{ minRowInt, maxColInt });
+			this->SampleColorVector(color10, Location{ maxRowInt, minColInt });
+			this->SampleColorVector(color11, Location{ maxRowInt, maxColInt });
+
+			colorVector =
+				color00 * area11 +
+				color01 * area10 +
+				color10 * area01 +
+				color11 * area00;
+
+			break;
+		}
+		default:
+		{
+			colorVector.SetComponents(1.0, 1.0, 1.0);
+			break;
+		}
+	}
 }
 
 void Image::SampleColorVector(Vector& colorVector, const Location& location) const

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Scene.h"
+#include "../FileAssets/Image.h"
 
 namespace Frumpy
 {
@@ -25,5 +26,6 @@ namespace Frumpy
 	private:
 		Mesh* mesh;
 		Image* texture;
+		Image::SampleMethod sampleMethod;
 	};
 }

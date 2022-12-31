@@ -139,6 +139,7 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 	this->vertex[1] = nullptr;
 	this->vertex[2] = nullptr;
 	this->texture = nullptr;
+	this->sampleMethod = Image::SampleMethod::NEAREST;
 }
 
 /*virtual*/ Renderer::TriangleRenderJob::~TriangleRenderJob()
@@ -348,7 +349,7 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 				interpolatedTexCoords.y = FRUMPY_CLAMP(interpolatedTexCoords.y, 0.0, 1.0);
 				interpolatedTexCoords.z = FRUMPY_CLAMP(interpolatedTexCoords.z, 0.0, 1.0);
 
-				texture->SampleColorVector(surfaceProperties.diffuseColor, interpolatedTexCoords);
+				texture->SampleColorVector(surfaceProperties.diffuseColor, interpolatedTexCoords, this->sampleMethod);
 			}
 			else
 			{

@@ -9,6 +9,7 @@ MeshObject::MeshObject()
 {
 	this->mesh = nullptr;
 	this->texture = nullptr;
+	this->sampleMethod = Image::SampleMethod::NEAREST;
 }
 
 /*virtual*/ MeshObject::~MeshObject()
@@ -72,6 +73,7 @@ MeshObject::MeshObject()
 		job->vertex[1] = &vertexB;
 		job->vertex[2] = &vertexC;
 		job->texture = this->texture;
+		job->sampleMethod = this->sampleMethod;
 		renderer.SubmitJob(job);
 	}
 }

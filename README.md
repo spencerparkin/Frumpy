@@ -7,8 +7,4 @@ only concerns itself with generating the pixel data.  Following is the latest sc
 
 ![snapshot](https://github.com/spencerparkin/Frumpy/blob/master/Screenshot.png?raw=true)
 
-As you can see, it looks like crap, and there's something wrong with the texturing on the spout.
-I'm not yet sure where the math is becoming too unstable or is perhaps just plain wrong.
-
-You can also see that it renders at an abismal frame-rate, even at low resolution.
-I'm not sure how to get that to go faster at the moment.
+As you can see, it looks like crap, but it's coming along.

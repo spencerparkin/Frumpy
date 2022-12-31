@@ -4,6 +4,7 @@
 #include "List.h"
 #include "Matrix.h"
 #include "LightSources/AmbientLight.h"
+#include "FileAssets/Image.h"
 #include <mutex>
 #include <thread>
 #include <semaphore>
@@ -61,6 +62,7 @@ namespace Frumpy
 
 			const Vertex* vertex[3];
 			const Image* texture;
+			Image::SampleMethod sampleMethod;
 		};
 
 		void SetFramebuffer(Image* frameBuffer) { this->frameBuffer = frameBuffer; }

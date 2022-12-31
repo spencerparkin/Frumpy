@@ -99,7 +99,13 @@ namespace Frumpy
 			return &this->pixelData[i];
 		}
 
-		void SampleColorVector(Vector& colorVector, const Vector& texCoords) const;
+		enum SampleMethod
+		{
+			NEAREST,
+			BILINEAR
+		};
+
+		void SampleColorVector(Vector& colorVector, const Vector& texCoords, SampleMethod sampleMethod) const;
 		void SampleColorVector(Vector& colorVector, const Location& location) const;
 
 	private:
