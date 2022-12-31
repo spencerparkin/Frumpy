@@ -154,19 +154,19 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 	double minY = FRUMPY_MIN(FRUMPY_MIN(vertexA.imageSpacePoint.y, vertexB.imageSpacePoint.y), vertexC.imageSpacePoint.y);
 	double maxY = FRUMPY_MAX(FRUMPY_MAX(vertexA.imageSpacePoint.y, vertexB.imageSpacePoint.y), vertexC.imageSpacePoint.y);
 
-	unsigned int minRow = unsigned int(minY);
-	unsigned int maxRow = unsigned int(maxY);
+	int minRow = int(minY);
+	int maxRow = int(maxY);
 
-	if (thread->minScanline <= minRow && minRow <= thread->maxScanline)
+	if (int(thread->minScanline) <= minRow && minRow <= int(thread->maxScanline))
 		return true;
 
-	if (thread->minScanline <= maxRow && maxRow <= thread->maxScanline)
+	if (int(thread->minScanline) <= maxRow && maxRow <= int(thread->maxScanline))
 		return true;
 
-	if (minRow <= thread->minScanline && thread->minScanline <= maxRow)
+	if (minRow <= int(thread->minScanline) && int(thread->minScanline) <= maxRow)
 		return true;
 
-	if (minRow <= thread->maxScanline && thread->maxScanline <= maxRow)
+	if (minRow <= int(thread->maxScanline) && int(thread->maxScanline) <= maxRow)
 		return true;
 
 	return false;
@@ -256,12 +256,12 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 		maxEdges[1].vertexB = &vertexB.imageSpacePoint;
 	}
 
-	unsigned int minRow = unsigned int(minY);
-	unsigned int maxRow = unsigned int(maxY);
-	unsigned int midRow = unsigned int(midY);
+	int minRow = int(minY);
+	int maxRow = int(maxY);
+	int midRow = int(midY);
 
-	minRow = FRUMPY_CLAMP(minRow, thread->minScanline, thread->maxScanline);
-	maxRow = FRUMPY_CLAMP(maxRow, thread->minScanline, thread->maxScanline);
+	minRow = FRUMPY_CLAMP(minRow, int(thread->minScanline), int(thread->maxScanline));
+	maxRow = FRUMPY_CLAMP(maxRow, int(thread->minScanline), int(thread->maxScanline));
 
 	Triangle triangle;
 	triangle.vertex[0] = vertexA.cameraSpacePoint;
@@ -271,7 +271,7 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 	Plane planeOfTriangle;
 	planeOfTriangle.SetFromTriangle(triangle);
 
-	for (unsigned int row = minRow; row <= maxRow; row++)
+	for (int row = minRow; row <= maxRow; row++)
 	{
 		Edge* edges = (row < midRow) ? minEdges : maxEdges;
 
@@ -302,15 +302,15 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 		double minX = FRUMPY_MIN(x0, x1);
 		double maxX = FRUMPY_MAX(x0, x1);
 
-		unsigned int minCol = unsigned int(minX);
-		unsigned int maxCol = unsigned int(maxX);
+		int minCol = int(minX);
+		int maxCol = int(maxX);
 
 		minCol = FRUMPY_MAX(minCol, 0);
-		maxCol = FRUMPY_MIN(maxCol, frameBuffer->GetWidth() - 1);
+		maxCol = FRUMPY_MIN(maxCol, int(frameBuffer->GetWidth() - 1));
 
-		for (unsigned int col = minCol; col <= maxCol; col++)
+		for (int col = minCol; col <= maxCol; col++)
 		{
-			Image::Location location{ row, col };
+			Image::Location location{ unsigned(row), unsigned(col) };
 
 			Vector imagePointA(double(col), double(row), 0.0);
 			Vector imagePointB(double(col), double(row), -1.0);

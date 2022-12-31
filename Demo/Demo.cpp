@@ -76,7 +76,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->depthBuffer = new Frumpy::Image(this->image->GetWidth(), this->image->GetHeight());
 
     this->directionLight = new Frumpy::DirectionalLight();
-    this->directionLight->directionWorldSpace.SetComponents(-0.5, -1.0, 0.0);
+    this->directionLight->directionWorldSpace.SetComponents(0.0, 0.0, -1.0);
     this->directionLight->directionWorldSpace.Normalize();
     this->directionLight->ambientIntensity = 0.1;
 
@@ -84,7 +84,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->renderer->SetFramebuffer(this->image);
     this->renderer->SetDepthBuffer(this->depthBuffer);
     this->renderer->SetLightSource(this->directionLight);
-    this->renderer->Startup(32);
+    this->renderer->Startup(8);
 
     this->scene = new Frumpy::Scene();
     this->scene->clearPixel.color = 0;
