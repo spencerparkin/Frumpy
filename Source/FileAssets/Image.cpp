@@ -127,7 +127,7 @@ void Image::SampleColorVector(Vector& colorVector, const Vector& texCoords) cons
 {
 	double approxRow = (1.0 - texCoords.y) * double(this->height - 1);
 	double approxCol = texCoords.x * double(this->width - 1);
-
+#if 0
 	double minRow = floor(approxRow);
 	double maxRow = minRow + 1.0;
 	double minCol = floor(approxCol);
@@ -155,6 +155,12 @@ void Image::SampleColorVector(Vector& colorVector, const Vector& texCoords) cons
 		color01 * area01 +
 		color10 * area10 +
 		color11 * area11;
+#else
+	Location location;
+	location.row = FRUMPY_CLAMP(unsigned int(approxRow), 0, this->height - 1);
+	location.col = FRUMPY_CLAMP(unsigned int(approxCol), 0, this->width - 1);
+	this->SampleColorVector(colorVector, location);
+#endif
 }
 
 void Image::SampleColorVector(Vector& colorVector, const Location& location) const
