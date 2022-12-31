@@ -52,8 +52,8 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->frameBitmapInfo.bmiHeader.biPlanes = 1;
     this->frameBitmapInfo.bmiHeader.biBitCount = 32;
     this->frameBitmapInfo.bmiHeader.biCompression = BI_RGB;
-    this->frameBitmapInfo.bmiHeader.biWidth = 512;
-    this->frameBitmapInfo.bmiHeader.biHeight = 512;
+    this->frameBitmapInfo.bmiHeader.biWidth = 256;
+    this->frameBitmapInfo.bmiHeader.biHeight = 256;
 
     this->frameDCHandle = CreateCompatibleDC(NULL);
     // TODO: Error handling.

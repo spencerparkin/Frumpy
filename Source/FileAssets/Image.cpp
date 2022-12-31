@@ -125,9 +125,9 @@ const Image::Pixel* Image::GetPixel(const Location& location) const
 
 void Image::SampleColorVector(Vector& colorVector, const Vector& texCoords) const
 {
-	double approxRow = (1.0 - texCoords.y) * double(this->height - 1);
+	double approxRow = texCoords.y * double(this->height - 1);
 	double approxCol = texCoords.x * double(this->width - 1);
-#if 0
+#if 0	// TODO: What's wrong with this code?  Or is it a problem with the given texture coordinates?
 	double minRow = floor(approxRow);
 	double maxRow = minRow + 1.0;
 	double minCol = floor(approxCol);
