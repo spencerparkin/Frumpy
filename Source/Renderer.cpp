@@ -53,16 +53,14 @@ void Renderer::Shutdown()
 
 void Renderer::SubmitJob(RenderJob* job)
 {
-	Thread* bestThread = nullptr;
 	for (List<Thread*>::Node* node = this->threadList.GetHead(); node; node = node->GetNext())
 	{
 		Thread* thread = node->value;
-		if (!bestThread || bestThread->renderJobQueue.GetCount() > thread->renderJobQueue.GetCount())
-			bestThread = thread;
+		if (job->ShouldRenderOnThread(thread))
+			thread->SubmitJob(job);
 	}
 
-	if (bestThread)
-		bestThread->SubmitJob(job);
+	this->submittedJobsList.AddTail(job);
 }
 
 // TODO: We'll need an opaque pass and a translucency pass.
@@ -70,21 +68,18 @@ void Renderer::BeginRenderPass()
 {
 	this->lightSource->PrepareForRender(this->pipelineMatrices);
 
-	// Each thread works with their own copy of the framebuffer and z-buffer.
-	// Trying to synchronize shared access to a single framebuffer/z-buffer is not practical as far as I can see.
-	// So what we do is let each thread work independently and then composite the final framebuffer/z-buffer at the end of the pass.
+	// Evenly distribute the scan-line work-load across all the threads.
+	// We really only need to do this if the frame-buffer dimensions change on us, but it's so quick, just always do it.
+	unsigned int scanlinesPerThread = this->frameBuffer->GetHeight() / this->threadList.GetCount();
+	unsigned int minScanline = 0;
+	unsigned int maxScanline = scanlinesPerThread - 1;
 	for (List<Thread*>::Node* node = this->threadList.GetHead(); node; node = node->GetNext())
 	{
 		Thread* thread = node->value;
-		if (!thread->frameBuffer)
-			thread->frameBuffer = (Image*)this->frameBuffer->Clone();
-		else
-			thread->frameBuffer->SetAsCopyOf(this->frameBuffer);
-
-		if (!thread->depthBuffer)
-			thread->depthBuffer = (Image*)this->depthBuffer->Clone();
-		else
-			thread->depthBuffer->SetAsCopyOf(this->depthBuffer);
+		thread->minScanline = minScanline;
+		thread->maxScanline = node->GetNext() ? maxScanline : (this->frameBuffer->GetHeight() - 1);
+		minScanline = maxScanline + 1;
+		maxScanline = minScanline + scanlinesPerThread - 1;
 	}
 }
 
@@ -92,24 +87,7 @@ void Renderer::EndRenderPass()
 {
 	this->WaitForAllJobCompletion();
 
-	for (unsigned int i = 0; i < this->frameBuffer->GetNumPixels(); i++)
-	{
-		Image::Pixel* pixel = this->frameBuffer->GetPixel(i);
-		Image::Pixel* pixelZ = this->depthBuffer->GetPixel(i);
-
-		for (List<Thread*>::Node* node = this->threadList.GetHead(); node; node = node->GetNext())
-		{
-			Thread* thread = node->value;
-			Image::Pixel* threadPixelZ = thread->depthBuffer->GetPixel(i);
-			if (threadPixelZ->depth > pixelZ->depth)
-			{
-				Image::Pixel* threadPixel = thread->frameBuffer->GetPixel(i);
-
-				pixelZ->depth = threadPixelZ->depth;
-				pixel->color = threadPixel->color;
-			}
-		}
-	}
+	this->submittedJobsList.Delete();
 }
 
 void Renderer::WaitForAllJobCompletion()
@@ -131,6 +109,11 @@ Renderer::RenderJob::RenderJob()
 
 /*virtual*/ Renderer::RenderJob::~RenderJob()
 {
+}
+
+/*virtual*/ bool Renderer::RenderJob::ShouldRenderOnThread(Thread* thread)
+{
+	return false;
 }
 
 //-------------------------- Renderer::ExitRenderJob --------------------------
@@ -162,15 +145,33 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 {
 }
 
+/*virtual*/ bool Renderer::TriangleRenderJob::ShouldRenderOnThread(Thread* thread)
+{
+	const Vertex& vertexA = *this->vertex[0];
+	const Vertex& vertexB = *this->vertex[1];
+	const Vertex& vertexC = *this->vertex[2];
+
+	double minY = FRUMPY_MIN(FRUMPY_MIN(vertexA.imageSpacePoint.y, vertexB.imageSpacePoint.y), vertexC.imageSpacePoint.y);
+	double maxY = FRUMPY_MAX(FRUMPY_MAX(vertexA.imageSpacePoint.y, vertexB.imageSpacePoint.y), vertexC.imageSpacePoint.y);
+
+	unsigned int minRow = unsigned int(minY);
+	unsigned int maxRow = unsigned int(maxY);
+
+	if (thread->minScanline <= minRow && minRow <= thread->maxScanline)
+		return true;
+
+	if (thread->minScanline <= maxRow && maxRow <= thread->maxScanline)
+		return true;
+
+	return false;
+}
+
 /*virtual*/ void Renderer::TriangleRenderJob::Render(Thread* thread)
 {
 	const PipelineMatrices& pipelineMatrices = thread->renderer->pipelineMatrices;
 
-	Image* frameBuffer = thread->frameBuffer;
-	Image* depthBuffer = thread->depthBuffer;
-	
-	if (!frameBuffer || !depthBuffer)
-		return;
+	Image* frameBuffer = thread->renderer->frameBuffer;
+	Image* depthBuffer = thread->renderer->depthBuffer;
 
 	const Vertex& vertexA = *this->vertex[0];
 	const Vertex& vertexB = *this->vertex[1];
@@ -249,15 +250,12 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 		maxEdges[1].vertexB = &vertexB.imageSpacePoint;
 	}
 
-	int minRow = int(minY);
-	int maxRow = int(maxY);
-	int midRow = int(midY);
+	unsigned int minRow = unsigned int(minY);
+	unsigned int maxRow = unsigned int(maxY);
+	unsigned int midRow = unsigned int(midY);
 
-	minRow = FRUMPY_MAX(minRow, 0);
-	maxRow = FRUMPY_MIN(maxRow, signed(frameBuffer->GetHeight() - 1));
-
-	if (minRow >= maxRow)
-		return;
+	minRow = FRUMPY_CLAMP(minRow, thread->minScanline, thread->maxScanline);
+	maxRow = FRUMPY_CLAMP(maxRow, thread->minScanline, thread->maxScanline);
 
 	Triangle triangle;
 	triangle.vertex[0] = vertexA.cameraSpacePoint;
@@ -267,7 +265,7 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 	Plane planeOfTriangle;
 	planeOfTriangle.SetFromTriangle(triangle);
 
-	for (int row = minRow; row <= maxRow; row++)
+	for (unsigned int row = minRow; row <= maxRow; row++)
 	{
 		Edge* edges = (row < midRow) ? minEdges : maxEdges;
 
@@ -298,15 +296,15 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 		double minX = FRUMPY_MIN(x0, x1);
 		double maxX = FRUMPY_MAX(x0, x1);
 
-		int minCol = int(minX);
-		int maxCol = int(maxX);
+		unsigned int minCol = unsigned int(minX);
+		unsigned int maxCol = unsigned int(maxX);
 
 		minCol = FRUMPY_MAX(minCol, 0);
-		maxCol = FRUMPY_MIN(maxCol, signed(frameBuffer->GetWidth() - 1));
+		maxCol = FRUMPY_MIN(maxCol, frameBuffer->GetWidth() - 1);
 
-		for (int col = minCol; col <= maxCol; col++)
+		for (unsigned int col = minCol; col <= maxCol; col++)
 		{
-			Image::Location location{ unsigned(row), unsigned(col) };
+			Image::Location location{ row, col };
 
 			Vector imagePointA(double(col), double(row), 0.0);
 			Vector imagePointB(double(col), double(row), -1.0);
@@ -380,16 +378,14 @@ Renderer::Thread::Thread(Renderer* renderer) : renderJobQueueSemaphore(0)
 {
 	this->renderer = renderer;
 	this->exitSignaled = false;
-	this->frameBuffer = nullptr;
-	this->depthBuffer = nullptr;
+	this->minScanline = 0;
+	this->maxScanline = 0;
 	this->thread = new std::thread([=]() { this->Run(); });
 }
 
 /*virtual*/ Renderer::Thread::~Thread()
 {
 	delete this->thread;
-	delete this->frameBuffer;
-	delete this->depthBuffer;
 }
 
 void Renderer::Thread::SubmitJob(RenderJob* job)
@@ -418,7 +414,6 @@ void Renderer::Thread::Run()
 
 			// Process the job.
 			renderJob->Render(this);
-			delete renderJob;
 			(*this->renderer->jobCount)--;
 		}
 	}

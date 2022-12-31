@@ -38,6 +38,7 @@ namespace Frumpy
 			virtual ~RenderJob();
 
 			virtual void Render(Thread* thread) = 0;
+			virtual bool ShouldRenderOnThread(Thread* thread);
 		};
 
 		class ExitRenderJob : public RenderJob
@@ -56,6 +57,7 @@ namespace Frumpy
 			virtual ~TriangleRenderJob();
 
 			virtual void Render(Thread* thread) override;
+			virtual bool ShouldRenderOnThread(Thread* thread) override;
 
 			const Vertex* vertex[3];
 			const Image* texture;
@@ -84,8 +86,8 @@ namespace Frumpy
 			std::thread* thread;
 			bool exitSignaled;
 			Renderer* renderer;
-			Image* frameBuffer;
-			Image* depthBuffer;
+			unsigned int minScanline;
+			unsigned int maxScanline;
 		};
 
 		void SetLightSource(LightSource* lightSource) { this->lightSource = lightSource; }
@@ -101,5 +103,6 @@ namespace Frumpy
 		std::atomic<unsigned int>* jobCount;
 		LightSource* lightSource;
 		AmbientLight defaultLightSource;
+		List<RenderJob*> submittedJobsList;
 	};
 }
