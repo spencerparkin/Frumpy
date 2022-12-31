@@ -163,6 +163,12 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 	if (thread->minScanline <= maxRow && maxRow <= thread->maxScanline)
 		return true;
 
+	if (minRow <= thread->minScanline && thread->minScanline <= maxRow)
+		return true;
+
+	if (minRow <= thread->maxScanline && thread->maxScanline <= maxRow)
+		return true;
+
 	return false;
 }
 

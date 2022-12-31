@@ -84,7 +84,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->renderer->SetFramebuffer(this->image);
     this->renderer->SetDepthBuffer(this->depthBuffer);
     this->renderer->SetLightSource(this->directionLight);
-    this->renderer->Startup(16);
+    this->renderer->Startup(32);
 
     this->scene = new Frumpy::Scene();
     this->scene->clearPixel.color = 0;
