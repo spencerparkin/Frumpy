@@ -11,7 +11,7 @@ namespace Frumpy
 		AmbientLight();
 		virtual ~AmbientLight();
 
-		virtual void PrepareForRender(const PipelineMatrices& pipelineMatrices) const override;
+		virtual void PrepareForRender(const GraphicsMatrices& graphicsMatrices) const override;
 		virtual void CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector& surfaceColor) const override;
 	};
 }

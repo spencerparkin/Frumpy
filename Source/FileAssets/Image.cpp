@@ -55,9 +55,18 @@ bool Image::SetPixel(const Location& location, uint32_t color)
 	return true;
 }
 
-uint32_t Image::MakeColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a)
+uint32_t Image::MakeColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a) const
 {
 	return (r << this->format.rShift) | (g << this->format.gShift) | (b << this->format.bShift) | (a << this->format.aShift);
+}
+
+uint32_t Image::MakeColor(const Vector& colorVector) const
+{
+	unsigned int r = FRUMPY_CLAMP((unsigned int)(colorVector.x * 255.0), 0, 255);
+	unsigned int g = FRUMPY_CLAMP((unsigned int)(colorVector.y * 255.0), 0, 255);
+	unsigned int b = FRUMPY_CLAMP((unsigned int)(colorVector.z * 255.0), 0, 255);
+
+	return this->MakeColor(r, g, b, 0);
 }
 
 void Image::SetWidthAndHeight(unsigned int width, unsigned int height)

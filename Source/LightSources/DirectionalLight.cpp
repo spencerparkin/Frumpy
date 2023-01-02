@@ -1,4 +1,5 @@
 #include "DirectionalLight.h"
+#include "../Renderer.h"
 
 using namespace Frumpy;
 
@@ -11,9 +12,9 @@ DirectionalLight::DirectionalLight()
 {
 }
 
-/*virtual*/ void DirectionalLight::PrepareForRender(const PipelineMatrices& pipelineMatrices) const
+/*virtual*/ void DirectionalLight::PrepareForRender(const GraphicsMatrices& graphicsMatrices) const
 {
-	pipelineMatrices.worldToCamera.TransformVector(this->directionWorldSpace, this->directionCameraSpace);
+	graphicsMatrices.worldToCamera.TransformVector(this->directionWorldSpace, this->directionCameraSpace);
 }
 
 /*virtual*/ void DirectionalLight::CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector& surfaceColor) const

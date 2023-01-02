@@ -11,3 +11,8 @@ LightSource::LightSource()
 /*virtual*/ LightSource::~LightSource()
 {
 }
+
+/*virtual*/ bool LightSource::CalcShadowCamera(Camera& shadowCamera) const
+{
+	return false;
+}

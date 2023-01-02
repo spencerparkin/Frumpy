@@ -44,8 +44,9 @@ private:
 	bool exitProgram;
 	Frumpy::Scene* scene;
 	Frumpy::Camera* camera;
-	Frumpy::Image* image;
+	Frumpy::Image* frameBuffer;
 	Frumpy::Image* depthBuffer;
+	Frumpy::Image* shadowBuffer;
 	Frumpy::Renderer* renderer;
 	Frumpy::DirectionalLight* directionLight;
 	Frumpy::AssetManager* assetManager;

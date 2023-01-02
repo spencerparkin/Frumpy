@@ -27,8 +27,8 @@ MeshObject::MeshObject()
 	if (!this->mesh)
 		return;
 
-	Matrix objectToImage = renderer.pipelineMatrices.worldToImage * this->objectToWorld;
-	Matrix objectToCamera = renderer.pipelineMatrices.worldToCamera * this->objectToWorld;
+	Matrix objectToImage = renderer.GetGraphicsMatrices().worldToImage * this->objectToWorld;
+	Matrix objectToCamera = renderer.GetGraphicsMatrices().worldToCamera * this->objectToWorld;
 
 	for (unsigned int i = 0; i < this->mesh->GetVertexBufferSize(); i++)
 	{

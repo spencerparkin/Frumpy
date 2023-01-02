@@ -25,8 +25,9 @@ Demo::Demo()
     this->exitProgram = false;
     this->scene = nullptr;
     this->camera = nullptr;
-    this->image = nullptr;
+    this->frameBuffer = nullptr;
     this->depthBuffer = nullptr;
+    this->shadowBuffer = nullptr;
     this->renderer = nullptr;
     this->directionLight = nullptr;
     this->assetManager = nullptr;
@@ -69,11 +70,13 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     format.rShift = 16;
     format.aShift = 24;
 
-    this->image = new Frumpy::Image();
-    this->image->SetRawPixelBuffer(this->framePixelBuffer, this->frameBitmapInfo.bmiHeader.biWidth, this->frameBitmapInfo.bmiHeader.biHeight);
-    this->image->SetFormat(format);
+    this->frameBuffer = new Frumpy::Image();
+    this->frameBuffer->SetRawPixelBuffer(this->framePixelBuffer, this->frameBitmapInfo.bmiHeader.biWidth, this->frameBitmapInfo.bmiHeader.biHeight);
+    this->frameBuffer->SetFormat(format);
 
-    this->depthBuffer = new Frumpy::Image(this->image->GetWidth(), this->image->GetHeight());
+    this->depthBuffer = new Frumpy::Image(this->frameBuffer->GetWidth(), this->frameBuffer->GetHeight());
+
+    this->shadowBuffer = new Frumpy::Image(128, 128);
 
     this->directionLight = new Frumpy::DirectionalLight();
     this->directionLight->directionWorldSpace.SetComponents(0.5, -1.0, -0.5);
@@ -81,13 +84,13 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->directionLight->ambientIntensity = 0.1;
 
     this->renderer = new Frumpy::Renderer();
-    this->renderer->SetFramebuffer(this->image);
+    this->renderer->SetFramebuffer(this->frameBuffer);
     this->renderer->SetDepthBuffer(this->depthBuffer);
+    this->renderer->SetShadowBuffer(this->shadowBuffer);
     this->renderer->SetLightSource(this->directionLight);
     this->renderer->Startup(8);
 
     this->scene = new Frumpy::Scene();
-    this->scene->clearPixel.color = 0;
 
     this->camera = new Frumpy::Camera();
     this->camera->LookAt(Frumpy::Vector(0.0, 0.0, 100.0), Frumpy::Vector(0.0, 0.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
@@ -96,6 +99,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Teapot001")));
     object->GetMesh()->SetColor(Frumpy::Vector(1.0, 0.0, 0.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
+    object->castsShadow = true;
     strcpy_s(object->name, "object");
     this->scene->objectList.AddTail(object);
 
@@ -179,7 +183,7 @@ void Demo::Run()
         if (this->renderer && this->camera && this->scene)
         {
             ProfileBlock profileBlock(&this->frumpyRenderTime);
-            this->scene->Render(*this->camera, *this->renderer);
+            this->renderer->RenderScene(this->scene, this->camera);
         }
 
         // Ask windows to have us repaint our window.
@@ -193,8 +197,8 @@ void Demo::Run()
             double fps = double(frameFPSCalcFrequency) / totalElapsedTimeSeconds;
             static char fpsMessage[256];
             sprintf_s(fpsMessage, sizeof(fpsMessage), "Image Size: %d x %d; FPS: %2.4f; Render: %2.4f; Blit: %2.4f; Msg: %2.4f",
-                this->image->GetWidth(),
-                this->image->GetHeight(),
+                this->frameBuffer->GetWidth(),
+                this->frameBuffer->GetHeight(),
                 fps,
                 this->frumpyRenderTime.GetAverageMilliseconds(),
                 this->demoBlitTime.GetAverageMilliseconds(),
@@ -232,16 +236,22 @@ int Demo::Shutdown()
         this->camera = nullptr;
     }
 
-    if (this->image)
+    if (this->frameBuffer)
     {
-        delete this->image;
-        this->image = nullptr;
+        delete this->frameBuffer;
+        this->frameBuffer = nullptr;
     }
 
     if (this->depthBuffer)
     {
         delete this->depthBuffer;
         this->depthBuffer = nullptr;
+    }
+
+    if (this->shadowBuffer)
+    {
+        delete this->shadowBuffer;
+        this->shadowBuffer = nullptr;
     }
 
     if (this->directionLight)

@@ -7,69 +7,11 @@ using namespace Frumpy;
 
 Scene::Scene()
 {
-	this->clearPixel.color = 0;
 }
 
 /*virtual*/ Scene::~Scene()
 {
 	this->objectList.Delete();
-}
-
-/*virtual*/ void Scene::Render(const Camera& camera, Renderer& renderer) const
-{
-	// First, resolve the object-to-world transform for each object in the scene hierarchy.
-	Matrix parentToWorld;
-	parentToWorld.Identity();
-	for (const ObjectList::Node* node = this->objectList.GetHead(); node; node = node->GetNext())
-	{
-		const Object* object = node->value;
-		object->CalculateWorldTransform(parentToWorld);
-	}
-
-	// Calculate the other matrices we'll need.
-	camera.frustum.CalcProjectionMatrix(renderer.pipelineMatrices.cameraToProjection);
-	renderer.pipelineMatrices.worldToCamera.Invert(camera.worldTransform);
-	renderer.GetFramebuffer()->CalcImageMatrix(renderer.pipelineMatrices.projectionToImage);
-	renderer.pipelineMatrices.worldToImage =
-		renderer.pipelineMatrices.projectionToImage *
-		renderer.pipelineMatrices.cameraToProjection *
-		renderer.pipelineMatrices.worldToCamera;
-	renderer.pipelineMatrices.imageToCamera.Invert(
-		renderer.pipelineMatrices.projectionToImage *
-		renderer.pipelineMatrices.cameraToProjection);
-
-	// Next, go determine the list of objects visible to the viewing frustum.  This, of course,
-	// does not account for any kind of occlusion that may be taking place.  The depth buffer will
-	// take care of any occlusion, but we're not able to necessarily skip anything fully occluded here.
-	List<Plane> frustumPlanesList;
-	camera.frustum.GeneratePlanes(frustumPlanesList);
-	ObjectList visibleObjectList;
-	const_cast<Scene*>(this)->ForAllObjects([&visibleObjectList, &frustumPlanesList](Object* object) -> bool {
-		if (object->IntersectsFrustum(frustumPlanesList))
-			visibleObjectList.AddTail(object);
-		return true;
-	});
-
-	// Clear the depth buffer before we start using it.
-	Image::Pixel pixel;
-	pixel.depth = -(float)camera.frustum._far;
-	renderer.GetDepthBuffer()->Clear(pixel);
-
-	// Clear the image buffer before we start rasterizing to it.
-	renderer.GetFramebuffer()->Clear(this->clearPixel);
-
-	// This must be called before doing any job submission.
-	renderer.BeginRenderPass();
-
-	// Finally, go render the list of objects we think are visible.
-	for (ObjectList::Node* node = visibleObjectList.GetHead(); node; node = node->GetNext())
-	{
-		const Object* object = node->value;
-		object->Render(renderer);
-	}
-
-	// This waits for the render jobs to complete, then composites the final frame.
-	renderer.EndRenderPass();
 }
 
 Scene::Object* Scene::FindObjectByName(const char* name)
@@ -105,9 +47,25 @@ void Scene::ForAllObjects(std::function<bool(Object*)> lambda)
 	}
 }
 
+void Scene::GenerateVisibleObjectsList(const Camera* camera, ObjectList& visibleObjectList) const
+{
+	// Go determine the list of objects visible to the viewing frustum of the given camera.  This, of
+	// course, does not account for any kind of occlusion that may be taking place.  The depth buffer will
+	// take care of any occlusion, so we're not able to necessarily skip anything fully occluded here.
+	List<Plane> frustumPlanesList;
+	camera->frustum.GeneratePlanes(frustumPlanesList);
+	const_cast<Scene*>(this)->ForAllObjects([&visibleObjectList, &frustumPlanesList](Object* object) -> bool {
+		if (object->IntersectsFrustum(frustumPlanesList))
+			visibleObjectList.AddTail(object);
+		return true;
+	});
+}
+
 Scene::Object::Object()
 {
 	this->name[0] = '\0';
+	this->renderType = RenderType::RENDER_OPAQUE;
+	this->castsShadow = false;
 }
 
 /*virtual*/ Scene::Object::~Object()

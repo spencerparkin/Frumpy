@@ -92,7 +92,8 @@ namespace Frumpy
 
 		bool SetPixel(const Location& location, uint32_t color);
 
-		uint32_t MakeColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a);
+		uint32_t MakeColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a) const;
+		uint32_t MakeColor(const Vector& colorVector) const;
 
 		Pixel* GetPixel(unsigned int i)
 		{

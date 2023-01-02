@@ -11,7 +11,7 @@ AmbientLight::AmbientLight()
 {
 }
 
-/*virtual*/ void AmbientLight::PrepareForRender(const PipelineMatrices& pipelineMatrices) const
+/*virtual*/ void AmbientLight::PrepareForRender(const GraphicsMatrices& graphicsMatrices) const
 {
 }
 

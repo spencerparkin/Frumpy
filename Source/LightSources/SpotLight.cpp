@@ -1,4 +1,5 @@
 #include "SpotLight.h"
+#include "../Renderer.h"
 
 using namespace Frumpy;
 
@@ -13,10 +14,10 @@ SpotLight::SpotLight()
 {
 }
 
-/*virtual*/ void SpotLight::PrepareForRender(const PipelineMatrices& pipelineMatrices) const
+/*virtual*/ void SpotLight::PrepareForRender(const GraphicsMatrices& graphicsMatrices) const
 {
-	pipelineMatrices.worldToCamera.TransformPoint(this->locationWorldSpace, this->locationCameraSpace);
-	pipelineMatrices.worldToCamera.TransformVector(this->directionWorldSpace, this->directionCameraSpace);
+	graphicsMatrices.worldToCamera.TransformPoint(this->locationWorldSpace, this->locationCameraSpace);
+	graphicsMatrices.worldToCamera.TransformVector(this->directionWorldSpace, this->directionCameraSpace);
 }
 
 /*virtual*/ void SpotLight::CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector& surfaceColor) const

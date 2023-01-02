@@ -15,22 +15,51 @@ namespace Frumpy
 	class Vertex;
 	class Image;
 	class LightSource;
+	class Scene;
+
+	struct GraphicsMatrices
+	{
+		void Calculate(const Camera& camera, const Image& target);
+
+		Matrix worldToCamera;
+		Matrix cameraToProjection;
+		Matrix projectionToImage;
+		Matrix worldToImage;
+		Matrix imageToCamera;
+	};
 
 	class FRUMPY_API Renderer
 	{
+	private:
+		class Thread;
+
 	public:
 		Renderer();
 		virtual ~Renderer();
 
 		bool Startup(unsigned int threadCount);
 		void Shutdown();
+		void RenderScene(const Scene* scene, const Camera* camera);
+
+		void SetLightSource(LightSource* lightSource) { this->lightSource = lightSource; }
+		LightSource* GeLightSource() { return this->lightSource; }
+
+		void SetFramebuffer(Image* frameBuffer) { this->frameBuffer = frameBuffer; }
+		Image* GetFramebuffer() { return this->frameBuffer; }
+
+		void SetDepthBuffer(Image* depthBuffer) { this->depthBuffer = depthBuffer; }
+		Image* GetDepthBuffer() { return this->depthBuffer; }
+
+		void SetShadowBuffer(Image* shadowBuffer) { this->shadowBuffer = shadowBuffer; }
+		Image* GetShadowBuffer() { return this->shadowBuffer; }
+
+		void SetClearColor(const Vector& clearColor);
+
+		const GraphicsMatrices& GetGraphicsMatrices() const { return this->graphicsMatrices; }
 
 		class RenderJob;
-		class Thread;
 
 		void SubmitJob(RenderJob* job);
-		void BeginRenderPass();
-		void EndRenderPass();
 
 		class RenderJob
 		{
@@ -65,13 +94,7 @@ namespace Frumpy
 			Image::SampleMethod sampleMethod;
 		};
 
-		void SetFramebuffer(Image* frameBuffer) { this->frameBuffer = frameBuffer; }
-		Image* GetFramebuffer() { return this->frameBuffer; }
-
-		void SetDepthBuffer(Image* depthBuffer) { this->depthBuffer = depthBuffer; }
-		Image* GetDepthBuffer() { return this->depthBuffer; }
-
-		PipelineMatrices pipelineMatrices;
+	private:
 
 		class Thread
 		{
@@ -92,19 +115,26 @@ namespace Frumpy
 			unsigned int maxScanline;
 		};
 
-		void SetLightSource(LightSource* lightSource) { this->lightSource = lightSource; }
-		LightSource* GeLightSource() { return this->lightSource; }
-
-	private:
-
 		void WaitForAllJobCompletion();
+
+		enum RenderPass
+		{
+			UNKNOWN_PASS,
+			OPAQUE_PASS,
+			TRANSPARENT_PASS,
+			SHADOW_PASS
+		};
 
 		List<Thread*> threadList;
 		Image* frameBuffer;
 		Image* depthBuffer;
+		Image* shadowBuffer;
 		std::atomic<unsigned int>* jobCount;
 		LightSource* lightSource;
 		AmbientLight defaultLightSource;
 		List<RenderJob*> submittedJobsList;
+		GraphicsMatrices graphicsMatrices;
+		Image::Pixel clearPixel;
+		RenderPass renderPass;
 	};
 }

@@ -3,13 +3,13 @@
 #include "Defines.h"
 #include "Matrix.h"
 #include "List.h"
-#include "FileAssets/Image.h"
-#include "Camera.h"
+#include "Plane.h"
 #include <functional>
 
 namespace Frumpy
 {
 	class Renderer;
+	class Camera;
 
 	// This defines the scene as a hierarchy of scene objects.
 	class FRUMPY_API Scene
@@ -18,15 +18,12 @@ namespace Frumpy
 		Scene();
 		virtual ~Scene();
 
-		// This is it!  This is the main entry-point to Frumpy.  Frumpy is just
-		// a bare-bones, simple-as-possible, software renderer.  That's all it is.
-		// That's all it does.  You want fancy-pants to the max?  Use DX12 or Volkan.
-		virtual void Render(const Camera& camera, Renderer& renderer) const;
-
 		class Object;
 		typedef List<Object*> ObjectList;
 
 		Object* FindObjectByName(const char* name);
+		void ForAllObjects(std::function<bool(Object*)> lambda);
+		void GenerateVisibleObjectsList(const Camera* camera, ObjectList& visibleObjectList) const;
 
 		// Derivatives of this are anything that might get rendered in the scene.
 		class FRUMPY_API Object
@@ -39,16 +36,20 @@ namespace Frumpy
 			virtual bool IntersectsFrustum(const List<Plane>& frustumPlanesList) const;
 			virtual void Render(Renderer& renderer) const;
 
+			enum RenderType
+			{
+				RENDER_OPAQUE,
+				RENDER_TRANSPARENT
+			};
+
 			char name[128];
 			Matrix childToParent;
 			mutable Matrix objectToWorld;
 			ObjectList childObjectList;
+			RenderType renderType;
+			bool castsShadow;
 		};
 
-		void ForAllObjects(std::function<bool(Object*)> lambda);
-
 		ObjectList objectList;
-		Image::Pixel clearPixel;
-		// TODO: Add list of lights?  How would we cast shadows?
 	};
 }

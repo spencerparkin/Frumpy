@@ -5,6 +5,8 @@
 #include "Vertex.h"
 #include "Triangle.h"
 #include "Plane.h"
+#include "Scene.h"
+#include "Camera.h"
 #include <math.h>
 
 using namespace Frumpy;
@@ -13,8 +15,11 @@ Renderer::Renderer()
 {
 	this->frameBuffer = nullptr;
 	this->depthBuffer = nullptr;
+	this->shadowBuffer = nullptr;
 	this->jobCount = new std::atomic<unsigned int>(0);
 	this->lightSource = &this->defaultLightSource;
+	this->renderPass = RenderPass::UNKNOWN_PASS;
+	this->clearPixel.color = 0;
 }
 
 /*virtual*/ Renderer::~Renderer()
@@ -24,10 +29,33 @@ Renderer::Renderer()
 
 bool Renderer::Startup(unsigned int threadCount)
 {
+	if (!this->frameBuffer || !this->depthBuffer)
+		return false;
+
+	if (this->frameBuffer->GetWidth() != this->depthBuffer->GetWidth())
+		return false;
+
+	if (this->frameBuffer->GetHeight() != this->depthBuffer->GetHeight())
+		return false;
+
+	// Launch our worker threads that do all the shading.
 	for (unsigned int i = 0; i < threadCount; i++)
 	{
 		Thread* thread = new Thread(this);
 		this->threadList.AddTail(thread);
+	}
+
+	// Evenly distribute the scan-line work-load across all the threads.
+	unsigned int scanlinesPerThread = this->frameBuffer->GetHeight() / this->threadList.GetCount();
+	unsigned int minScanline = 0;
+	unsigned int maxScanline = scanlinesPerThread - 1;
+	for (List<Thread*>::Node* node = this->threadList.GetHead(); node; node = node->GetNext())
+	{
+		Thread* thread = node->value;
+		thread->minScanline = minScanline;
+		thread->maxScanline = node->GetNext() ? maxScanline : (this->frameBuffer->GetHeight() - 1);
+		minScanline = maxScanline + 1;
+		maxScanline = minScanline + scanlinesPerThread - 1;
 	}
 
 	return true;
@@ -51,6 +79,89 @@ void Renderer::Shutdown()
 	this->threadList.Clear();
 }
 
+void GraphicsMatrices::Calculate(const Camera& camera, const Image& target)
+{
+	camera.frustum.CalcProjectionMatrix(this->cameraToProjection);
+	this->worldToCamera.Invert(camera.worldTransform);
+	target.CalcImageMatrix(this->projectionToImage);
+	this->worldToImage = this->projectionToImage * this->cameraToProjection * this->worldToCamera;
+	this->imageToCamera.Invert(this->projectionToImage * this->cameraToProjection);
+}
+
+void Renderer::RenderScene(const Scene* scene, const Camera* camera)
+{
+	// First, resolve the object-to-world transform for each object in the scene hierarchy.
+	Matrix parentToWorld;
+	parentToWorld.Identity();
+	for (const Scene::ObjectList::Node* node = scene->objectList.GetHead(); node; node = node->GetNext())
+	{
+		const Scene::Object* object = node->value;
+		object->CalculateWorldTransform(parentToWorld);
+	}
+
+	Scene::ObjectList visibleObjectList;
+	Image::Pixel pixel;
+
+	// Render the scene from the perspective of the light source into the shadow buffer.
+	// The shadow buffer can then be used in the remainder of the render to determine
+	// if a shaded pixel is in light or shadow.
+	if (this->shadowBuffer && this->lightSource)
+	{
+		Camera shadowCamera;
+		if (this->lightSource->CalcShadowCamera(shadowCamera))
+		{
+			this->graphicsMatrices.Calculate(shadowCamera, *this->shadowBuffer);
+			scene->GenerateVisibleObjectsList(&shadowCamera, visibleObjectList);
+			this->renderPass = RenderPass::SHADOW_PASS;
+			pixel.depth = -(float)shadowCamera.frustum._far;
+			this->shadowBuffer->Clear(pixel);
+
+			for (Scene::ObjectList::Node* node = visibleObjectList.GetHead(); node; node = node->GetNext())
+			{
+				const Scene::Object* object = node->value;
+				if (object->castsShadow)
+					object->Render(*this);
+			}
+
+			this->WaitForAllJobCompletion();
+		}
+	}
+
+	visibleObjectList.Clear();
+	this->graphicsMatrices.Calculate(*camera, *this->frameBuffer);
+	scene->GenerateVisibleObjectsList(camera, visibleObjectList);
+
+	// Clear buffers and get the light source ready for lighting calculations.
+	pixel.depth = -(float)camera->frustum._far;
+	this->depthBuffer->Clear(pixel);
+	this->frameBuffer->Clear(this->clearPixel);
+	this->lightSource->PrepareForRender(this->graphicsMatrices);
+
+	// Render all the opaque stuff first.
+	this->renderPass = RenderPass::OPAQUE_PASS;
+	for (Scene::ObjectList::Node* node = visibleObjectList.GetHead(); node; node = node->GetNext())
+	{
+		const Scene::Object* object = node->value;
+		if (object->renderType == Scene::Object::RenderType::RENDER_OPAQUE)
+			object->Render(*this);
+	}
+	
+	this->WaitForAllJobCompletion();
+
+	// Now render all the transparent stuff so that it can blend with what's already in the frame-buffer.
+	this->renderPass = RenderPass::TRANSPARENT_PASS;
+	for (Scene::ObjectList::Node* node = visibleObjectList.GetHead(); node; node = node->GetNext())
+	{
+		const Scene::Object* object = node->value;
+		if (object->renderType == Scene::Object::RenderType::RENDER_TRANSPARENT)
+			object->Render(*this);
+	}
+	
+	this->WaitForAllJobCompletion();
+
+	this->submittedJobsList.Delete();
+}
+
 void Renderer::SubmitJob(RenderJob* job)
 {
 	for (List<Thread*>::Node* node = this->threadList.GetHead(); node; node = node->GetNext())
@@ -63,33 +174,6 @@ void Renderer::SubmitJob(RenderJob* job)
 	this->submittedJobsList.AddTail(job);
 }
 
-// TODO: We'll need an opaque pass and a translucency pass.
-void Renderer::BeginRenderPass()
-{
-	this->lightSource->PrepareForRender(this->pipelineMatrices);
-
-	// Evenly distribute the scan-line work-load across all the threads.
-	// We really only need to do this if the frame-buffer dimensions change on us, but it's so quick, just always do it.
-	unsigned int scanlinesPerThread = this->frameBuffer->GetHeight() / this->threadList.GetCount();
-	unsigned int minScanline = 0;
-	unsigned int maxScanline = scanlinesPerThread - 1;
-	for (List<Thread*>::Node* node = this->threadList.GetHead(); node; node = node->GetNext())
-	{
-		Thread* thread = node->value;
-		thread->minScanline = minScanline;
-		thread->maxScanline = node->GetNext() ? maxScanline : (this->frameBuffer->GetHeight() - 1);
-		minScanline = maxScanline + 1;
-		maxScanline = minScanline + scanlinesPerThread - 1;
-	}
-}
-
-void Renderer::EndRenderPass()
-{
-	this->WaitForAllJobCompletion();
-
-	this->submittedJobsList.Delete();
-}
-
 void Renderer::WaitForAllJobCompletion()
 {
 	// TODO: How can we do this without busy-waiting?
@@ -99,6 +183,11 @@ void Renderer::WaitForAllJobCompletion()
 		using namespace std::chrono_literals;
 		std::this_thread::sleep_for(1ms);
 	}
+}
+
+void Renderer::SetClearColor(const Vector& clearColor)
+{
+	this->clearPixel.color = this->frameBuffer->MakeColor(clearColor);
 }
 
 //-------------------------- Renderer::RenderJob --------------------------
@@ -175,10 +264,11 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 
 /*virtual*/ void Renderer::TriangleRenderJob::Render(Thread* thread)
 {
-	const PipelineMatrices& pipelineMatrices = thread->renderer->pipelineMatrices;
+	const GraphicsMatrices& graphicsMatrices = thread->renderer->graphicsMatrices;
 
 	Image* frameBuffer = thread->renderer->frameBuffer;
 	Image* depthBuffer = thread->renderer->depthBuffer;
+	Image* shadowBuffer = thread->renderer->shadowBuffer;
 
 	const Vertex& vertexA = *this->vertex[0];
 	const Vertex& vertexB = *this->vertex[1];
@@ -318,8 +408,8 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 
 			Vector cameraPointA, cameraPointB;
 
-			pipelineMatrices.imageToCamera.TransformPoint(imagePointA, cameraPointA);
-			pipelineMatrices.imageToCamera.TransformPoint(imagePointB, cameraPointB);
+			graphicsMatrices.imageToCamera.TransformPoint(imagePointA, cameraPointA);
+			graphicsMatrices.imageToCamera.TransformPoint(imagePointB, cameraPointB);
 
 			Vector rayDirection = cameraPointB - cameraPointA;
 			double lambda = 0.0;
@@ -369,11 +459,8 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 			Vector surfaceColor;
 			thread->renderer->lightSource->CalcSurfaceColor(surfaceProperties, surfaceColor);
 
-			unsigned char r = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.x * 255.0), 0, 255);
-			unsigned char g = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.y * 255.0), 0, 255);
-			unsigned char b = (unsigned char)FRUMPY_CLAMP(int(surfaceColor.z * 255.0), 0, 255);
-
-			uint32_t color = frameBuffer->MakeColor(r, g, b, 0);	// TODO: What about alpha here?
+			// TODO: Support alpha blending.  We'll have to do an opaque pass then an alpha pass.
+			uint32_t color = frameBuffer->MakeColor(surfaceColor);
 			frameBuffer->SetPixel(location, color);
 		}
 	}

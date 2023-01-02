@@ -6,6 +6,9 @@
 
 namespace Frumpy
 {
+	class Camera;
+	struct GraphicsMatrices;
+
 	class FRUMPY_API LightSource
 	{
 	public:
@@ -18,8 +21,9 @@ namespace Frumpy
 			Vector normal;
 		};
 
-		virtual void PrepareForRender(const PipelineMatrices& pipelineMatrices) const = 0;
+		virtual void PrepareForRender(const GraphicsMatrices& graphicsMatrices) const = 0;
 		virtual void CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector& surfaceColor) const = 0;
+		virtual bool CalcShadowCamera(Camera& shadowCamera) const;
 
 		double mainIntensity;
 		double ambientIntensity;
