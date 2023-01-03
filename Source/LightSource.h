@@ -18,7 +18,8 @@ namespace Frumpy
 		struct SurfaceProperties
 		{
 			Vector diffuseColor;
-			Vector normal;
+			Vector cameraSpacePoint;
+			Vector cameraSpaceNormal;
 		};
 
 		virtual void PrepareForRender(const GraphicsMatrices& graphicsMatrices) const = 0;

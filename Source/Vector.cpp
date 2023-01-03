@@ -229,4 +229,11 @@ namespace Frumpy
 		result.Scale(scalar);
 		return result;
 	}
+
+	Vector operator/(const Vector& vector, double scalar)
+	{
+		Vector result(vector);
+		result.Scale(1.0 / scalar);
+		return result;
+	}
 }

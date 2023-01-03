@@ -5,7 +5,7 @@
 #include "Camera.h"
 #include "FileAssets/Image.h"
 #include "FileAssets/Mesh.h"
-#include "LightSources/DirectionalLight.h"
+#include "LightSources/SpotLight.h"
 #include "Renderer.h"
 #include "ProfileBlock.h"
 #include "Vector.h"
@@ -48,7 +48,7 @@ private:
 	Frumpy::Image* depthBuffer;
 	Frumpy::Image* shadowBuffer;
 	Frumpy::Renderer* renderer;
-	Frumpy::DirectionalLight* directionLight;
+	Frumpy::SpotLight* spotLight;
 	Frumpy::AssetManager* assetManager;
 	double rotationAngle;
 	double rotationRate;

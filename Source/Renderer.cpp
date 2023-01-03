@@ -414,19 +414,18 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 			Vector rayDirection = cameraPointB - cameraPointA;
 			double lambda = 0.0;
 			planeOfTriangle.RayCast(cameraPointA, rayDirection, lambda);
-			Vector trianglePoint = cameraPointA + rayDirection * lambda;
+			LightSource::SurfaceProperties surfaceProperties;
+			surfaceProperties.cameraSpacePoint = cameraPointA + rayDirection * lambda;
 
 			Image::Pixel* pixelZ = depthBuffer->GetPixel(location);
-			if (trianglePoint.z <= pixelZ->depth)	// TODO: Depth-testing optional?
+			if (surfaceProperties.cameraSpacePoint.z <= pixelZ->depth)	// TODO: Depth-testing optional?
 				continue;
 			
-			pixelZ->depth = (float)trianglePoint.z;
+			pixelZ->depth = (float)surfaceProperties.cameraSpacePoint.z;
 
 			Vector baryCoords;
-			if (!triangle.CalcBarycentricCoordinates(trianglePoint, baryCoords))
+			if (!triangle.CalcBarycentricCoordinates(surfaceProperties.cameraSpacePoint, baryCoords))
 				continue;
-
-			LightSource::SurfaceProperties surfaceProperties;
 
 			if (this->texture)
 			{
@@ -449,12 +448,12 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 					vertexC.color * baryCoords.z;
 			}
 
-			surfaceProperties.normal =
+			surfaceProperties.cameraSpaceNormal =
 				vertexA.cameraSpaceNormal * baryCoords.x +
 				vertexB.cameraSpaceNormal * baryCoords.y +
 				vertexC.cameraSpaceNormal * baryCoords.z;
 
-			surfaceProperties.normal.Normalize();
+			surfaceProperties.cameraSpaceNormal.Normalize();
 
 			Vector surfaceColor;
 			thread->renderer->lightSource->CalcSurfaceColor(surfaceProperties, surfaceColor);

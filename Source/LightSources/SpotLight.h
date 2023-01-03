@@ -14,11 +14,14 @@ namespace Frumpy
 		virtual void PrepareForRender(const GraphicsMatrices& graphicsMatrices) const override;
 		virtual void CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector& surfaceColor) const override;
 
-		Frumpy::Vector locationWorldSpace;
-		Frumpy::Vector directionWorldSpace;
-		double attenuationRadius;
+		Frumpy::Vector worldSpaceLocation;
+		Frumpy::Vector worldSpaceDirection;
 
-		mutable Frumpy::Vector locationCameraSpace;
-		mutable Frumpy::Vector directionCameraSpace;
+		double innerConeAngle;
+		double outerConeAngle;
+		//double attenuationRadius;		TODO: Support this.  For now, the radius is infinite.
+
+		mutable Frumpy::Vector cameraSpaceLocation;
+		mutable Frumpy::Vector cameraSpaceDirection;
 	};
 }

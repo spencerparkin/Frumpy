@@ -29,7 +29,7 @@ Demo::Demo()
     this->depthBuffer = nullptr;
     this->shadowBuffer = nullptr;
     this->renderer = nullptr;
-    this->directionLight = nullptr;
+    this->spotLight = nullptr;
     this->assetManager = nullptr;
     this->rotationAngle = 0.0;
     this->rotationRate = 20.0;
@@ -48,6 +48,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->assetManager = new Frumpy::AssetManager();
     this->assetManager->LoadAssets("Images/texture.ppm");
     this->assetManager->LoadAssets("Meshes/Teapot.obj");
+    this->assetManager->LoadAssets("Meshes/GroundPlane.obj");
 
     this->frameBitmapInfo.bmiHeader.biSize = sizeof(frameBitmapInfo.bmiHeader);
     this->frameBitmapInfo.bmiHeader.biPlanes = 1;
@@ -78,29 +79,40 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     this->shadowBuffer = new Frumpy::Image(128, 128);
 
-    this->directionLight = new Frumpy::DirectionalLight();
-    this->directionLight->directionWorldSpace.SetComponents(0.5, -1.0, -0.5);
-    this->directionLight->directionWorldSpace.Normalize();
-    this->directionLight->ambientIntensity = 0.1;
+    this->spotLight = new Frumpy::SpotLight();
+    this->spotLight->worldSpaceDirection.SetComponents(0.0, -1.0, 0.0);
+    this->spotLight->worldSpaceDirection.Normalize();
+    this->spotLight->worldSpaceLocation.SetComponents(0.0, 40.0, 0.0);
+    this->spotLight->innerConeAngle = 5.0;
+    this->spotLight->outerConeAngle = 20.0;
+    this->spotLight->ambientIntensity = 0.1;
 
     this->renderer = new Frumpy::Renderer();
     this->renderer->SetFramebuffer(this->frameBuffer);
     this->renderer->SetDepthBuffer(this->depthBuffer);
     this->renderer->SetShadowBuffer(this->shadowBuffer);
-    this->renderer->SetLightSource(this->directionLight);
+    this->renderer->SetLightSource(this->spotLight);
     this->renderer->Startup(8);
 
     this->scene = new Frumpy::Scene();
 
     this->camera = new Frumpy::Camera();
-    this->camera->LookAt(Frumpy::Vector(0.0, 0.0, 100.0), Frumpy::Vector(0.0, 0.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
+    this->camera->LookAt(Frumpy::Vector(0.0, 100.0, 100.0), Frumpy::Vector(0.0, 20.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
 
     Frumpy::MeshObject* object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Teapot001")));
     object->GetMesh()->SetColor(Frumpy::Vector(1.0, 0.0, 0.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
     object->castsShadow = true;
+    object->childToParent.Translation(Frumpy::Vector(0.0, 20.0, 0.0));
     strcpy_s(object->name, "object");
+    this->scene->objectList.AddTail(object);
+
+    object = new Frumpy::MeshObject();
+    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Plane001")));
+    object->GetMesh()->SetColor(Frumpy::Vector(1.0, 1.0, 1.0));
+    object->castsShadow = false;
+    strcpy_s(object->name, "ground_plane");
     this->scene->objectList.AddTail(object);
 
     LoadString(this->hInst, IDS_APP_TITLE, this->szTitle, MAX_LOADSTRING);
@@ -170,14 +182,12 @@ void Demo::Run()
         // Let the user control the camera.
         this->HandleKeyboardInput(deltaTimeSeconds);
 
-        // Animate our mesh by rotating it at a desired rate.
-        Frumpy::MeshObject* object = (Frumpy::MeshObject*)this->scene->FindObjectByName("object");
-        if (object)
-        {
-            //this->rotationAngle += this->rotationRate * deltaTimeSeconds;
-            Frumpy::Vector axis(0.0, 1.0, 0.0);
-            object->childToParent.Rotation(axis, FRUMPY_DEGS_TO_RADS(this->rotationAngle));
-        }
+        // Animate the spot light to show-off the dynamic shadowing.
+        this->rotationAngle += this->rotationRate * deltaTimeSeconds;
+        static double radius = 70.0;
+        this->spotLight->worldSpaceLocation.SetComponents(radius * cos(FRUMPY_DEGS_TO_RADS(this->rotationAngle)), 100.0, radius * sin(FRUMPY_DEGS_TO_RADS(this->rotationAngle)));
+        this->spotLight->worldSpaceDirection = this->spotLight->worldSpaceLocation * -1.0;
+        this->spotLight->worldSpaceDirection.Normalize();
 
         // Render a frame directly into the windows BMP memory.
         if (this->renderer && this->camera && this->scene)
@@ -254,10 +264,10 @@ int Demo::Shutdown()
         this->shadowBuffer = nullptr;
     }
 
-    if (this->directionLight)
+    if (this->spotLight)
     {
-        delete this->directionLight;
-        this->directionLight = nullptr;
+        delete this->spotLight;
+        this->spotLight = nullptr;
     }
 
     if (this->assetManager)

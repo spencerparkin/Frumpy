@@ -48,4 +48,5 @@ namespace Frumpy
 	FRUMPY_API Vector operator-(const Vector& leftVector, const Vector& rightVector);
 	FRUMPY_API Vector operator*(const Vector& vector, double scalar);
 	FRUMPY_API Vector operator*(double scalar, const Vector& vector);
+	FRUMPY_API Vector operator/(const Vector& vector, double scalar);
 }

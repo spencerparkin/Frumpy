@@ -5,7 +5,7 @@ using namespace Frumpy;
 
 DirectionalLight::DirectionalLight()
 {
-	this->directionWorldSpace.SetComponents(0.0, -1.0, 0.0);
+	this->worldSpaceDirection.SetComponents(0.0, -1.0, 0.0);
 }
 
 /*virtual*/ DirectionalLight::~DirectionalLight()
@@ -14,12 +14,12 @@ DirectionalLight::DirectionalLight()
 
 /*virtual*/ void DirectionalLight::PrepareForRender(const GraphicsMatrices& graphicsMatrices) const
 {
-	graphicsMatrices.worldToCamera.TransformVector(this->directionWorldSpace, this->directionCameraSpace);
+	graphicsMatrices.worldToCamera.TransformVector(this->worldSpaceDirection, this->cameraSpaceDirection);
 }
 
 /*virtual*/ void DirectionalLight::CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector& surfaceColor) const
 {
-	double dot = Vector::Dot(surfaceProperties.normal, this->directionCameraSpace);
+	double dot = Vector::Dot(surfaceProperties.cameraSpaceNormal, this->cameraSpaceDirection);
 	if (dot < 0.0)
 		surfaceColor = surfaceProperties.diffuseColor * -dot * this->mainIntensity;
 

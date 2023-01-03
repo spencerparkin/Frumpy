@@ -14,7 +14,7 @@ namespace Frumpy
 		virtual void PrepareForRender(const GraphicsMatrices& graphicsMatrices) const override;
 		virtual void CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector& surfaceColor) const override;
 
-		Frumpy::Vector directionWorldSpace;
-		mutable Frumpy::Vector directionCameraSpace;
+		Frumpy::Vector worldSpaceDirection;
+		mutable Frumpy::Vector cameraSpaceDirection;
 	};
 }
