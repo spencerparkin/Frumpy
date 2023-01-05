@@ -134,7 +134,7 @@ const Image::Pixel* Image::GetPixel(const Location& location) const
 
 void Image::SampleColorVector(Vector& colorVector, const Vector& texCoords, SampleMethod sampleMethod) const
 {
-	double approxRow = (1.0 - texCoords.y) * double(this->height - 1);
+	double approxRow = texCoords.y * double(this->height - 1);
 	double approxCol = texCoords.x * double(this->width - 1);
 
 	switch (sampleMethod)
@@ -204,13 +204,64 @@ void Image::CalcImageMatrix(Matrix& imageMatrix) const
 	imageMatrix.ele[1][3] = double(this->height) / 2.0;
 }
 
+void Image::Pixel::GetColorComponents(uint32_t& r, uint32_t& g, uint32_t& b, const Image* image) const
+{
+	r = (this->color & (0xFF << image->format.rShift)) >> image->format.rShift;
+	g = (this->color & (0xFF << image->format.gShift)) >> image->format.gShift;
+	b = (this->color & (0xFF << image->format.bShift)) >> image->format.bShift;
+}
+
 void Image::Pixel::MakeColorVector(Vector& colorVector, const Image* image) const
 {
-	unsigned int r = (this->color & (0xFF << image->format.rShift)) >> image->format.rShift;
-	unsigned int g = (this->color & (0xFF << image->format.gShift)) >> image->format.gShift;
-	unsigned int b = (this->color & (0xFF << image->format.bShift)) >> image->format.bShift;
+	uint32_t r, g, b;
+
+	this->GetColorComponents(r, g, b, image);
 
 	colorVector.x = double(r) / 255.0;
 	colorVector.y = double(g) / 255.0;
 	colorVector.z = double(b) / 255.0;
+}
+
+void Image::ConvertDepthToGreyScale(float depthIgnore)
+{
+	float minZ = 9999.0;
+	float maxZ = -9999.0;
+
+	for (unsigned int i = 0; i < this->height; i++)
+	{
+		for (unsigned int j = 0; j < this->width; j++)
+		{
+			Pixel* pixel = this->GetPixel(Location{ i, j });
+			float depth = -pixel->depth;
+
+			if (depth != depthIgnore)
+			{
+				if (minZ > depth)
+					minZ = depth;
+				if (maxZ < depth)
+					maxZ = depth;
+			}
+		}
+	}
+
+	for (unsigned int i = 0; i < this->height; i++)
+	{
+		for (unsigned int j = 0; j < this->width; j++)
+		{
+			Pixel* pixel = this->GetPixel(Location{ i, j });
+			float depth = -pixel->depth;
+			if (depth == depthIgnore)
+			{
+				Vector colorVector(1.0, 0.0, 0.0);
+				pixel->color = this->MakeColor(colorVector);
+			}
+			else
+			{
+				float scale = (depth - minZ) / (maxZ - minZ);
+				scale = FRUMPY_CLAMP(scale, 0.0f, 1.0f);
+				Vector colorVector(scale, scale, scale);
+				pixel->color = this->MakeColor(colorVector);
+			}
+		}
+	}
 }

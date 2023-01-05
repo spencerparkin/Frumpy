@@ -79,10 +79,12 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     this->shadowBuffer = new Frumpy::Image(128, 128);
 
+    static double radius = 70.0;
+
     this->spotLight = new Frumpy::SpotLight();
-    this->spotLight->worldSpaceDirection.SetComponents(0.0, -1.0, 0.0);
+    this->spotLight->worldSpaceLocation.SetComponents(radius * cos(FRUMPY_DEGS_TO_RADS(this->rotationAngle)), 100.0, radius * sin(FRUMPY_DEGS_TO_RADS(this->rotationAngle)));
+    this->spotLight->worldSpaceDirection = this->spotLight->worldSpaceLocation * -1.0;
     this->spotLight->worldSpaceDirection.Normalize();
-    this->spotLight->worldSpaceLocation.SetComponents(0.0, 40.0, 0.0);
     this->spotLight->innerConeAngle = 5.0;
     this->spotLight->outerConeAngle = 20.0;
     this->spotLight->ambientIntensity = 0.1;
@@ -98,6 +100,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     this->camera = new Frumpy::Camera();
     this->camera->LookAt(Frumpy::Vector(0.0, 100.0, 100.0), Frumpy::Vector(0.0, 20.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
+    //this->spotLight->CalcShadowCamera(*this->camera);
 
     Frumpy::MeshObject* object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Teapot001")));
@@ -183,11 +186,20 @@ void Demo::Run()
         this->HandleKeyboardInput(deltaTimeSeconds);
 
         // Animate the spot light to show-off the dynamic shadowing.
+#if 0
         this->rotationAngle += this->rotationRate * deltaTimeSeconds;
+#endif
         static double radius = 70.0;
         this->spotLight->worldSpaceLocation.SetComponents(radius * cos(FRUMPY_DEGS_TO_RADS(this->rotationAngle)), 100.0, radius * sin(FRUMPY_DEGS_TO_RADS(this->rotationAngle)));
         this->spotLight->worldSpaceDirection = this->spotLight->worldSpaceLocation * -1.0;
         this->spotLight->worldSpaceDirection.Normalize();
+
+        static bool debug = false;
+        if (debug)
+        {
+            this->shadowBuffer->ConvertDepthToGreyScale(10000.0);
+            this->assetManager->SaveAsset("shadow_buffer.ppm", this->shadowBuffer);
+        }
 
         // Render a frame directly into the windows BMP memory.
         if (this->renderer && this->camera && this->scene)

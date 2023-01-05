@@ -74,6 +74,7 @@ namespace Frumpy
 				float depth;
 			};
 
+			void GetColorComponents(uint32_t& r, uint32_t& g, uint32_t& b, const Image* image) const;
 			void MakeColorVector(Vector& colorVector, const Image* image) const;
 		};
 
@@ -108,6 +109,8 @@ namespace Frumpy
 
 		void SampleColorVector(Vector& colorVector, const Vector& texCoords, SampleMethod sampleMethod) const;
 		void SampleColorVector(Vector& colorVector, const Location& location) const;
+
+		void ConvertDepthToGreyScale(float depthIgnore);
 
 	private:
 

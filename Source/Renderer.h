@@ -115,6 +115,7 @@ namespace Frumpy
 			unsigned int maxScanline;
 		};
 
+		void DistributeWorkloadForImage(const Image* image);
 		void WaitForAllJobCompletion();
 
 		enum RenderPass

@@ -43,6 +43,18 @@ bool AssetManager::LoadAssets(const char* filePath)
 	return true;
 }
 
+bool AssetManager::SaveAsset(const char* filePath, const Asset* asset)
+{
+	FileFormat* fileFormat = this->FindApplicableFileFormat(filePath);
+	if (!fileFormat)
+		return false;
+
+	List<const Asset*> assetList;
+	assetList.AddTail(asset);
+
+	return fileFormat->SaveAssets(filePath, assetList);
+}
+
 AssetManager::FileFormat* AssetManager::FindApplicableFileFormat(const char* filePath)
 {
 	char extension[16];

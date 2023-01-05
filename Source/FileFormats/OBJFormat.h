@@ -21,7 +21,7 @@ namespace Frumpy
 		virtual const char* SupportedExtension() override;
 
 		virtual bool LoadAssets(const char* filePath, List<AssetManager::Asset*>& assetList) override;
-		virtual bool SaveAssets(const char* filePath, const List<AssetManager::Asset*>& assetList) override;
+		virtual bool SaveAssets(const char* filePath, const List<const AssetManager::Asset*>& assetList) override;
 
 	private:
 

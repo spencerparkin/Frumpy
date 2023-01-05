@@ -60,7 +60,7 @@ bool Plane::RayCast(const Vector& rayOrigin, const Vector& rayDirection, double&
 	double numer = this->distance - Vector::Dot(rayOrigin, this->unitNormal);
 	double denom = Vector::Dot(rayDirection, this->unitNormal);
 	lambda = numer / denom;
-	if (lambda != lambda)
+	if (lambda != lambda || lambda < 0.0)
 		return false;
 	return true;
 }

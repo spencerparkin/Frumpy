@@ -45,19 +45,6 @@ bool Renderer::Startup(unsigned int threadCount)
 		this->threadList.AddTail(thread);
 	}
 
-	// Evenly distribute the scan-line work-load across all the threads.
-	unsigned int scanlinesPerThread = this->frameBuffer->GetHeight() / this->threadList.GetCount();
-	unsigned int minScanline = 0;
-	unsigned int maxScanline = scanlinesPerThread - 1;
-	for (List<Thread*>::Node* node = this->threadList.GetHead(); node; node = node->GetNext())
-	{
-		Thread* thread = node->value;
-		thread->minScanline = minScanline;
-		thread->maxScanline = node->GetNext() ? maxScanline : (this->frameBuffer->GetHeight() - 1);
-		minScanline = maxScanline + 1;
-		maxScanline = minScanline + scanlinesPerThread - 1;
-	}
-
 	return true;
 }
 
@@ -77,6 +64,22 @@ void Renderer::Shutdown()
 	}
 
 	this->threadList.Clear();
+}
+
+void Renderer::DistributeWorkloadForImage(const Image* image)
+{
+	// Evenly distribute the scan-line work-load across all the threads.
+	unsigned int scanlinesPerThread = image->GetHeight() / this->threadList.GetCount();
+	unsigned int minScanline = 0;
+	unsigned int maxScanline = scanlinesPerThread - 1;
+	for (List<Thread*>::Node* node = this->threadList.GetHead(); node; node = node->GetNext())
+	{
+		Thread* thread = node->value;
+		thread->minScanline = minScanline;
+		thread->maxScanline = node->GetNext() ? maxScanline : (image->GetHeight() - 1);
+		minScanline = maxScanline + 1;
+		maxScanline = minScanline + scanlinesPerThread - 1;
+	}
 }
 
 void GraphicsMatrices::Calculate(const Camera& camera, const Image& target)
@@ -115,6 +118,7 @@ void Renderer::RenderScene(const Scene* scene, const Camera* camera)
 			this->renderPass = RenderPass::SHADOW_PASS;
 			pixel.depth = -(float)shadowCamera.frustum._far;
 			this->shadowBuffer->Clear(pixel);
+			this->DistributeWorkloadForImage(this->shadowBuffer);
 
 			for (Scene::ObjectList::Node* node = visibleObjectList.GetHead(); node; node = node->GetNext())
 			{
@@ -138,6 +142,7 @@ void Renderer::RenderScene(const Scene* scene, const Camera* camera)
 	this->lightSource->PrepareForRender(this->graphicsMatrices);
 
 	// Render all the opaque stuff first.
+	this->DistributeWorkloadForImage(this->frameBuffer);
 	this->renderPass = RenderPass::OPAQUE_PASS;
 	for (Scene::ObjectList::Node* node = visibleObjectList.GetHead(); node; node = node->GetNext())
 	{
@@ -266,9 +271,21 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 {
 	const GraphicsMatrices& graphicsMatrices = thread->renderer->graphicsMatrices;
 
-	Image* frameBuffer = thread->renderer->frameBuffer;
-	Image* depthBuffer = thread->renderer->depthBuffer;
-	Image* shadowBuffer = thread->renderer->shadowBuffer;
+	Image* frameBuffer = nullptr;
+	Image* depthBuffer = nullptr;
+
+	if (thread->renderer->renderPass == RenderPass::OPAQUE_PASS || thread->renderer->renderPass == RenderPass::TRANSPARENT_PASS)
+	{
+		frameBuffer = thread->renderer->frameBuffer;
+		depthBuffer = thread->renderer->depthBuffer;
+	}
+	else if (thread->renderer->renderPass == RenderPass::SHADOW_PASS)
+	{
+		frameBuffer = thread->renderer->shadowBuffer;
+		depthBuffer = thread->renderer->shadowBuffer;
+	}
+	else
+		return;
 
 	const Vertex& vertexA = *this->vertex[0];
 	const Vertex& vertexB = *this->vertex[1];
@@ -411,17 +428,23 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 			graphicsMatrices.imageToCamera.TransformPoint(imagePointA, cameraPointA);
 			graphicsMatrices.imageToCamera.TransformPoint(imagePointB, cameraPointB);
 
+			LightSource::SurfaceProperties surfaceProperties;
+
 			Vector rayDirection = cameraPointB - cameraPointA;
 			double lambda = 0.0;
-			planeOfTriangle.RayCast(cameraPointA, rayDirection, lambda);
-			LightSource::SurfaceProperties surfaceProperties;
-			surfaceProperties.cameraSpacePoint = cameraPointA + rayDirection * lambda;
+			if (planeOfTriangle.RayCast(cameraPointA, rayDirection, lambda))
+				surfaceProperties.cameraSpacePoint = cameraPointA + rayDirection * lambda;
+			else
+				surfaceProperties.cameraSpacePoint = (vertexA.cameraSpacePoint + vertexB.cameraSpacePoint + vertexC.cameraSpacePoint) / 3.0;
 
 			Image::Pixel* pixelZ = depthBuffer->GetPixel(location);
 			if (surfaceProperties.cameraSpacePoint.z <= pixelZ->depth)	// TODO: Depth-testing optional?
 				continue;
 			
 			pixelZ->depth = (float)surfaceProperties.cameraSpacePoint.z;
+
+			if (thread->renderer->renderPass == RenderPass::SHADOW_PASS)
+				continue;
 
 			Vector baryCoords;
 			if (!triangle.CalcBarycentricCoordinates(surfaceProperties.cameraSpacePoint, baryCoords))
@@ -456,7 +479,7 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 			surfaceProperties.cameraSpaceNormal.Normalize();
 
 			Vector surfaceColor;
-			thread->renderer->lightSource->CalcSurfaceColor(surfaceProperties, surfaceColor);
+			thread->renderer->lightSource->CalcSurfaceColor(surfaceProperties, surfaceColor, thread->renderer->shadowBuffer);
 
 			// TODO: Support alpha blending.  We'll have to do an opaque pass then an alpha pass.
 			uint32_t color = frameBuffer->MakeColor(surfaceColor);

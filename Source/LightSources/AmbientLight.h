@@ -12,6 +12,6 @@ namespace Frumpy
 		virtual ~AmbientLight();
 
 		virtual void PrepareForRender(const GraphicsMatrices& graphicsMatrices) const override;
-		virtual void CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector& surfaceColor) const override;
+		virtual void CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector& surfaceColor, const Image* shadowBuffer) const override;
 	};
 }

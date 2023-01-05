@@ -23,6 +23,7 @@ namespace Frumpy
 		};
 
 		bool LoadAssets(const char* filePath);
+		bool SaveAsset(const char* filePath, const Asset* asset);
 
 		Asset* FindAssetByName(const char* assetName);
 
@@ -35,7 +36,7 @@ namespace Frumpy
 			virtual const char* SupportedExtension() = 0;
 
 			virtual bool LoadAssets(const char* filePath, List<Asset*>& assetList) = 0;
-			virtual bool SaveAssets(const char* filePath, const List<Asset*>& assetList) = 0;
+			virtual bool SaveAssets(const char* filePath, const List<const Asset*>& assetList) = 0;
 		};
 
 	private:

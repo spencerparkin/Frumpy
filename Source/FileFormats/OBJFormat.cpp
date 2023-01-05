@@ -247,7 +247,7 @@ void OBJFormat::ConvexPolygon::Tesselate(std::vector<ConvexPolygon>& triangleArr
 	}
 }
 
-/*virtual*/ bool OBJFormat::SaveAssets(const char* filePath, const List<AssetManager::Asset*>& assetList)
+/*virtual*/ bool OBJFormat::SaveAssets(const char* filePath, const List<const AssetManager::Asset*>& assetList)
 {
 	std::ofstream fileStream(filePath);
 	if (!fileStream.is_open())
@@ -260,7 +260,7 @@ void OBJFormat::ConvexPolygon::Tesselate(std::vector<ConvexPolygon>& triangleArr
 	this->totalVertices = 0;
 	this->totalFaces = 0;
 
-	for (const List<AssetManager::Asset*>::Node* node = assetList.GetHead(); node; node = node->GetNext())
+	for (const List<const AssetManager::Asset*>::Node* node = assetList.GetHead(); node; node = node->GetNext())
 	{
 		const AssetManager::Asset* asset = node->value;
 
