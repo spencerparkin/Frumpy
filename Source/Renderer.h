@@ -92,7 +92,18 @@ namespace Frumpy
 			const Vertex* vertex[3];
 			const Image* texture;
 			Image::SampleMethod sampleMethod;
+			bool canBeShadowed;
 		};
+
+		enum RenderPass
+		{
+			UNKNOWN_PASS,
+			OPAQUE_PASS,
+			TRANSPARENT_PASS,
+			SHADOW_PASS
+		};
+
+		RenderPass GetRenderPass() { return this->renderPass; }
 
 	private:
 
@@ -117,14 +128,6 @@ namespace Frumpy
 
 		void DistributeWorkloadForImage(const Image* image);
 		void WaitForAllJobCompletion();
-
-		enum RenderPass
-		{
-			UNKNOWN_PASS,
-			OPAQUE_PASS,
-			TRANSPARENT_PASS,
-			SHADOW_PASS
-		};
 
 		List<Thread*> threadList;
 		Image* frameBuffer;

@@ -234,6 +234,7 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 	this->vertex[2] = nullptr;
 	this->texture = nullptr;
 	this->sampleMethod = Image::SampleMethod::NEAREST;
+	this->canBeShadowed = false;
 }
 
 /*virtual*/ Renderer::TriangleRenderJob::~TriangleRenderJob()
@@ -479,7 +480,7 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 			surfaceProperties.cameraSpaceNormal.Normalize();
 
 			Vector surfaceColor;
-			thread->renderer->lightSource->CalcSurfaceColor(surfaceProperties, surfaceColor, thread->renderer->shadowBuffer);
+			thread->renderer->lightSource->CalcSurfaceColor(surfaceProperties, surfaceColor, this->canBeShadowed ? thread->renderer->shadowBuffer : nullptr);
 
 			// TODO: Support alpha blending.  We'll have to do an opaque pass then an alpha pass.
 			uint32_t color = frameBuffer->MakeColor(surfaceColor);

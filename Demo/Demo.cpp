@@ -77,7 +77,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     this->depthBuffer = new Frumpy::Image(this->frameBuffer->GetWidth(), this->frameBuffer->GetHeight());
 
-    this->shadowBuffer = new Frumpy::Image(128, 128);
+    this->shadowBuffer = new Frumpy::Image(512, 512);
 
     static double radius = 70.0;
 
@@ -107,6 +107,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     object->GetMesh()->SetColor(Frumpy::Vector(1.0, 0.0, 0.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
     object->castsShadow = true;
+    object->canBeShadowed = false;  // Self-shadowing of the teapot just looks like crap.
     object->childToParent.Translation(Frumpy::Vector(0.0, 20.0, 0.0));
     strcpy_s(object->name, "object");
     this->scene->objectList.AddTail(object);
@@ -115,6 +116,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Plane001")));
     object->GetMesh()->SetColor(Frumpy::Vector(1.0, 1.0, 1.0));
     object->castsShadow = false;
+    object->canBeShadowed = true;
     strcpy_s(object->name, "ground_plane");
     this->scene->objectList.AddTail(object);
 
@@ -186,9 +188,7 @@ void Demo::Run()
         this->HandleKeyboardInput(deltaTimeSeconds);
 
         // Animate the spot light to show-off the dynamic shadowing.
-#if 0
         this->rotationAngle += this->rotationRate * deltaTimeSeconds;
-#endif
         static double radius = 70.0;
         this->spotLight->worldSpaceLocation.SetComponents(radius * cos(FRUMPY_DEGS_TO_RADS(this->rotationAngle)), 100.0, radius * sin(FRUMPY_DEGS_TO_RADS(this->rotationAngle)));
         this->spotLight->worldSpaceDirection = this->spotLight->worldSpaceLocation * -1.0;

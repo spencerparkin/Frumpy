@@ -74,6 +74,7 @@ MeshObject::MeshObject()
 		job->vertex[2] = &vertexC;
 		job->texture = this->texture;
 		job->sampleMethod = this->sampleMethod;
+		job->canBeShadowed = this->canBeShadowed;
 		renderer.SubmitJob(job);
 	}
 }

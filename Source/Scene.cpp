@@ -66,6 +66,7 @@ Scene::Object::Object()
 	this->name[0] = '\0';
 	this->renderType = RenderType::RENDER_OPAQUE;
 	this->castsShadow = false;
+	this->canBeShadowed = false;
 }
 
 /*virtual*/ Scene::Object::~Object()

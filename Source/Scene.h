@@ -48,6 +48,7 @@ namespace Frumpy
 			ObjectList childObjectList;
 			RenderType renderType;
 			bool castsShadow;
+			bool canBeShadowed;
 		};
 
 		ObjectList objectList;
