@@ -22,6 +22,10 @@ SpotLight::SpotLight()
 {
 	graphicsMatrices.worldToCamera.TransformPoint(this->worldSpaceLocation, this->cameraSpaceLocation);
 	graphicsMatrices.worldToCamera.TransformVector(this->worldSpaceDirection, this->cameraSpaceDirection);
+
+	graphicsMatrices.worldToCamera.TransformVector(this->shadowMapXAxis, shadowMapXAxis);
+	graphicsMatrices.worldToCamera.TransformVector(this->shadowMapYAxis, shadowMapYAxis);
+	graphicsMatrices.worldToCamera.TransformVector(this->shadowMapZAxis, shadowMapZAxis);
 }
 
 /*virtual*/ void SpotLight::CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector& surfaceColor, const Image* shadowBuffer) const
@@ -46,14 +50,13 @@ SpotLight::SpotLight()
 		double shadowFactor = 1.0;
 		if (shadowBuffer && angleDegs <= this->outerConeAngle)
 		{
-			// TODO: Where am I going wrong here?  The UVs calculated should always lie in the [0,1] range, but this isn't happening.
 			Vector shadowMapPoint = unitVectorFromLightSource + this->shadowMapZAxis * projectedLength;
 			double shadowMapXComponent = Vector::Dot(shadowMapPoint, this->shadowMapXAxis);
 			double shadowMapYComponent = Vector::Dot(shadowMapPoint, this->shadowMapYAxis);
 			double uCoord = (shadowMapXComponent + this->shadowMapExtent) / (2.0 * this->shadowMapExtent);
 			double vCoord = (shadowMapYComponent + this->shadowMapExtent) / (2.0 * this->shadowMapExtent);
 			double shortestLengthToLightSource = -shadowBuffer->SampleDepth(uCoord, vCoord);
-			double eps = 1e-2;
+			double eps = 2.0;
 			if (distanceToLightSource > shortestLengthToLightSource + eps)
 			{
 				// Our view of the light is obscurred.  We are in shadow!
