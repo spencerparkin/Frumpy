@@ -24,5 +24,11 @@ namespace Frumpy
 
 		mutable Frumpy::Vector cameraSpaceLocation;
 		mutable Frumpy::Vector cameraSpaceDirection;
+
+		mutable Frumpy::Vector shadowMapXAxis;
+		mutable Frumpy::Vector shadowMapYAxis;
+		mutable Frumpy::Vector shadowMapZAxis;
+
+		mutable double shadowMapExtent;
 	};
 }

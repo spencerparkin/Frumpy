@@ -121,6 +121,7 @@ bool Image::ValidLocation(const Location& location) const
 
 Image::Pixel* Image::GetPixel(const Location& location)
 {
+	// TODO: Maybe compile this check out of release.
 	if (!this->ValidLocation(location))
 		return nullptr;
 
@@ -130,6 +131,19 @@ Image::Pixel* Image::GetPixel(const Location& location)
 const Image::Pixel* Image::GetPixel(const Location& location) const
 {
 	return const_cast<Image*>(this)->GetPixel(location);
+}
+
+float Image::SampleDepth(double uCoord, double vCoord) const
+{
+	double approxRow = vCoord * double(this->height - 1);
+	double approxCol = uCoord * double(this->width - 1);
+
+	Location location;
+	location.row = FRUMPY_CLAMP((unsigned int)(approxRow), 0, this->height - 1);
+	location.col = FRUMPY_CLAMP((unsigned int)(approxCol), 0, this->width - 1);
+
+	const Pixel* pixel = this->GetPixel(location);
+	return pixel->depth;
 }
 
 void Image::SampleColorVector(Vector& colorVector, const Vector& texCoords, SampleMethod sampleMethod) const

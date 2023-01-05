@@ -11,6 +11,7 @@ SpotLight::SpotLight()
 	this->worldSpaceDirection.SetComponents(1.0, 0.0, 0.0);
 	this->innerConeAngle = 10.0;
 	this->outerConeAngle = 15.0;
+	this->shadowMapExtent = 0.0;
 }
 
 /*virtual*/ SpotLight::~SpotLight()
@@ -32,7 +33,9 @@ SpotLight::SpotLight()
 	{
 		Vector vectorFromLightSource = surfaceProperties.cameraSpacePoint - this->cameraSpaceLocation;
 		double distanceToLightSource = vectorFromLightSource.Length();	// TODO: This would factor in with the attenuation radius.  Use inverse square fall-off?
-		double angleDegs = FRUMPY_RADS_TO_DEGS(acos(Vector::Dot(vectorFromLightSource / distanceToLightSource, this->cameraSpaceDirection)));
+		Vector unitVectorFromLightSource = vectorFromLightSource / distanceToLightSource;
+		double projectedLength = Vector::Dot(unitVectorFromLightSource, this->cameraSpaceDirection);
+		double angleDegs = FRUMPY_RADS_TO_DEGS(acos(projectedLength));
 
 		double spotLightFactor = 0.0;
 		if (angleDegs <= this->innerConeAngle)
@@ -43,8 +46,15 @@ SpotLight::SpotLight()
 		double shadowFactor = 1.0;
 		if (shadowBuffer && angleDegs <= this->outerConeAngle)
 		{
-			double shortestLengthToLightSource = 9999999.0;	// TODO: This comes from the shadow-buffer.
-			if (distanceToLightSource > shortestLengthToLightSource)
+			// TODO: Where am I going wrong here?  The UVs calculated should always lie in the [0,1] range, but this isn't happening.
+			Vector shadowMapPoint = unitVectorFromLightSource + this->shadowMapZAxis * projectedLength;
+			double shadowMapXComponent = Vector::Dot(shadowMapPoint, this->shadowMapXAxis);
+			double shadowMapYComponent = Vector::Dot(shadowMapPoint, this->shadowMapYAxis);
+			double uCoord = (shadowMapXComponent + this->shadowMapExtent) / (2.0 * this->shadowMapExtent);
+			double vCoord = (shadowMapYComponent + this->shadowMapExtent) / (2.0 * this->shadowMapExtent);
+			double shortestLengthToLightSource = -shadowBuffer->SampleDepth(uCoord, vCoord);
+			double eps = 1e-2;
+			if (distanceToLightSource > shortestLengthToLightSource + eps)
 			{
 				// Our view of the light is obscurred.  We are in shadow!
 				shadowFactor = 0.0;
@@ -68,6 +78,12 @@ SpotLight::SpotLight()
 	shadowCamera.frustum._far = 10000.0;
 	shadowCamera.frustum.hfovi = 2.0 * this->outerConeAngle;
 	shadowCamera.frustum.vfovi = 2.0 * this->outerConeAngle;
+
+	shadowCamera.worldTransform.GetCol(0, this->shadowMapXAxis);
+	shadowCamera.worldTransform.GetCol(1, this->shadowMapYAxis);
+	shadowCamera.worldTransform.GetCol(2, this->shadowMapZAxis);
+
+	this->shadowMapExtent = tan(FRUMPY_DEGS_TO_RADS(this->outerConeAngle));
 
 	return true;
 }

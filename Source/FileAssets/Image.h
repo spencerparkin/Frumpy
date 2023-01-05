@@ -110,6 +110,8 @@ namespace Frumpy
 		void SampleColorVector(Vector& colorVector, const Vector& texCoords, SampleMethod sampleMethod) const;
 		void SampleColorVector(Vector& colorVector, const Location& location) const;
 
+		float SampleDepth(double uCoord, double vCoord) const;
+
 		void ConvertDepthToGreyScale(float depthIgnore);
 
 	private:
