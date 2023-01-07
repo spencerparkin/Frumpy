@@ -558,6 +558,20 @@ LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
             }
             break;
         }
+        case ID_TEXTURING_NEARESTFILTERING:
+        {
+            Frumpy::MeshObject* object = dynamic_cast<Frumpy::MeshObject*>(this->scene->FindObjectByName("teapot"));
+            if (object)
+                object->SetSampleMethod(Frumpy::Image::NEAREST);
+            break;
+        }
+        case ID_TEXTURING_BILINEARFILTERING:
+        {
+            Frumpy::MeshObject* object = dynamic_cast<Frumpy::MeshObject*>(this->scene->FindObjectByName("teapot"));
+            if (object)
+                object->SetSampleMethod(Frumpy::Image::BILINEAR);
+            break;
+        }
         default:
         {
             return DefWindowProc(this->hWnd, WM_COMMAND, wParam, lParam);
@@ -871,6 +885,24 @@ void Demo::UpdateOptionsMenuItemChecks(HMENU menuHandle)
             case ID_MULTITHREADING_16_THREADS:
             {
                 CheckMenuItem(menuHandle, menuItemID, (this->renderer->GetThreadCount() == 16) ? MF_CHECKED : MF_UNCHECKED);
+                break;
+            }
+            case ID_TEXTURING_NEARESTFILTERING:
+            {
+                bool checked = false;
+                Frumpy::MeshObject* object = dynamic_cast<Frumpy::MeshObject*>(this->scene->FindObjectByName("teapot"));
+                if (object)
+                    checked = (object->GetSampleMethod() == Frumpy::Image::NEAREST) ? MF_CHECKED : MF_UNCHECKED;
+                CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_TEXTURING_BILINEARFILTERING:
+            {
+                bool checked = false;
+                Frumpy::MeshObject* object = dynamic_cast<Frumpy::MeshObject*>(this->scene->FindObjectByName("teapot"));
+                if (object)
+                    checked = (object->GetSampleMethod() == Frumpy::Image::BILINEAR) ? MF_CHECKED : MF_UNCHECKED;
+                CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
                 break;
             }
             default:

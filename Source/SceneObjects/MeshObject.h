@@ -23,6 +23,9 @@ namespace Frumpy
 		void SetTexture(Image* texture) { this->texture = texture; }
 		Image* GetTexture() { return this->texture; }
 
+		void SetSampleMethod(Image::SampleMethod sampleMethod) { this->sampleMethod = sampleMethod; }
+		Image::SampleMethod GetSampleMethod() const { return this->sampleMethod; }
+
 	private:
 		Mesh* mesh;
 		Image* texture;
