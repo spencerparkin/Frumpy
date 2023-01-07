@@ -460,6 +460,26 @@ LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
             this->ResizeFramebuffer(1024);
             break;
         }
+        case ID_SHADOWBUFFER_128X128:
+        {
+            this->shadowBuffer->SetWidthAndHeight(128, 128);
+            break;
+        }
+        case ID_SHADOWBUFFER_256X256:
+        {
+            this->shadowBuffer->SetWidthAndHeight(256, 256);
+            break;
+        }
+        case ID_SHADOWBUFFER_512X512:
+        {
+            this->shadowBuffer->SetWidthAndHeight(512, 512);
+            break;
+        }
+        case ID_SHADOWBUFFER_1024X1024:
+        {
+            this->shadowBuffer->SetWidthAndHeight(1024, 1024);
+            break;
+        }
         default:
         {
             return DefWindowProc(this->hWnd, WM_COMMAND, wParam, lParam);
@@ -723,6 +743,26 @@ void Demo::UpdateOptionsMenuItemChecks(HMENU menuHandle)
             case ID_FRAMEBUFFER_1024X1024:
             {
                 CheckMenuItem(menuHandle, menuItemID, (this->frameBuffer->GetWidth() == 1024 ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_SHADOWBUFFER_128X128:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->shadowBuffer->GetWidth() == 128 ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_SHADOWBUFFER_256X256:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->shadowBuffer->GetWidth() == 256 ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_SHADOWBUFFER_512X512:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->shadowBuffer->GetWidth() == 512 ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_SHADOWBUFFER_1024X1024:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->shadowBuffer->GetWidth() == 1024 ? MF_CHECKED : MF_UNCHECKED));
                 break;
             }
             default:
