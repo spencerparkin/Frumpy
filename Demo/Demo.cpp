@@ -109,7 +109,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Box001")));
-    object->GetMesh()->SetColor(Frumpy::Vector(0.0, 1.0, 0.0));
+    object->GetMesh()->SetColor(Frumpy::Vector(0.0, 0.0, 1.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
     object->childToParent.Translation(Frumpy::Vector(0.0, 20.0, 10.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
@@ -572,6 +572,32 @@ LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
                 object->SetSampleMethod(Frumpy::Image::BILINEAR);
             break;
         }
+        case ID_TEXTURING_USETEXTURE:
+        {
+            this->scene->ForAllObjects([=](Frumpy::Scene::Object* object) -> bool {
+                if (0 != strcmp(object->name, "ground_plane"))
+                {
+                    Frumpy::MeshObject* meshObject = dynamic_cast<Frumpy::MeshObject*>(object);
+                    if (meshObject)
+                        meshObject->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
+                }
+                return true;
+            });
+            break;
+        }
+        case ID_TEXTURING_USEVERTEXCOLORS:
+        {
+            this->scene->ForAllObjects([=](Frumpy::Scene::Object* object) -> bool {
+                if (0 != strcmp(object->name, "ground_plane"))
+                {
+                    Frumpy::MeshObject* meshObject = dynamic_cast<Frumpy::MeshObject*>(object);
+                    if (meshObject)
+                        meshObject->SetTexture(nullptr);
+                }
+                return true;
+            });
+            break;
+        }
         default:
         {
             return DefWindowProc(this->hWnd, WM_COMMAND, wParam, lParam);
@@ -902,6 +928,24 @@ void Demo::UpdateOptionsMenuItemChecks(HMENU menuHandle)
                 Frumpy::MeshObject* object = dynamic_cast<Frumpy::MeshObject*>(this->scene->FindObjectByName("teapot"));
                 if (object)
                     checked = (object->GetSampleMethod() == Frumpy::Image::BILINEAR) ? MF_CHECKED : MF_UNCHECKED;
+                CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_TEXTURING_USETEXTURE:
+            {
+                bool checked = false;
+                Frumpy::MeshObject* object = dynamic_cast<Frumpy::MeshObject*>(this->scene->FindObjectByName("teapot"));
+                if (object)
+                    checked = object->GetTexture() ? true : false;
+                CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_TEXTURING_USEVERTEXCOLORS:
+            {
+                bool checked = false;
+                Frumpy::MeshObject* object = dynamic_cast<Frumpy::MeshObject*>(this->scene->FindObjectByName("teapot"));
+                if (object)
+                    checked = object->GetTexture() ? false : true;
                 CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
                 break;
             }
