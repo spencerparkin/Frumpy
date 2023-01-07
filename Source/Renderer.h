@@ -42,7 +42,7 @@ namespace Frumpy
 		void RenderScene(const Scene* scene, const Camera* camera);
 
 		void SetLightSource(LightSource* lightSource) { this->lightSource = lightSource; }
-		LightSource* GeLightSource() { return this->lightSource; }
+		LightSource* GetLightSource() { return this->lightSource; }
 
 		void SetFramebuffer(Image* frameBuffer) { this->frameBuffer = frameBuffer; }
 		Image* GetFramebuffer() { return this->frameBuffer; }

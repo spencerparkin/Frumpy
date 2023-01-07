@@ -5,7 +5,6 @@
 #include "Camera.h"
 #include "FileAssets/Image.h"
 #include "FileAssets/Mesh.h"
-#include "LightSources/SpotLight.h"
 #include "Renderer.h"
 #include "ProfileBlock.h"
 #include "Vector.h"
@@ -51,7 +50,6 @@ private:
 	Frumpy::Image* depthBuffer;
 	Frumpy::Image* shadowBuffer;
 	Frumpy::Renderer* renderer;
-	Frumpy::SpotLight* spotLight;
 	Frumpy::AssetManager* assetManager;
 	TimingStat frumpyRenderTime;
 	TimingStat demoBlitTime;

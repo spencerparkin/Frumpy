@@ -10,6 +10,9 @@
 #include "Vertex.h"
 #include "AssetManager.h"
 #include "SceneObjects/MeshObject.h"
+#include "LightSources/SpotLight.h"
+#include "LightSources/DirectionalLight.h"
+#include "LightSources/AmbientLight.h"
 #include "ProfileBlock.h"
 #include <time.h>
 
@@ -29,7 +32,6 @@ Demo::Demo()
     this->depthBuffer = nullptr;
     this->shadowBuffer = nullptr;
     this->renderer = nullptr;
-    this->spotLight = nullptr;
     this->assetManager = nullptr;
     this->lastMouseMove = -1;
     this->rotateObjects = false;
@@ -68,14 +70,14 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->shadowBuffer = new Frumpy::Image(512, 512);
     this->renderer->SetShadowBuffer(this->shadowBuffer);
 
-    this->spotLight = new Frumpy::SpotLight();
-    this->spotLight->worldSpaceLocation.SetComponents(70.0, 100.0, 0.0);
-    this->spotLight->worldSpaceDirection = this->spotLight->worldSpaceLocation * -1.0;
-    this->spotLight->worldSpaceDirection.Normalize();
-    this->spotLight->innerConeAngle = 5.0;
-    this->spotLight->outerConeAngle = 20.0;
-    this->spotLight->ambientIntensity = 0.1;
-    this->renderer->SetLightSource(this->spotLight);
+    Frumpy::SpotLight* spotLight = new Frumpy::SpotLight();
+    spotLight->worldSpaceLocation.SetComponents(70.0, 100.0, 0.0);
+    spotLight->worldSpaceDirection = spotLight->worldSpaceLocation * -1.0;
+    spotLight->worldSpaceDirection.Normalize();
+    spotLight->innerConeAngle = 5.0;
+    spotLight->outerConeAngle = 20.0;
+    spotLight->ambientIntensity = 0.1;
+    this->renderer->SetLightSource(spotLight);
 
     this->scene = new Frumpy::Scene();
 
@@ -193,11 +195,21 @@ void Demo::Run()
         // Rotate the lright if configured to do so.
         if (this->rotateLight)
         {
-            this->lightRotationAngle += this->lightRotationRate * deltaTimeSeconds;
-            static double radius = 70.0;
-            this->spotLight->worldSpaceLocation.SetComponents(radius * cos(FRUMPY_DEGS_TO_RADS(this->lightRotationAngle)), 100.0, radius * sin(FRUMPY_DEGS_TO_RADS(this->lightRotationAngle)));
-            this->spotLight->worldSpaceDirection = this->spotLight->worldSpaceLocation * -1.0;
-            this->spotLight->worldSpaceDirection.Normalize();
+            Frumpy::SpotLight* spotLight = dynamic_cast<Frumpy::SpotLight*>(this->renderer->GetLightSource());
+            if (spotLight)
+            {
+                this->lightRotationAngle += this->lightRotationRate * deltaTimeSeconds;
+                static double radius = 70.0;
+                spotLight->worldSpaceLocation.SetComponents(radius * cos(FRUMPY_DEGS_TO_RADS(this->lightRotationAngle)), 100.0, radius * sin(FRUMPY_DEGS_TO_RADS(this->lightRotationAngle)));
+                spotLight->worldSpaceDirection = spotLight->worldSpaceLocation * -1.0;
+                spotLight->worldSpaceDirection.Normalize();
+            }
+
+            Frumpy::DirectionalLight* directionalLight = dynamic_cast<Frumpy::DirectionalLight*>(this->renderer->GetLightSource());
+            if (directionalLight)
+            {
+                //...
+            }
         }
 
         // Rotate the objects around if configured to do so.
@@ -283,6 +295,8 @@ int Demo::Shutdown()
 
     if (this->renderer)
     {
+        delete this->renderer->GetLightSource();
+        this->renderer->SetLightSource(nullptr);
         this->renderer->Shutdown();
         delete this->renderer;
         this->renderer = nullptr;
@@ -304,12 +318,6 @@ int Demo::Shutdown()
     {
         delete this->shadowBuffer;
         this->shadowBuffer = nullptr;
-    }
-
-    if (this->spotLight)
-    {
-        delete this->spotLight;
-        this->spotLight = nullptr;
     }
 
     if (this->assetManager)
@@ -478,6 +486,49 @@ LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
         case ID_SHADOWBUFFER_1024X1024:
         {
             this->shadowBuffer->SetWidthAndHeight(1024, 1024);
+            break;
+        }
+        case ID_LIGHTING_AMBIENTLIGHTONLY:
+        {
+            Frumpy::AmbientLight* ambientLight = dynamic_cast<Frumpy::AmbientLight*>(this->renderer->GetLightSource());
+            if (!ambientLight)
+            {
+                ambientLight = new Frumpy::AmbientLight();
+                ambientLight->ambientIntensity = 0.6;
+                delete this->renderer->GetLightSource();
+                this->renderer->SetLightSource(ambientLight);
+            }
+            break;
+        }
+        case ID_LIGHTING_DIRECTIONALLIGHT:
+        {
+            Frumpy::DirectionalLight* directionalLight = dynamic_cast<Frumpy::DirectionalLight*>(this->renderer->GetLightSource());
+            if (!directionalLight)
+            {
+                directionalLight = new Frumpy::DirectionalLight();
+                directionalLight->worldSpaceDirection.SetComponents(-0.5, -1.0, 0.0);
+                directionalLight->worldSpaceDirection.Normalize();
+                directionalLight->ambientIntensity = 0.1;
+                delete this->renderer->GetLightSource();
+                this->renderer->SetLightSource(directionalLight);
+            }
+            break;
+        }
+        case ID_LIGHTING_SPOTLIGHT:
+        {
+            Frumpy::SpotLight* spotLight = dynamic_cast<Frumpy::SpotLight*>(this->renderer->GetLightSource());
+            if (!spotLight)
+            {
+                spotLight = new Frumpy::SpotLight();
+                spotLight->worldSpaceLocation.SetComponents(70.0, 100.0, 0.0);
+                spotLight->worldSpaceDirection = spotLight->worldSpaceLocation * -1.0;
+                spotLight->worldSpaceDirection.Normalize();
+                spotLight->innerConeAngle = 5.0;
+                spotLight->outerConeAngle = 20.0;
+                spotLight->ambientIntensity = 0.1;
+                delete this->renderer->GetLightSource();
+                this->renderer->SetLightSource(spotLight);
+            }
             break;
         }
         default:
@@ -763,6 +814,21 @@ void Demo::UpdateOptionsMenuItemChecks(HMENU menuHandle)
             case ID_SHADOWBUFFER_1024X1024:
             {
                 CheckMenuItem(menuHandle, menuItemID, (this->shadowBuffer->GetWidth() == 1024 ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_LIGHTING_AMBIENTLIGHTONLY:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (dynamic_cast<Frumpy::AmbientLight*>(this->renderer->GetLightSource()) ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_LIGHTING_DIRECTIONALLIGHT:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (dynamic_cast<Frumpy::DirectionalLight*>(this->renderer->GetLightSource()) ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_LIGHTING_SPOTLIGHT:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (dynamic_cast<Frumpy::SpotLight*>(this->renderer->GetLightSource()) ? MF_CHECKED : MF_UNCHECKED));
                 break;
             }
             default:
