@@ -105,6 +105,8 @@ namespace Frumpy
 
 		RenderPass GetRenderPass() { return this->renderPass; }
 
+		unsigned int GetThreadCount() { return this->threadList.GetCount(); }
+
 	private:
 
 		class Thread

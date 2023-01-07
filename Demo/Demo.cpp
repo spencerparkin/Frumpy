@@ -531,6 +531,33 @@ LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
             }
             break;
         }
+        case ID_MULTITHREADING_1_THREAD:
+        {
+            if (this->renderer->GetThreadCount() != 1)
+            {
+                this->renderer->Shutdown();
+                this->renderer->Startup(1);
+            }
+            break;
+        }
+        case ID_MULTITHREADING_8_THREADS:
+        {
+            if (this->renderer->GetThreadCount() != 8)
+            {
+                this->renderer->Shutdown();
+                this->renderer->Startup(8);
+            }
+            break;
+        }
+        case ID_MULTITHREADING_16_THREADS:
+        {
+            if (this->renderer->GetThreadCount() != 16)
+            {
+                this->renderer->Shutdown();
+                this->renderer->Startup(16);
+            }
+            break;
+        }
         default:
         {
             return DefWindowProc(this->hWnd, WM_COMMAND, wParam, lParam);
@@ -829,6 +856,21 @@ void Demo::UpdateOptionsMenuItemChecks(HMENU menuHandle)
             case ID_LIGHTING_SPOTLIGHT:
             {
                 CheckMenuItem(menuHandle, menuItemID, (dynamic_cast<Frumpy::SpotLight*>(this->renderer->GetLightSource()) ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_MULTITHREADING_1_THREAD:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->renderer->GetThreadCount() == 1) ? MF_CHECKED : MF_UNCHECKED);
+                break;
+            }
+            case ID_MULTITHREADING_8_THREADS:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->renderer->GetThreadCount() == 8) ? MF_CHECKED : MF_UNCHECKED);
+                break;
+            }
+            case ID_MULTITHREADING_16_THREADS:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->renderer->GetThreadCount() == 16) ? MF_CHECKED : MF_UNCHECKED);
                 break;
             }
             default:
