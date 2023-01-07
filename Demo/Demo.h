@@ -26,6 +26,8 @@ private:
 
 	LRESULT HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
+	void UpdateOptionsMenuItemChecks(HMENU menuHandle);
+	LRESULT HandleCommandMessage(WPARAM wParam, LPARAM lParam);
 	void HandleKeyboardInput(double deltaTimeSeconds);
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -50,10 +52,17 @@ private:
 	Frumpy::Renderer* renderer;
 	Frumpy::SpotLight* spotLight;
 	Frumpy::AssetManager* assetManager;
-	double rotationAngle;
-	double rotationRate;
 	TimingStat frumpyRenderTime;
 	TimingStat demoBlitTime;
 	TimingStat demoMessageTime;
 	DWORD lastMouseMove;
+	bool rotateObjects;
+	bool rotateCamera;
+	bool rotateLight;
+	double objectRotationAngle;
+	double cameraRotationAngle;
+	double lightRotationAngle;
+	double objectRotationRate;
+	double cameraRotationRate;
+	double lightRotationRate;
 };

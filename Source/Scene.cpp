@@ -55,7 +55,7 @@ void Scene::GenerateVisibleObjectsList(const Camera* camera, ObjectList& visible
 	List<Plane> frustumPlanesList;
 	camera->frustum.GeneratePlanes(frustumPlanesList);
 	const_cast<Scene*>(this)->ForAllObjects([&visibleObjectList, &frustumPlanesList](Object* object) -> bool {
-		if (object->IntersectsFrustum(frustumPlanesList))
+		if (object->GetRenderFlag(Object::VISIBLE) && object->IntersectsFrustum(frustumPlanesList))
 			visibleObjectList.AddTail(object);
 		return true;
 	});
@@ -65,13 +65,27 @@ Scene::Object::Object()
 {
 	this->name[0] = '\0';
 	this->renderType = RenderType::RENDER_OPAQUE;
-	this->castsShadow = false;
-	this->canBeShadowed = false;
+	this->renderFlags = RenderFlag::VISIBLE;
 }
 
 /*virtual*/ Scene::Object::~Object()
 {
 	this->childObjectList.Delete();
+}
+
+void Scene::Object::SetRenderFlag(RenderFlag renderFlag, bool enabled)
+{
+	uint32_t flagBit = (uint32_t)renderFlag;
+	if (enabled)
+		this->renderFlags |= flagBit;
+	else
+		this->renderFlags &= ~flagBit;
+}
+
+bool Scene::Object::GetRenderFlag(RenderFlag renderFlag) const
+{
+	uint32_t flagBit = (uint32_t)renderFlag;
+	return (this->renderFlags & flagBit) != 0;
 }
 
 /*virtual*/ void Scene::Object::CalculateWorldTransform(const Matrix& parentToWorld) const

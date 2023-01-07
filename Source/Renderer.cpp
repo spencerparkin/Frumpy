@@ -123,7 +123,7 @@ void Renderer::RenderScene(const Scene* scene, const Camera* camera)
 			for (Scene::ObjectList::Node* node = visibleObjectList.GetHead(); node; node = node->GetNext())
 			{
 				const Scene::Object* object = node->value;
-				if (object->castsShadow)
+				if (object->GetRenderFlag(Scene::Object::CASTS_SHADOW))
 					object->Render(*this);
 			}
 

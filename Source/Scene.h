@@ -42,13 +42,22 @@ namespace Frumpy
 				RENDER_TRANSPARENT
 			};
 
+			enum RenderFlag
+			{
+				VISIBLE			= 0x00000001,
+				CASTS_SHADOW	= 0x00000002,
+				CAN_BE_SHADOWED	= 0x00000004
+			};
+
+			void SetRenderFlag(RenderFlag renderFlag, bool enabled);
+			bool GetRenderFlag(RenderFlag renderFlag) const;
+
 			char name[128];
 			Matrix childToParent;
 			mutable Matrix objectToWorld;
 			ObjectList childObjectList;
 			RenderType renderType;
-			bool castsShadow;
-			bool canBeShadowed;
+			uint32_t renderFlags;
 		};
 
 		ObjectList objectList;

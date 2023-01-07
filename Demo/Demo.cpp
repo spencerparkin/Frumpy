@@ -31,9 +31,16 @@ Demo::Demo()
     this->renderer = nullptr;
     this->spotLight = nullptr;
     this->assetManager = nullptr;
-    this->rotationAngle = 0.0;
-    this->rotationRate = 20.0;
     this->lastMouseMove = -1;
+    this->rotateObjects = false;
+    this->rotateCamera = false;
+    this->rotateLight = false;
+    this->objectRotationAngle = 0.0;
+    this->cameraRotationAngle = 0.0;
+    this->lightRotationAngle = 0.0;
+    this->objectRotationRate = 20.0;
+    this->cameraRotationRate = -18.0;
+    this->lightRotationRate = 15.0;
 }
 
 /*virtual*/ Demo::~Demo()
@@ -48,6 +55,8 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->assetManager = new Frumpy::AssetManager();
     this->assetManager->LoadAssets("Images/texture.ppm");
     this->assetManager->LoadAssets("Meshes/Teapot.obj");
+    this->assetManager->LoadAssets("Meshes/Cube.obj");
+    this->assetManager->LoadAssets("Meshes/Torus.obj");
     this->assetManager->LoadAssets("Meshes/GroundPlane.obj");
 
     this->frameBitmapInfo.bmiHeader.biSize = sizeof(frameBitmapInfo.bmiHeader);
@@ -79,10 +88,8 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     this->shadowBuffer = new Frumpy::Image(512, 512);
 
-    static double radius = 70.0;
-
     this->spotLight = new Frumpy::SpotLight();
-    this->spotLight->worldSpaceLocation.SetComponents(radius * cos(FRUMPY_DEGS_TO_RADS(this->rotationAngle)), 100.0, radius * sin(FRUMPY_DEGS_TO_RADS(this->rotationAngle)));
+    this->spotLight->worldSpaceLocation.SetComponents(70.0, 100.0, 0.0);
     this->spotLight->worldSpaceDirection = this->spotLight->worldSpaceLocation * -1.0;
     this->spotLight->worldSpaceDirection.Normalize();
     this->spotLight->innerConeAngle = 5.0;
@@ -99,24 +106,47 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->scene = new Frumpy::Scene();
 
     this->camera = new Frumpy::Camera();
-    this->camera->LookAt(Frumpy::Vector(0.0, 100.0, 100.0), Frumpy::Vector(0.0, 20.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
-    //this->spotLight->CalcShadowCamera(*this->camera);
+    this->camera->LookAt(Frumpy::Vector(100.0, 100.0, 0.0), Frumpy::Vector(0.0, 20.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
 
-    Frumpy::MeshObject* object = new Frumpy::MeshObject();
+    Frumpy::MeshObject* object = nullptr;
+
+    object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Teapot001")));
     object->GetMesh()->SetColor(Frumpy::Vector(1.0, 0.0, 0.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
-    object->castsShadow = true;
-    object->canBeShadowed = false;  // Self-shadowing of the teapot just looks like crap.
+    object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
+    object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->childToParent.Translation(Frumpy::Vector(0.0, 20.0, 0.0));
-    strcpy_s(object->name, "object");
+    strcpy_s(object->name, "teapot");
+    this->scene->objectList.AddTail(object);
+
+    object = new Frumpy::MeshObject();
+    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Torus001")));
+    object->GetMesh()->SetColor(Frumpy::Vector(0.0, 1.0, 0.0));
+    object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
+    object->childToParent.Translation(Frumpy::Vector(0.0, 20.0, -25.0));
+    object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
+    object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
+    object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
+    strcpy_s(object->name, "torus");
+    this->scene->objectList.AddTail(object);
+
+    object = new Frumpy::MeshObject();
+    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Box001")));
+    object->GetMesh()->SetColor(Frumpy::Vector(0.0, 1.0, 0.0));
+    object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
+    object->childToParent.Translation(Frumpy::Vector(0.0, 20.0, 25.0));
+    object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
+    object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
+    object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
+    strcpy_s(object->name, "cube");
     this->scene->objectList.AddTail(object);
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Plane001")));
     object->GetMesh()->SetColor(Frumpy::Vector(1.0, 1.0, 1.0));
-    object->castsShadow = false;
-    object->canBeShadowed = true;
+    object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, false);
+    object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, true);
     strcpy_s(object->name, "ground_plane");
     this->scene->objectList.AddTail(object);
 
@@ -184,15 +214,47 @@ void Demo::Run()
         lastTime = currentTime;
         totalElapsedTimeSeconds += deltaTimeSeconds;
 
-        // Let the user control the camera.
-        this->HandleKeyboardInput(deltaTimeSeconds);
+        // Rotate the lright if configured to do so.
+        if (this->rotateLight)
+        {
+            this->lightRotationAngle += this->lightRotationRate * deltaTimeSeconds;
+            static double radius = 70.0;
+            this->spotLight->worldSpaceLocation.SetComponents(radius * cos(FRUMPY_DEGS_TO_RADS(this->lightRotationAngle)), 100.0, radius * sin(FRUMPY_DEGS_TO_RADS(this->lightRotationAngle)));
+            this->spotLight->worldSpaceDirection = this->spotLight->worldSpaceLocation * -1.0;
+            this->spotLight->worldSpaceDirection.Normalize();
+        }
 
-        // Animate the spot light to show-off the dynamic shadowing.
-        this->rotationAngle += this->rotationRate * deltaTimeSeconds;
-        static double radius = 70.0;
-        this->spotLight->worldSpaceLocation.SetComponents(radius * cos(FRUMPY_DEGS_TO_RADS(this->rotationAngle)), 100.0, radius * sin(FRUMPY_DEGS_TO_RADS(this->rotationAngle)));
-        this->spotLight->worldSpaceDirection = this->spotLight->worldSpaceLocation * -1.0;
-        this->spotLight->worldSpaceDirection.Normalize();
+        // Rotate the objects around if configured to do so.
+        if (this->rotateObjects)
+        {
+            this->objectRotationAngle += this->objectRotationRate * deltaTimeSeconds;
+            Frumpy::Vector axis(0.0, 0.0, 1.0);
+            this->scene->ForAllObjects([=](Frumpy::Scene::Object* object) -> bool {
+                if (0 != strcmp(object->name, "ground_plane"))
+                {
+                    Frumpy::Vector translation;
+                    object->childToParent.GetCol(3, translation);
+                    object->childToParent.RigidBodyMotion(axis, FRUMPY_DEGS_TO_RADS(this->objectRotationAngle), translation);
+                }
+                return true;
+            });
+        }
+
+        // Rotate the camera if configured to do so.
+        if (this->rotateCamera)
+        {
+            this->cameraRotationAngle += this->cameraRotationRate * deltaTimeSeconds;
+            static double radius = 100.0;
+            Frumpy::Vector upDirection(0.0, 1.0, 0.0);
+            Frumpy::Vector eyePoint(radius * cos(FRUMPY_DEGS_TO_RADS(this->cameraRotationAngle)), 100.0, radius * sin(FRUMPY_DEGS_TO_RADS(this->cameraRotationAngle)));
+            Frumpy::Vector eyeTarget(0.0, 0.0, 0.0);
+            this->camera->LookAt(eyePoint, eyeTarget, upDirection);
+        }
+        else
+        {
+            // Let the user control the camera.
+            this->HandleKeyboardInput(deltaTimeSeconds);
+        }
 
         static bool debug = false;
         if (debug)
@@ -327,30 +389,114 @@ void Demo::HandleKeyboardInput(double deltaTimeSeconds)
     return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
+LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
+{
+    int wmId = LOWORD(wParam);
+    switch (wmId)
+    {
+        case IDM_ABOUT:
+        {
+            DialogBox(this->hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+            break;
+        }
+        case IDM_EXIT:
+        {
+            DestroyWindow(this->hWnd);
+            break;
+        }
+        case ID_SCENE_TEAPOT:
+        {
+            Frumpy::Scene::Object* object = this->scene->FindObjectByName("teapot");
+            if (object)
+                object->SetRenderFlag(Frumpy::Scene::Object::VISIBLE, !object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE));
+            break;
+        }
+        case ID_SCENE_CUBE:
+        {
+            Frumpy::Scene::Object* object = this->scene->FindObjectByName("cube");
+            if (object)
+                object->SetRenderFlag(Frumpy::Scene::Object::VISIBLE, !object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE));
+            break;
+        }
+        case ID_SCENE_TORUS:
+        {
+            Frumpy::Scene::Object* object = this->scene->FindObjectByName("torus");
+            if (object)
+                object->SetRenderFlag(Frumpy::Scene::Object::VISIBLE, !object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE));
+            break;
+        }
+        case ID_LIGHTING_CASTSHADOWS:
+        {
+            Frumpy::Scene::Object* torusObject = this->scene->FindObjectByName("torus");
+            if (torusObject)
+            {
+                bool castsShadow = !torusObject->GetRenderFlag(Frumpy::Scene::Object::CASTS_SHADOW);
+                this->scene->ForAllObjects([=](Frumpy::Scene::Object* object) -> bool {
+                    if (0 != strcmp(object->name, "ground_plane"))
+                        object->SetRenderFlag(Frumpy::Scene::Object::CASTS_SHADOW, castsShadow);
+                    return true;
+                });
+
+                this->renderer->SetShadowBuffer(castsShadow ? this->shadowBuffer : nullptr);
+            }
+
+            break;
+        }
+        case ID_LIGHTING_SELF_SHADOW:
+        {
+            Frumpy::Scene::Object* torusObject = this->scene->FindObjectByName("torus");
+            if (torusObject)
+            {
+                bool canBeShadowed = !torusObject->GetRenderFlag(Frumpy::Scene::Object::CAN_BE_SHADOWED);
+                this->scene->ForAllObjects([=](Frumpy::Scene::Object* object) -> bool {
+                    if (0 != strcmp(object->name, "ground_plane"))
+                        object->SetRenderFlag(Frumpy::Scene::Object::CAN_BE_SHADOWED, canBeShadowed);
+                    return true;
+                });
+            }
+
+            break;
+        }
+        case ID_ANIMATION_ROTATECAMERA:
+        {
+            this->rotateCamera = !this->rotateCamera;
+            break;
+        }
+        case ID_ANIMATION_ROTATELIGHT:
+        {
+            this->rotateLight = !this->rotateLight;
+            break;
+        }
+        case ID_ANIMATION_ROTATEOBJECT:
+        {
+            this->rotateObjects = !this->rotateObjects;
+            break;
+        }
+        default:
+        {
+            return DefWindowProc(this->hWnd, WM_COMMAND, wParam, lParam);
+        }
+    }
+
+    return 0;
+}
+
 LRESULT Demo::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
         case WM_COMMAND:
         {
-            int wmId = LOWORD(wParam);
-            switch (wmId)
+            return this->HandleCommandMessage(wParam, lParam);
+        }
+        case WM_MENUSELECT:
+        {
+            if (LOWORD(wParam) == 0x0001 /* options menu */)
             {
-                case IDM_ABOUT:
-                {
-                    DialogBox(this->hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                    break;
-                }
-                case IDM_EXIT:
-                {
-                    DestroyWindow(hWnd);
-                    break;
-                }
-                default:
-                {
-                    return DefWindowProc(hWnd, message, wParam, lParam);
-                }
+                HMENU optionsMenuHandle = (HMENU)lParam;
+                this->UpdateOptionsMenuItemChecks(optionsMenuHandle);
             }
+
             break;
         }
         case WM_PAINT:
@@ -449,6 +595,88 @@ LRESULT Demo::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
     }
 
     return 0;
+}
+
+void Demo::UpdateOptionsMenuItemChecks(HMENU menuHandle)
+{
+    int menuItemCount = GetMenuItemCount(menuHandle);
+    for (int i = 0; i < menuItemCount; i++)
+    {
+        UINT menuItemID = GetMenuItemID(menuHandle, i);
+
+        switch (menuItemID)
+        {
+            case ID_SCENE_TEAPOT:
+            {
+                bool checked = false;
+                Frumpy::Scene::Object* object = this->scene->FindObjectByName("teapot");
+                if (object)
+                    checked = object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE);
+                CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_SCENE_CUBE:
+            {
+                bool checked = false;
+                Frumpy::Scene::Object* object = this->scene->FindObjectByName("cube");
+                if (object)
+                    checked = object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE);
+                CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_SCENE_TORUS:
+            {
+                bool checked = false;
+                Frumpy::Scene::Object* object = this->scene->FindObjectByName("torus");
+                if (object)
+                    checked = object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE);
+                CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_LIGHTING_CASTSHADOWS:
+            {
+                bool checked = false;
+                Frumpy::Scene::Object* object = this->scene->FindObjectByName("teapot");
+                if (object)
+                    checked = object->GetRenderFlag(Frumpy::Scene::Object::CASTS_SHADOW);
+                CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_LIGHTING_SELF_SHADOW:
+            {
+                bool checked = false;
+                Frumpy::Scene::Object* object = this->scene->FindObjectByName("teapot");
+                if (object)
+                    checked = object->GetRenderFlag(Frumpy::Scene::Object::CAN_BE_SHADOWED);
+                CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_ANIMATION_ROTATECAMERA:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->rotateCamera ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_ANIMATION_ROTATELIGHT:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->rotateLight ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_ANIMATION_ROTATEOBJECT:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->rotateObjects ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            default:
+            {
+                HMENU subMenuHandle = GetSubMenu(menuHandle, i);
+                if (subMenuHandle != NULL)
+                {
+                    this->UpdateOptionsMenuItemChecks(subMenuHandle);
+                }
+                break;
+            }
+        }
+    }
 }
 
 /*static*/ INT_PTR CALLBACK Demo::About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
