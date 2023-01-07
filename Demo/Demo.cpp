@@ -59,34 +59,14 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->assetManager->LoadAssets("Meshes/Torus.obj");
     this->assetManager->LoadAssets("Meshes/GroundPlane.obj");
 
-    this->frameBitmapInfo.bmiHeader.biSize = sizeof(frameBitmapInfo.bmiHeader);
-    this->frameBitmapInfo.bmiHeader.biPlanes = 1;
-    this->frameBitmapInfo.bmiHeader.biBitCount = 32;
-    this->frameBitmapInfo.bmiHeader.biCompression = BI_RGB;
-    this->frameBitmapInfo.bmiHeader.biWidth = 512;
-    this->frameBitmapInfo.bmiHeader.biHeight = 512;
+    this->renderer = new Frumpy::Renderer();
 
     this->frameDCHandle = CreateCompatibleDC(NULL);
-    // TODO: Error handling.
 
-    this->frameBitmapHandle = CreateDIBSection(NULL, &this->frameBitmapInfo, DIB_RGB_COLORS, (void**)&this->framePixelBuffer, NULL, 0);
-    // TODO: Perform error handling.
-
-    SelectObject(this->frameDCHandle, this->frameBitmapHandle);
-
-    Frumpy::Image::Format format;
-    format.bShift = 0;
-    format.gShift = 8;
-    format.rShift = 16;
-    format.aShift = 24;
-
-    this->frameBuffer = new Frumpy::Image();
-    this->frameBuffer->SetRawPixelBuffer(this->framePixelBuffer, this->frameBitmapInfo.bmiHeader.biWidth, this->frameBitmapInfo.bmiHeader.biHeight);
-    this->frameBuffer->SetFormat(format);
-
-    this->depthBuffer = new Frumpy::Image(this->frameBuffer->GetWidth(), this->frameBuffer->GetHeight());
+    this->ResizeFramebuffer(512);
 
     this->shadowBuffer = new Frumpy::Image(512, 512);
+    this->renderer->SetShadowBuffer(this->shadowBuffer);
 
     this->spotLight = new Frumpy::SpotLight();
     this->spotLight->worldSpaceLocation.SetComponents(70.0, 100.0, 0.0);
@@ -95,13 +75,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->spotLight->innerConeAngle = 5.0;
     this->spotLight->outerConeAngle = 20.0;
     this->spotLight->ambientIntensity = 0.1;
-
-    this->renderer = new Frumpy::Renderer();
-    this->renderer->SetFramebuffer(this->frameBuffer);
-    this->renderer->SetDepthBuffer(this->depthBuffer);
-    this->renderer->SetShadowBuffer(this->shadowBuffer);
     this->renderer->SetLightSource(this->spotLight);
-    this->renderer->Startup(8);
 
     this->scene = new Frumpy::Scene();
 
@@ -124,7 +98,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Torus001")));
     object->GetMesh()->SetColor(Frumpy::Vector(0.0, 1.0, 0.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
-    object->childToParent.Translation(Frumpy::Vector(0.0, 20.0, -25.0));
+    object->childToParent.Translation(Frumpy::Vector(0.0, 20.0, -10.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
@@ -135,7 +109,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Box001")));
     object->GetMesh()->SetColor(Frumpy::Vector(0.0, 1.0, 0.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
-    object->childToParent.Translation(Frumpy::Vector(0.0, 20.0, 25.0));
+    object->childToParent.Translation(Frumpy::Vector(0.0, 20.0, 10.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
@@ -149,6 +123,8 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, true);
     strcpy_s(object->name, "ground_plane");
     this->scene->objectList.AddTail(object);
+
+    this->renderer->Startup(8);
 
     LoadString(this->hInst, IDS_APP_TITLE, this->szTitle, MAX_LOADSTRING);
     LoadString(this->hInst, IDC_DEMO, this->szWindowClass, MAX_LOADSTRING);
@@ -228,11 +204,19 @@ void Demo::Run()
         if (this->rotateObjects)
         {
             this->objectRotationAngle += this->objectRotationRate * deltaTimeSeconds;
-            Frumpy::Vector axis(0.0, 0.0, 1.0);
-            this->scene->ForAllObjects([=](Frumpy::Scene::Object* object) -> bool {
+            int i = 0;
+            this->scene->ForAllObjects([=, &i](Frumpy::Scene::Object* object) -> bool {
                 if (0 != strcmp(object->name, "ground_plane"))
                 {
                     Frumpy::Vector translation;
+                    Frumpy::Vector axis;
+                    if (i == 0)
+                        axis.SetComponents(1.0, 0.0, 0.0);
+                    else if (i == 1)
+                        axis.SetComponents(0.0, 1.0, 0.0);
+                    else
+                        axis.SetComponents(0.0, 0.0, 1.0);
+                    i++;
                     object->childToParent.GetCol(3, translation);
                     object->childToParent.RigidBodyMotion(axis, FRUMPY_DEGS_TO_RADS(this->objectRotationAngle), translation);
                 }
@@ -295,11 +279,7 @@ void Demo::Run()
 
 int Demo::Shutdown()
 {
-    if (this->frameBitmapHandle != NULL)
-    {
-        DeleteObject(this->frameBitmapHandle);
-        this->frameBitmapHandle = NULL;
-    }
+    this->ResizeFramebuffer(0);
 
     if (this->renderer)
     {
@@ -318,18 +298,6 @@ int Demo::Shutdown()
     {
         delete this->camera;
         this->camera = nullptr;
-    }
-
-    if (this->frameBuffer)
-    {
-        delete this->frameBuffer;
-        this->frameBuffer = nullptr;
-    }
-
-    if (this->depthBuffer)
-    {
-        delete this->depthBuffer;
-        this->depthBuffer = nullptr;
     }
 
     if (this->shadowBuffer)
@@ -472,6 +440,26 @@ LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
             this->rotateObjects = !this->rotateObjects;
             break;
         }
+        case ID_FRAMEBUFFER_128X128:
+        {
+            this->ResizeFramebuffer(128);
+            break;
+        }
+        case ID_FRAMEBUFFER_256X256:
+        {
+            this->ResizeFramebuffer(256);
+            break;
+        }
+        case ID_FRAMEBUFFER_512X512:
+        {
+            this->ResizeFramebuffer(512);
+            break;
+        }
+        case ID_FRAMEBUFFER_1024X1024:
+        {
+            this->ResizeFramebuffer(1024);
+            break;
+        }
         default:
         {
             return DefWindowProc(this->hWnd, WM_COMMAND, wParam, lParam);
@@ -479,6 +467,57 @@ LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
     }
 
     return 0;
+}
+
+void Demo::ResizeFramebuffer(unsigned int newSize)
+{
+    if (this->frameBitmapHandle != NULL)
+    {
+        DeleteObject(this->frameBitmapHandle);
+        this->frameBitmapHandle = NULL;
+        this->framePixelBuffer = NULL;
+    }
+
+    if (this->frameBuffer)
+    {
+        delete this->frameBuffer;
+        this->frameBuffer = nullptr;
+    }
+
+    if (this->depthBuffer)
+    {
+        delete this->depthBuffer;
+        this->depthBuffer = nullptr;
+    }
+
+    if (newSize > 0)
+    {
+        this->frameBitmapInfo.bmiHeader.biSize = sizeof(frameBitmapInfo.bmiHeader);
+        this->frameBitmapInfo.bmiHeader.biPlanes = 1;
+        this->frameBitmapInfo.bmiHeader.biBitCount = 32;
+        this->frameBitmapInfo.bmiHeader.biCompression = BI_RGB;
+        this->frameBitmapInfo.bmiHeader.biWidth = newSize;
+        this->frameBitmapInfo.bmiHeader.biHeight = newSize;
+
+        this->frameBitmapHandle = CreateDIBSection(NULL, &this->frameBitmapInfo, DIB_RGB_COLORS, (void**)&this->framePixelBuffer, NULL, 0);
+        
+        SelectObject(this->frameDCHandle, this->frameBitmapHandle);
+
+        Frumpy::Image::Format format;
+        format.bShift = 0;
+        format.gShift = 8;
+        format.rShift = 16;
+        format.aShift = 24;
+
+        this->frameBuffer = new Frumpy::Image();
+        this->frameBuffer->SetRawPixelBuffer(this->framePixelBuffer, this->frameBitmapInfo.bmiHeader.biWidth, this->frameBitmapInfo.bmiHeader.biHeight);
+        this->frameBuffer->SetFormat(format);
+
+        this->depthBuffer = new Frumpy::Image(this->frameBuffer->GetWidth(), this->frameBuffer->GetHeight());
+    }
+
+    this->renderer->SetFramebuffer(this->frameBuffer);
+    this->renderer->SetDepthBuffer(this->depthBuffer);
 }
 
 LRESULT Demo::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -664,6 +703,26 @@ void Demo::UpdateOptionsMenuItemChecks(HMENU menuHandle)
             case ID_ANIMATION_ROTATEOBJECT:
             {
                 CheckMenuItem(menuHandle, menuItemID, (this->rotateObjects ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_FRAMEBUFFER_128X128:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->frameBuffer->GetWidth() == 128 ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_FRAMEBUFFER_256X256:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->frameBuffer->GetWidth() == 256 ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_FRAMEBUFFER_512X512:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->frameBuffer->GetWidth() == 512 ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_FRAMEBUFFER_1024X1024:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->frameBuffer->GetWidth() == 1024 ? MF_CHECKED : MF_UNCHECKED));
                 break;
             }
             default:
