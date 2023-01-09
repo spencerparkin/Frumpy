@@ -20,6 +20,7 @@ Renderer::Renderer()
 	this->lightSource = &this->defaultLightSource;
 	this->renderPass = RenderPass::UNKNOWN_PASS;
 	this->clearPixel.color = 0;
+	this->totalRenderJobsPerformedPerFrame = 0;
 }
 
 /*virtual*/ Renderer::~Renderer()
@@ -164,6 +165,7 @@ void Renderer::RenderScene(const Scene* scene, const Camera* camera)
 	
 	this->WaitForAllJobCompletion();
 
+	this->totalRenderJobsPerformedPerFrame = this->submittedJobsList.GetCount();
 	this->submittedJobsList.Delete();
 }
 

@@ -107,6 +107,8 @@ namespace Frumpy
 
 		unsigned int GetThreadCount() { return this->threadList.GetCount(); }
 
+		uint32_t totalRenderJobsPerformedPerFrame;
+
 	private:
 
 		class Thread

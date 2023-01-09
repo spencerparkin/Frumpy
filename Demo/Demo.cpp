@@ -276,13 +276,14 @@ void Demo::Run()
         {
             double fps = double(frameFPSCalcFrequency) / totalElapsedTimeSeconds;
             static char fpsMessage[256];
-            sprintf_s(fpsMessage, sizeof(fpsMessage), "Image Size: %d x %d; FPS: %2.4f; Render: %2.4f; Blit: %2.4f; Msg: %2.4f",
+            sprintf_s(fpsMessage, sizeof(fpsMessage), "Image Size: %d x %d; FPS: %2.4f; Render: %2.4f; Blit: %2.4f; Msg: %2.4f; Jobs: %d",
                 this->frameBuffer->GetWidth(),
                 this->frameBuffer->GetHeight(),
                 fps,
                 this->frumpyRenderTime.GetAverageMilliseconds(),
                 this->demoBlitTime.GetAverageMilliseconds(),
-                this->demoMessageTime.GetAverageMilliseconds());
+                this->demoMessageTime.GetAverageMilliseconds(),
+                this->renderer->totalRenderJobsPerformedPerFrame);
             SendMessage(this->hWndStatusBar, SB_SETTEXT, 0, (LPARAM)fpsMessage);
             totalElapsedTimeSeconds = 0.0;
         }
