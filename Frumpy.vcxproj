@@ -19,8 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Aabb.h" />
     <ClInclude Include="Source\AssetManager.h" />
     <ClInclude Include="Source\Camera.h" />
+    <ClInclude Include="Source\ConvexHull.h" />
     <ClInclude Include="Source\FileAssets\Image.h" />
     <ClInclude Include="Source\FileAssets\Mesh.h" />
     <ClInclude Include="Source\FileFormats\OBJFormat.h" />
@@ -43,8 +45,10 @@
     <ClInclude Include="Source\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Aabb.cpp" />
     <ClCompile Include="Source\AssetManager.cpp" />
     <ClCompile Include="Source\Camera.cpp" />
+    <ClCompile Include="Source\ConvexHull.cpp" />
     <ClCompile Include="Source\FileAssets\Image.cpp" />
     <ClCompile Include="Source\FileAssets\Mesh.cpp" />
     <ClCompile Include="Source\FileFormats\OBJFormat.cpp" />

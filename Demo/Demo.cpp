@@ -92,6 +92,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
+    object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
     object->childToParent.Translation(Frumpy::Vector(0.0, 20.0, 0.0));
     strcpy_s(object->name, "teapot");
     this->scene->objectList.AddTail(object);

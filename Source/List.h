@@ -17,6 +17,16 @@ namespace Frumpy
 			this->count = 0;
 		}
 
+		List(const List& list)
+		{
+			this->head = nullptr;
+			this->tail = nullptr;
+			this->count = 0;
+
+			for (const Node* node = list.head; node; node = node->next)
+				this->AddTail(node->value);
+		}
+
 		virtual ~List()
 		{
 		}

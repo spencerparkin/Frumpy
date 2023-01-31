@@ -433,7 +433,7 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 
 			LightSource::SurfaceProperties surfaceProperties;
 
-			Vector rayDirection = cameraPointB - cameraPointA;
+			Vector rayDirection = cameraPointB - cameraPointA;	// Not sure why we can't just use cameraPointA = <0,0,0>.
 			double lambda = 0.0;
 			if (planeOfTriangle.RayCast(cameraPointA, rayDirection, lambda))
 				surfaceProperties.cameraSpacePoint = cameraPointA + rayDirection * lambda;

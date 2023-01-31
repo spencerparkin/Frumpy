@@ -6,6 +6,7 @@
 namespace Frumpy
 {
 	class Triangle;
+	class Matrix;
 
 	class FRUMPY_API Plane
 	{
@@ -20,6 +21,7 @@ namespace Frumpy
 		double SignedDistanceToPoint(const Vector& point) const;
 		bool ContainsPoint(const Vector& point, double planeThickness) const;
 		bool RayCast(const Vector& rayOrigin, const Vector& rayDirection, double& lambda) const;
+		void Transform(const Matrix& transformMatrix, bool isRigidBodyTransform);
 
 		Vector unitNormal;
 		double distance;

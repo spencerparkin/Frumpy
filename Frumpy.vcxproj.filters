@@ -85,6 +85,12 @@
     <ClInclude Include="Source\Map.h">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Aabb.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ConvexHull.h">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Scene.cpp">
@@ -142,6 +148,12 @@
       <Filter>Source\FileFormats</Filter>
     </ClCompile>
     <ClCompile Include="Source\AssetManager.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Aabb.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ConvexHull.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

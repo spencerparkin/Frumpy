@@ -22,6 +22,8 @@ namespace Frumpy
 		void GetAxes(Vector& xAxis, Vector& yAxis, Vector& zAxis) const;
 		void SetAxes(const Vector& xAxis, const Vector& yAxis, const Vector& zAxis);
 
+		// Note that if shear or non-uniform scale exist in a matrix, then you need to use
+		// the inverse transpose of a matrix in order to transform vectors, I think.
 		void TransformVector(const Vector& vector, Vector& vectorTransformed) const;
 		void TransformPoint(const Vector& point, Vector& pointTransformed) const;
 

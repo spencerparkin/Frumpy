@@ -1,6 +1,7 @@
 #include "Plane.h"
 #include "Vector.h"
 #include "Triangle.h"
+#include "Matrix.h"
 #include <math.h>
 
 using namespace Frumpy;
@@ -63,4 +64,22 @@ bool Plane::RayCast(const Vector& rayOrigin, const Vector& rayDirection, double&
 	if (lambda != lambda || lambda < 0.0)
 		return false;
 	return true;
+}
+
+void Plane::Transform(const Matrix& transformMatrix, bool isRigidBodyTransform)
+{
+	Vector point, normal;
+	this->GetToPointAndVector(point, normal);
+
+	if (isRigidBodyTransform)
+	{
+		transformMatrix.TransformPoint(point, point);
+		transformMatrix.TransformVector(normal, normal);
+	}
+	else
+	{
+		// TODO: Apply inverse transpose to normal?
+	}
+
+	this->SetFromPointAndVector(point, normal);
 }

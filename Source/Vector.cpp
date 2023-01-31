@@ -42,11 +42,13 @@ void Vector::GetComponents(double& x, double& y, double& z) const
 	z = this->z;
 }
 
-void Vector::operator=(const Vector& vector)
+Vector& Vector::operator=(const Vector& vector)
 {
 	this->x = vector.x;
 	this->y = vector.y;
 	this->z = vector.z;
+
+	return *this;
 }
 
 void Vector::operator+=(const Vector& vector)

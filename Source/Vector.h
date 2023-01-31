@@ -13,7 +13,7 @@ namespace Frumpy
 		Vector(const Vector& vector);
 		virtual ~Vector();
 
-		void operator=(const Vector& vector);
+		Vector& operator=(const Vector& vector);
 		void operator+=(const Vector& vector);
 		void operator-=(const Vector& vector);
 		void operator*=(double scalar);
