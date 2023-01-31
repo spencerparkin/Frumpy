@@ -13,6 +13,7 @@
 #include "LightSources/SpotLight.h"
 #include "LightSources/DirectionalLight.h"
 #include "LightSources/AmbientLight.h"
+#include "ConvexHull.h"
 #include "ProfileBlock.h"
 #include <time.h>
 
@@ -61,6 +62,21 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->assetManager->LoadAssets("Meshes/Torus.obj");
     this->assetManager->LoadAssets("Meshes/GroundPlane.obj");
 
+    Frumpy::ConvexHull convexHull;
+    Frumpy::Mesh* mesh = nullptr;
+
+    convexHull.Generate(Frumpy::ConvexHull::Polyhedron::REGULAR_TETRAHEDRON, 10.0);
+    mesh = convexHull.Generate();
+    strcpy_s(mesh->name, sizeof(mesh->name), "Tetrahedron");
+    this->assetManager->AddAsset(mesh);
+
+#if 0
+    convexHull.Generate(Frumpy::ConvexHull::Polyhedron::REGULAR_HEXADRON);
+    mesh = convexHull.Generate();
+    strcpy_s(mesh->name, sizeof(mesh->name), "Hexadron");
+    this->assetManager->AddAsset(mesh);
+#endif
+
     this->renderer = new Frumpy::Renderer();
 
     this->frameDCHandle = CreateCompatibleDC(NULL);
@@ -93,7 +109,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
-    object->childToParent.Translation(Frumpy::Vector(0.0, 20.0, 0.0));
+    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, 0.0));
     strcpy_s(object->name, "teapot");
     this->scene->objectList.AddTail(object);
 
@@ -101,7 +117,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Torus001")));
     object->GetMesh()->SetColor(Frumpy::Vector(0.0, 1.0, 0.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
-    object->childToParent.Translation(Frumpy::Vector(0.0, 20.0, -10.0));
+    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, -10.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
@@ -112,7 +128,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Box001")));
     object->GetMesh()->SetColor(Frumpy::Vector(0.0, 0.0, 1.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
-    object->childToParent.Translation(Frumpy::Vector(0.0, 20.0, 10.0));
+    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, 10.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
@@ -124,7 +140,18 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     object->GetMesh()->SetColor(Frumpy::Vector(1.0, 1.0, 1.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, false);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, true);
+    object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, true);
     strcpy_s(object->name, "ground_plane");
+    this->scene->objectList.AddTail(object);
+
+    object = new Frumpy::MeshObject();
+    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Tetrahedron")));
+    object->GetMesh()->SetColor(Frumpy::Vector(1.0, 1.0, 0.0));
+    object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
+    object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
+    object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, true);
+    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, 0.0));
+    strcpy_s(object->name, "tetrahedron");
     this->scene->objectList.AddTail(object);
 
     this->renderer->Startup(8);
@@ -399,6 +426,13 @@ LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
         case ID_SCENE_TORUS:
         {
             Frumpy::Scene::Object* object = this->scene->FindObjectByName("torus");
+            if (object)
+                object->SetRenderFlag(Frumpy::Scene::Object::VISIBLE, !object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE));
+            break;
+        }
+        case ID_SCENE_TETRAHEDRON:
+        {
+            Frumpy::Scene::Object* object = this->scene->FindObjectByName("tetrahedron");
             if (object)
                 object->SetRenderFlag(Frumpy::Scene::Object::VISIBLE, !object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE));
             break;
@@ -807,6 +841,15 @@ void Demo::UpdateOptionsMenuItemChecks(HMENU menuHandle)
             {
                 bool checked = false;
                 Frumpy::Scene::Object* object = this->scene->FindObjectByName("torus");
+                if (object)
+                    checked = object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE);
+                CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_SCENE_TETRAHEDRON:
+            {
+                bool checked = false;
+                Frumpy::Scene::Object* object = this->scene->FindObjectByName("tetrahedron");
                 if (object)
                     checked = object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE);
                 CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));

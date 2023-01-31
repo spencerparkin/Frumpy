@@ -18,6 +18,18 @@ AssetManager::AssetManager()
 	this->fileFormatList.Delete();
 }
 
+bool AssetManager::AddAsset(Asset* asset)
+{
+	Asset* existingAsset = nullptr;
+
+	this->assetMap.Find(asset->name, existingAsset);
+	if (existingAsset)
+		delete existingAsset;
+
+	this->assetMap.Insert(asset->name, asset);
+	return true;
+}
+
 bool AssetManager::LoadAssets(const char* filePath)
 {
 	FileFormat* fileFormat = this->FindApplicableFileFormat(filePath);
@@ -29,16 +41,7 @@ bool AssetManager::LoadAssets(const char* filePath)
 		return false;
 
 	for (List<Asset*>::Node* node = assetList.GetHead(); node; node = node->GetNext())
-	{
-		Asset* newAsset = node->value;
-		Asset* existingAsset = nullptr;
-
-		this->assetMap.Find(newAsset->name, existingAsset);
-		if (existingAsset)
-			delete existingAsset;
-
-		this->assetMap.Insert(newAsset->name, newAsset);
-	}
+		this->AddAsset(node->value);
 
 	return true;
 }

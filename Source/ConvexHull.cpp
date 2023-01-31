@@ -30,6 +30,111 @@ Vector ConvexHull::CalcCenter() const
 	return center;
 }
 
+bool ConvexHull::Generate(Polyhedron polyhedron, double uniformScale)
+{
+	List<Vector> vertexList;
+
+	double goldenRatio = (1.0 + sqrt(5.0)) / 2.0;
+
+	switch (polyhedron)
+	{
+		case Polyhedron::REGULAR_TETRAHEDRON:
+		{
+			for (int i = 0; i < 2; i++)
+			{
+				double signA = (i == 0) ? 1.0 : -1.0;
+
+				vertexList.AddTail(Vector(signA, 0.0, -1.0 / sqrt(2.0)));
+				vertexList.AddTail(Vector(0.0, signA, 1.0 / sqrt(2.0)));
+			}
+
+			break;
+		}
+		case Polyhedron::REGULAR_HEXADRON:
+		{
+			for (int i = 0; i < 2; i++)
+			{
+				double signA = (i == 0) ? 1.0 : -1.0;
+
+				for (int j = 0; j < 2; j++)
+				{
+					double signB = (j == 0) ? 1.0 : -1.0;
+
+					for (int k = 0; k < 2; k++)
+					{
+						double signC = (k == 0) ? 1.0 : -1.0;
+
+						vertexList.AddTail(Vector(signA, signB, signC));
+					}
+				}
+			}
+
+			break;
+		}
+		case Polyhedron::REGULAR_OCTAHEDRON:
+		{
+			for (int i = 0; i < 2; i++)
+			{
+				double signA = (i == 0) ? 1.0 : -1.0;
+
+				vertexList.AddTail(Vector(signA, 0.0, 0.0));
+				vertexList.AddTail(Vector(0.0, signA, 0.0));
+				vertexList.AddTail(Vector(0.0, 0.0, signA));
+			}
+
+			break;
+		}
+		case Polyhedron::REGULAR_ICOSAHEDRON:
+		{
+			for (int i = 0; i < 2; i++)
+			{
+				double signA = (i == 0) ? 1.0 : -1.0;
+
+				for (int j = 0; j < 2; j++)
+				{
+					double signB = (j == 0) ? 1.0 : -1.0;
+
+					vertexList.AddTail(Vector(0.0, signA, signB * goldenRatio));
+					vertexList.AddTail(Vector(signA, signB * goldenRatio, 0.0));
+					vertexList.AddTail(Vector(signB * goldenRatio, 0.0, signA));
+				}
+			}
+
+			break;
+		}
+		case Polyhedron::REGULAR_DODECAHEDRON:
+		{
+			for (int i = 0; i < 2; i++)
+			{
+				double signA = (i == 0) ? 1.0 : -1.0;
+
+				for (int j = 0; j < 2; j++)
+				{
+					double signB = (j == 0) ? 1.0 : -1.0;
+
+					vertexList.AddTail(Vector(0.0, signA * goldenRatio, signB * (1.0 / goldenRatio)));
+					vertexList.AddTail(Vector(signA * goldenRatio, signB * (1.0 / goldenRatio), 0.0));
+					vertexList.AddTail(Vector(signB * (1.0 / goldenRatio), 0.0, signA * goldenRatio));
+
+					for (int k = 0; k < 2; k++)
+					{
+						double signC = (k == 0) ? 1.0 : -1.0;
+
+						vertexList.AddTail(Vector(signA, signB, signC));
+					}
+				}
+			}
+
+			break;
+		}
+	}
+
+	for (List<Vector>::Node* node = vertexList.GetHead(); node; node = node->GetNext())
+		node->value.Scale(uniformScale);
+
+	return this->Generate(vertexList);
+}
+
 Mesh* ConvexHull::Generate(void) const
 {
 	Mesh* mesh = new Mesh();
@@ -185,7 +290,7 @@ bool ConvexHull::FindInitialTetrahedron(const List<Vector>& pointCloudList)
 					crossProduct.Cross(edgeX, edgeY);
 					double dotProduct = Vector::Dot(crossProduct, edgeZ);
 
-					if (dotProduct > 0.0)
+					if (fabs(dotProduct) > 0.0)
 					{
 						this->pointArray->push_back(pointA);
 						this->pointArray->push_back(pointB);
@@ -194,21 +299,42 @@ bool ConvexHull::FindInitialTetrahedron(const List<Vector>& pointCloudList)
 
 						Facet facet[4];
 
-						facet[0].pointArray.push_back(0);
-						facet[0].pointArray.push_back(2);
-						facet[0].pointArray.push_back(1);
+						if (dotProduct > 0.0)
+						{
+							facet[0].pointArray.push_back(0);
+							facet[0].pointArray.push_back(2);
+							facet[0].pointArray.push_back(1);
 
-						facet[1].pointArray.push_back(0);
-						facet[1].pointArray.push_back(3);
-						facet[1].pointArray.push_back(2);
+							facet[1].pointArray.push_back(0);
+							facet[1].pointArray.push_back(3);
+							facet[1].pointArray.push_back(2);
 
-						facet[2].pointArray.push_back(0);
-						facet[2].pointArray.push_back(1);
-						facet[2].pointArray.push_back(3);
-						
-						facet[3].pointArray.push_back(1);
-						facet[3].pointArray.push_back(2);
-						facet[3].pointArray.push_back(3);
+							facet[2].pointArray.push_back(0);
+							facet[2].pointArray.push_back(1);
+							facet[2].pointArray.push_back(3);
+
+							facet[3].pointArray.push_back(1);
+							facet[3].pointArray.push_back(2);
+							facet[3].pointArray.push_back(3);
+						}
+						else
+						{
+							facet[0].pointArray.push_back(0);
+							facet[0].pointArray.push_back(3);
+							facet[0].pointArray.push_back(1);
+
+							facet[1].pointArray.push_back(0);
+							facet[1].pointArray.push_back(2);
+							facet[1].pointArray.push_back(3);
+
+							facet[2].pointArray.push_back(0);
+							facet[2].pointArray.push_back(1);
+							facet[2].pointArray.push_back(2);
+
+							facet[3].pointArray.push_back(1);
+							facet[3].pointArray.push_back(3);
+							facet[3].pointArray.push_back(2);
+						}
 
 						this->facetArray->push_back(facet[0]);
 						this->facetArray->push_back(facet[1]);

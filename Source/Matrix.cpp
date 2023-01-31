@@ -205,7 +205,28 @@ double Matrix::Determinant() const
 	return det;
 }
 
-void Matrix::Rotation(const Vector& axis, double angle)
+void Matrix::SetTranslation(const Vector& translation)
+{
+	this->ele[0][3] = translation.x;
+	this->ele[1][3] = translation.y;
+	this->ele[2][3] = translation.z;
+}
+
+void Matrix::SetScale(const Vector& scale)
+{
+	this->SetCol(0, Vector(scale.x, 0.0, 0.0));
+	this->SetCol(1, Vector(0.0, scale.y, 0.0));
+	this->SetCol(2, Vector(0.0, 0.0, scale.z));
+}
+
+void Matrix::SetUniformScale(double scale)
+{
+	this->SetCol(0, Vector(scale, 0.0, 0.0));
+	this->SetCol(1, Vector(0.0, scale, 0.0));
+	this->SetCol(2, Vector(0.0, 0.0, scale));
+}
+
+void Matrix::SetRotation(const Vector& axis, double angle)
 {
 	Vector xAxis(1.0, 0.0, 0.0);
 	Vector yAxis(0.0, 1.0, 0.0);
@@ -217,27 +238,18 @@ void Matrix::Rotation(const Vector& axis, double angle)
 	yAxisRotated.Rotation(yAxis, axis, angle);
 	zAxisRotated.Rotation(zAxis, axis, angle);
 
-	this->Identity();
 	this->SetCol(0, xAxisRotated);
 	this->SetCol(1, yAxisRotated);
 	this->SetCol(2, zAxisRotated);
 }
 
-void Matrix::Translation(const Vector& delta)
-{
-	this->Identity();
-	this->ele[0][3] = delta.x;
-	this->ele[1][3] = delta.y;
-	this->ele[2][3] = delta.z;
-}
-
 void Matrix::RigidBodyMotion(const Vector& axis, double angle, const Vector& delta)
 {
 	Matrix rotation;
-	rotation.Rotation(axis, angle);
+	rotation.SetRotation(axis, angle);
 
 	Matrix translation;
-	translation.Translation(delta);
+	translation.SetTranslation(delta);
 
 	*this = translation * rotation;
 }

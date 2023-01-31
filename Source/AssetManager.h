@@ -27,6 +27,8 @@ namespace Frumpy
 
 		Asset* FindAssetByName(const char* assetName);
 
+		bool AddAsset(Asset* asset);
+
 		class FRUMPY_API FileFormat
 		{
 		public:

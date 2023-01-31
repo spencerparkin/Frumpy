@@ -19,9 +19,19 @@ namespace Frumpy
 		ConvexHull();
 		virtual ~ConvexHull();
 
+		enum Polyhedron
+		{
+			REGULAR_TETRAHEDRON,
+			REGULAR_HEXADRON,
+			REGULAR_OCTAHEDRON,
+			REGULAR_ICOSAHEDRON,
+			REGULAR_DODECAHEDRON
+		};
+
 		bool Generate(const List<Vector>& pointCloudList);
 		bool Generate(const Camera::Frustum& frustum);
 		bool Generate(const AxisAlignedBoundingBox& aabb);
+		bool Generate(Polyhedron polyhedron, double uniformScale);
 		Mesh* Generate(void) const;
 		void Transform(const Matrix& transformMatrix, bool isRigidBodyTransform);
 		bool OverlapsWith(const ConvexHull& convexHull) const;
