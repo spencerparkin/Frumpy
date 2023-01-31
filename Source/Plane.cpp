@@ -8,6 +8,7 @@ using namespace Frumpy;
 
 Plane::Plane()
 {
+	this->unitNormal.SetComponents(0.0, 0.0, 0.0);
 	this->distance = 0.0;
 }
 

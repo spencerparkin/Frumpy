@@ -9,6 +9,7 @@
 #endif
 
 #define FRUMPY_PI						3.1415926536
+#define FRUMPY_EPS						1e-5
 #define FRUMPY_DEGS_TO_RADS(x)			((x) * (FRUMPY_PI / 180.0))
 #define FRUMPY_RADS_TO_DEGS(x)			((x) * (180.0 / FRUMPY_PI))
 #define FRUMPY_MIN(x,y)					((x) < (y) ? (x) : (y))
