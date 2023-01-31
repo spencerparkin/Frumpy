@@ -1,5 +1,6 @@
 #include "ConvexHull.h"
 #include "Triangle.h"
+#include "FileAssets/Mesh.h"
 #include <math.h>
 
 using namespace Frumpy;
@@ -17,6 +18,52 @@ ConvexHull::ConvexHull()
 	delete this->pointArray;
 	delete this->facetArray;
 	delete this->cachedEdgeSet;
+}
+
+Vector ConvexHull::CalcCenter() const
+{
+	Vector center(0.0, 0.0, 0.0);
+	for (int i = 0; i < (signed)this->pointArray->size(); i++)
+		center += (*this->pointArray)[i];
+	if (this->pointArray->size() > 0)
+		center.Scale(1.0 / double(this->pointArray->size()));
+	return center;
+}
+
+Mesh* ConvexHull::Generate(void) const
+{
+	Mesh* mesh = new Mesh();
+
+	// Load up the vertices of the mesh.  Approximate the normals based on the hull's center.
+	mesh->SetVertexBufferSize(this->pointArray->size());
+	Vector center = this->CalcCenter();
+	for (int i = 0; i < (signed)this->pointArray->size(); i++)
+	{
+		Vertex* vertex = mesh->GetVertex(i);
+		vertex->objectSpacePoint = (*this->pointArray)[i];
+		vertex->objectSpaceNormal = (*this->pointArray)[i] - center;
+		vertex->objectSpaceNormal.Normalize();
+	}
+
+	// No matter how we tessellate the facets, the number of triangles can be computed as follows.
+	unsigned int totalTriangles = 0;
+	for (int i = 0; i < (signed)this->facetArray->size(); i++)
+	{
+		const Facet& facet = (*this->facetArray)[i];
+		unsigned int numTriangles = facet.pointArray.size() - 2;
+		totalTriangles += numTriangles;
+	}
+	mesh->SetIndexBufferSize(totalTriangles * 3);
+
+	// Load up the index buffer with triangles from all the facets.
+	unsigned int* triangleBuffer = mesh->GetRawIndexBuffer();
+	for (int i = 0; i < (signed)this->facetArray->size(); i++)
+	{
+		const Facet& facet = (*this->facetArray)[i];
+		facet.Tessellate(*this, triangleBuffer);
+	}
+
+	return mesh;
 }
 
 bool ConvexHull::Generate(const List<Vector>& pointCloudList)
@@ -61,7 +108,7 @@ bool ConvexHull::AddPoint(const Vector& point, double eps /*= FRUMPY_EPS*/)
 
 		if (dotProduct < 0.0)
 		{
-			for (int j = 0; j < oldFacet.pointArray.size(); j++)
+			for (int j = 0; j < (signed)oldFacet.pointArray.size(); j++)
 			{
 				Facet newSideFacet;
 				newSideFacet.pointArray.push_back(this->pointArray->size() - 1);
@@ -380,4 +427,71 @@ bool ConvexHull::Facet::IsCanceledBy(const Facet& facet) const
 	}
 
 	return false;
+}
+
+// This algorithm probably doesn't find the optimal tessellation, but it's something.
+// How exactly do you define the optimal tessellation anyway?
+bool ConvexHull::Facet::Tessellate(const ConvexHull& convexHull, unsigned int*& triangleBuffer) const
+{
+	if (this->pointArray.size() < 3)
+		return false;
+
+	if (this->pointArray.size() == 3)
+	{
+		*triangleBuffer++ = this->pointArray[0];
+		*triangleBuffer++ = this->pointArray[1];
+		*triangleBuffer++ = this->pointArray[2];
+		return true;
+	}
+
+	// Try to choose the best interior triangle.  Here we're trying to maximize
+	// the smallest interior triangle of all possible interior triangles.
+	double bestInteriorAngle = 0.0;
+	std::vector<int> bestTriangleOffsets;
+	for (int i = 0; i < (signed)this->pointArray.size(); i++)
+	{
+		for (int j = i + 1; j < (signed)this->pointArray.size(); j++)
+		{
+			for (int k = j + 1; k < (signed)this->pointArray.size(); k++)
+			{
+				Triangle triangle;
+				triangle.vertex[0] = convexHull.GetPoint(this->pointArray[i]);
+				triangle.vertex[1] = convexHull.GetPoint(this->pointArray[j]);
+				triangle.vertex[2] = convexHull.GetPoint(this->pointArray[k]);
+				double interiorAngle = triangle.SmallestInteriorAngle();
+				if (interiorAngle > bestInteriorAngle)
+				{
+					bestInteriorAngle = interiorAngle;
+					bestTriangleOffsets.clear();
+					bestTriangleOffsets.push_back(i);
+					bestTriangleOffsets.push_back(j);
+					bestTriangleOffsets.push_back(k);
+				}
+			}
+		}
+	}
+
+	if (bestTriangleOffsets.size() != 3)
+		return false;
+
+	Facet bestTriangle;
+	bestTriangle.pointArray.push_back(this->pointArray[bestTriangleOffsets[0]]);
+	bestTriangle.pointArray.push_back(this->pointArray[bestTriangleOffsets[1]]);
+	bestTriangle.pointArray.push_back(this->pointArray[bestTriangleOffsets[2]]);
+	bestTriangle.Tessellate(convexHull, triangleBuffer);
+
+	for (int i = 0; i < 3; i++)
+	{
+		Facet subFacet;
+		int j = bestTriangleOffsets[i];
+		while (j != bestTriangleOffsets[(i + 1) % 3])
+		{
+			subFacet.pointArray.push_back(this->pointArray[j]);
+			j = (j + 1) % this->pointArray.size();
+		}
+
+		subFacet.Tessellate(convexHull, triangleBuffer);
+	}
+
+	return true;
 }

@@ -6,6 +6,7 @@
 
 namespace Frumpy
 {
+	// These are always triangle meshes.  I should probably rename the class to be more specific.
 	class FRUMPY_API Mesh : public AssetManager::Asset
 	{
 	public:
@@ -25,6 +26,12 @@ namespace Frumpy
 		bool SetIndex(unsigned int i, unsigned int index);
 
 		void SetColor(const Vector& color);
+
+		Vertex* GetRawVertexBuffer() { return this->vertexBuffer; }
+		unsigned int* GetRawIndexBuffer() { return this->indexBuffer; }
+
+		const Vertex* GetRawVertexBuffer() const { return this->vertexBuffer; }
+		const unsigned int* GetRawIndexBuffer() const { return this->indexBuffer; }
 
 	protected:
 		Vertex* vertexBuffer;

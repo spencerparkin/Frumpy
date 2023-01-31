@@ -11,6 +11,8 @@
 
 namespace Frumpy
 {
+	class Mesh;
+
 	class FRUMPY_API ConvexHull
 	{
 	public:
@@ -20,11 +22,13 @@ namespace Frumpy
 		bool Generate(const List<Vector>& pointCloudList);
 		bool Generate(const Camera::Frustum& frustum);
 		bool Generate(const AxisAlignedBoundingBox& aabb);
+		Mesh* Generate(void) const;
 		void Transform(const Matrix& transformMatrix, bool isRigidBodyTransform);
 		bool OverlapsWith(const ConvexHull& convexHull) const;
 		bool ContainsPoint(const Vector& point, double eps = FRUMPY_EPS) const;
 		bool AddPoint(const Vector& point, double eps = FRUMPY_EPS);		// Return value indicates whether the hull expanded.
 		const Vector& GetPoint(int i) const;
+		Vector CalcCenter() const;
 
 	private:
 
@@ -43,6 +47,7 @@ namespace Frumpy
 
 			const Plane& GetSurfacePlane(const ConvexHull& convexHull) const;
 			bool IsCanceledBy(const Facet& facet) const;
+			bool Tessellate(const ConvexHull& convexHull, unsigned int*& triangleBuffer) const;
 		};
 		
 		std::vector<Vector>* pointArray;  // No 3 points should ever by co-linear.
