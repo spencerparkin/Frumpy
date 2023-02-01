@@ -28,7 +28,7 @@ namespace Frumpy
 			REGULAR_DODECAHEDRON
 		};
 
-		bool Generate(const List<Vector>& pointCloudList);
+		bool Generate(const List<Vector>& pointCloudList, bool compressFacets = false);
 		bool Generate(const Camera::Frustum& frustum);
 		bool Generate(const AxisAlignedBoundingBox& aabb);
 		bool Generate(Polyhedron polyhedron, double uniformScale);
@@ -39,6 +39,7 @@ namespace Frumpy
 		bool AddPoint(const Vector& point, double eps = FRUMPY_EPS);		// Return value indicates whether the hull expanded.
 		const Vector& GetPoint(int i) const;
 		Vector CalcCenter() const;
+		void CompressFacets();
 
 	private:
 

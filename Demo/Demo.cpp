@@ -70,12 +70,25 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     strcpy_s(mesh->name, sizeof(mesh->name), "Tetrahedron");
     this->assetManager->AddAsset(mesh);
 
-#if 0
-    convexHull.Generate(Frumpy::ConvexHull::Polyhedron::REGULAR_HEXADRON);
+    convexHull.Generate(Frumpy::ConvexHull::Polyhedron::REGULAR_HEXADRON, 10.0);
     mesh = convexHull.Generate();
     strcpy_s(mesh->name, sizeof(mesh->name), "Hexadron");
     this->assetManager->AddAsset(mesh);
-#endif
+
+    convexHull.Generate(Frumpy::ConvexHull::Polyhedron::REGULAR_OCTAHEDRON, 10.0);
+    mesh = convexHull.Generate();
+    strcpy_s(mesh->name, sizeof(mesh->name), "Octahedron");
+    this->assetManager->AddAsset(mesh);
+
+    convexHull.Generate(Frumpy::ConvexHull::Polyhedron::REGULAR_ICOSAHEDRON, 10.0);
+    mesh = convexHull.Generate();
+    strcpy_s(mesh->name, sizeof(mesh->name), "Icosahedron");
+    this->assetManager->AddAsset(mesh);
+
+    convexHull.Generate(Frumpy::ConvexHull::Polyhedron::REGULAR_DODECAHEDRON, 10.0);
+    mesh = convexHull.Generate();
+    strcpy_s(mesh->name, sizeof(mesh->name), "Dodecahedron");
+    this->assetManager->AddAsset(mesh);
 
     this->renderer = new Frumpy::Renderer();
 
@@ -149,9 +162,49 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     object->GetMesh()->SetColor(Frumpy::Vector(1.0, 1.0, 0.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
-    object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, true);
+    object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
     object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, 0.0));
     strcpy_s(object->name, "tetrahedron");
+    this->scene->objectList.AddTail(object);
+
+    object = new Frumpy::MeshObject();
+    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Hexadron")));
+    object->GetMesh()->SetColor(Frumpy::Vector(0.0, 1.0, 1.0));
+    object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
+    object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
+    object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
+    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, 0.0));
+    strcpy_s(object->name, "hexadron");
+    this->scene->objectList.AddTail(object);
+
+    object = new Frumpy::MeshObject();
+    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Octahedron")));
+    object->GetMesh()->SetColor(Frumpy::Vector(1.0, 0.0, 1.0));
+    object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
+    object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
+    object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
+    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, 0.0));
+    strcpy_s(object->name, "octahedron");
+    this->scene->objectList.AddTail(object);
+
+    object = new Frumpy::MeshObject();
+    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Icosahedron")));
+    object->GetMesh()->SetColor(Frumpy::Vector(0.0, 0.5, 1.0));
+    object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
+    object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
+    object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
+    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, 0.0));
+    strcpy_s(object->name, "icosahedron");
+    this->scene->objectList.AddTail(object);
+
+    object = new Frumpy::MeshObject();
+    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Dodecahedron")));
+    object->GetMesh()->SetColor(Frumpy::Vector(0.5, 1.0, 0.5));
+    object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
+    object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
+    object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
+    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, 0.0));
+    strcpy_s(object->name, "dodecahedron");
     this->scene->objectList.AddTail(object);
 
     this->renderer->Startup(8);
@@ -437,6 +490,34 @@ LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
                 object->SetRenderFlag(Frumpy::Scene::Object::VISIBLE, !object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE));
             break;
         }
+        case ID_SCENE_HEXADRON:
+        {
+            Frumpy::Scene::Object* object = this->scene->FindObjectByName("hexadron");
+            if (object)
+                object->SetRenderFlag(Frumpy::Scene::Object::VISIBLE, !object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE));
+            break;
+        }
+        case ID_SCENE_OCTAHEDRON:
+        {
+            Frumpy::Scene::Object* object = this->scene->FindObjectByName("octahedron");
+            if (object)
+                object->SetRenderFlag(Frumpy::Scene::Object::VISIBLE, !object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE));
+            break;
+        }
+        case ID_SCENE_ICOSAHEDRON:
+        {
+            Frumpy::Scene::Object* object = this->scene->FindObjectByName("icosahedron");
+            if (object)
+                object->SetRenderFlag(Frumpy::Scene::Object::VISIBLE, !object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE));
+            break;
+        }
+        case ID_SCENE_DODECAHEDRON:
+        {
+            Frumpy::Scene::Object* object = this->scene->FindObjectByName("dodecahedron");
+            if (object)
+                object->SetRenderFlag(Frumpy::Scene::Object::VISIBLE, !object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE));
+            break;
+        }
         case ID_LIGHTING_CASTSHADOWS:
         {
             Frumpy::Scene::Object* torusObject = this->scene->FindObjectByName("torus");
@@ -704,7 +785,8 @@ LRESULT Demo::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         }
         case WM_MENUSELECT:
         {
-            if (LOWORD(wParam) == 0x0001 /* options menu */)
+            DWORD menuOffset = LOWORD(wParam);
+            if (1 <= menuOffset && menuOffset <= 3)
             {
                 HMENU optionsMenuHandle = (HMENU)lParam;
                 this->UpdateOptionsMenuItemChecks(optionsMenuHandle);
@@ -850,6 +932,42 @@ void Demo::UpdateOptionsMenuItemChecks(HMENU menuHandle)
             {
                 bool checked = false;
                 Frumpy::Scene::Object* object = this->scene->FindObjectByName("tetrahedron");
+                if (object)
+                    checked = object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE);
+                CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_SCENE_HEXADRON:
+            {
+                bool checked = false;
+                Frumpy::Scene::Object* object = this->scene->FindObjectByName("hexadron");
+                if (object)
+                    checked = object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE);
+                CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_SCENE_OCTAHEDRON:
+            {
+                bool checked = false;
+                Frumpy::Scene::Object* object = this->scene->FindObjectByName("octahedron");
+                if (object)
+                    checked = object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE);
+                CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_SCENE_ICOSAHEDRON:
+            {
+                bool checked = false;
+                Frumpy::Scene::Object* object = this->scene->FindObjectByName("icosahedron");
+                if (object)
+                    checked = object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE);
+                CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_SCENE_DODECAHEDRON:
+            {
+                bool checked = false;
+                Frumpy::Scene::Object* object = this->scene->FindObjectByName("dodecahedron");
                 if (object)
                     checked = object->GetRenderFlag(Frumpy::Scene::Object::VISIBLE);
                 CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));

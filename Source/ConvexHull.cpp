@@ -171,7 +171,7 @@ Mesh* ConvexHull::Generate(void) const
 	return mesh;
 }
 
-bool ConvexHull::Generate(const List<Vector>& pointCloudList)
+bool ConvexHull::Generate(const List<Vector>& pointCloudList, bool compressFacets /*= false*/)
 {
 	if (pointCloudList.GetCount() < 4)
 		return false;
@@ -182,7 +182,17 @@ bool ConvexHull::Generate(const List<Vector>& pointCloudList)
 	for (const List<Vector>::Node* node = pointCloudList.GetHead(); node; node = node->GetNext())
 		this->AddPoint(node->value);
 
+	// At this point, all facets are triangles, but some could be coplanar with other facets.
+	// Such facets can be consolidated down into a single facet.
+	if (compressFacets)
+		this->CompressFacets();
+
 	return true;
+}
+
+void ConvexHull::CompressFacets()
+{
+	//...
 }
 
 bool ConvexHull::AddPoint(const Vector& point, double eps /*= FRUMPY_EPS*/)
