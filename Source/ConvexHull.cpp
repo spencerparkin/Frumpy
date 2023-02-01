@@ -231,7 +231,7 @@ bool ConvexHull::CompressFacetPair(const Facet& facetA, const Facet& facetB, Fac
 		if (facetB.FindPoint(facetA.pointArray[i]) >= 0)
 			commonPointCount++;
 
-	if (commonPointCount == 0)
+	if (commonPointCount < 2)
 		return false;
 
 	char facetBeingWalked = 'A';
