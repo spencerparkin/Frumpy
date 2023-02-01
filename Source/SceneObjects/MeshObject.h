@@ -2,6 +2,7 @@
 
 #include "../Scene.h"
 #include "../FileAssets/Image.h"
+#include "../ConvexHull.h"
 
 namespace Frumpy
 {
@@ -14,7 +15,7 @@ namespace Frumpy
 		MeshObject();
 		virtual ~MeshObject();
 
-		virtual bool IntersectsFrustum(const List<Plane>& frustumPlanesList) const override;
+		virtual bool IntersectsFrustum(const ConvexHull& frustumHull, const Matrix& worldToCamera) const override;
 		virtual void Render(Renderer& renderer) const override;
 
 		void SetMesh(Mesh* mesh) { this->mesh = mesh; }
@@ -30,5 +31,8 @@ namespace Frumpy
 		Mesh* mesh;
 		Image* texture;
 		Image::SampleMethod sampleMethod;
+
+		mutable ConvexHull objectSpaceBoundingHull;
+		mutable bool objectSpaceBoundingHullValid;
 	};
 }

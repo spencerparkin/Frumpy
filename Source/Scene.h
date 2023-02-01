@@ -10,6 +10,7 @@ namespace Frumpy
 {
 	class Renderer;
 	class Camera;
+	class ConvexHull;
 
 	// This defines the scene as a hierarchy of scene objects.
 	class FRUMPY_API Scene
@@ -23,7 +24,7 @@ namespace Frumpy
 
 		Object* FindObjectByName(const char* name);
 		void ForAllObjects(std::function<bool(Object*)> lambda);
-		void GenerateVisibleObjectsList(const Camera* camera, ObjectList& visibleObjectList) const;
+		void GenerateVisibleObjectsList(const Camera* camera, ObjectList& visibleObjectList, const Matrix& worldToCamera) const;
 
 		// Derivatives of this are anything that might get rendered in the scene.
 		class FRUMPY_API Object
@@ -33,7 +34,7 @@ namespace Frumpy
 			virtual ~Object();
 
 			virtual void CalculateWorldTransform(const Matrix& parentToWorld) const;
-			virtual bool IntersectsFrustum(const List<Plane>& frustumPlanesList) const;
+			virtual bool IntersectsFrustum(const ConvexHull& frustumHull, const Matrix& worldToCamera) const;
 			virtual void Render(Renderer& renderer) const;
 
 			enum RenderType

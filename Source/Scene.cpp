@@ -47,15 +47,14 @@ void Scene::ForAllObjects(std::function<bool(Object*)> lambda)
 	}
 }
 
-void Scene::GenerateVisibleObjectsList(const Camera* camera, ObjectList& visibleObjectList) const
+void Scene::GenerateVisibleObjectsList(const Camera* camera, ObjectList& visibleObjectList, const Matrix& worldToCamera) const
 {
 	// Go determine the list of objects visible to the viewing frustum of the given camera.  This, of
 	// course, does not account for any kind of occlusion that may be taking place.  The depth buffer will
 	// take care of any occlusion, so we're not able to necessarily skip anything fully occluded here.
-	List<Plane> frustumPlanesList;
-	camera->frustum.GeneratePlanes(frustumPlanesList);
-	const_cast<Scene*>(this)->ForAllObjects([&visibleObjectList, &frustumPlanesList](Object* object) -> bool {
-		if (object->GetRenderFlag(Object::VISIBLE) && object->IntersectsFrustum(frustumPlanesList))
+	const ConvexHull& frustumHull = camera->frustum.GetFrustumHull();
+	const_cast<Scene*>(this)->ForAllObjects([&visibleObjectList, &frustumHull, &worldToCamera](Object* object) -> bool {
+		if (object->GetRenderFlag(Object::VISIBLE) && object->IntersectsFrustum(frustumHull, worldToCamera))
 			visibleObjectList.AddTail(object);
 		return true;
 	});
@@ -104,7 +103,7 @@ bool Scene::Object::GetRenderFlag(RenderFlag renderFlag) const
 	// This method must be overridden for anything to actually get rendered.
 }
 
-/*virtual*/ bool Scene::Object::IntersectsFrustum(const List<Plane>& frustumPlanesList) const
+/*virtual*/ bool Scene::Object::IntersectsFrustum(const ConvexHull& frustumHull, const Matrix& worldToCamera) const
 {
 	// Deriviative classes should override this function as well.
 	return true;

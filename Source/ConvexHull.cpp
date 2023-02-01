@@ -1,6 +1,7 @@
 #include "ConvexHull.h"
 #include "Triangle.h"
 #include "FileAssets/Mesh.h"
+#include "Camera.h"
 #include <math.h>
 
 using namespace Frumpy;
@@ -11,6 +12,19 @@ ConvexHull::ConvexHull()
 	this->facetArray = new std::vector<Facet>();
 	this->cachedEdgeSet = new std::set<Edge>();
 	this->cachedEdgeSetValid = false;
+}
+
+ConvexHull::ConvexHull(const ConvexHull& convexHull)
+{
+	this->pointArray = new std::vector<Vector>();
+	this->facetArray = new std::vector<Facet>();
+	this->cachedEdgeSet = new std::set<Edge>();
+	this->cachedEdgeSetValid = false;
+
+	*this->pointArray = *convexHull.pointArray;
+	*this->facetArray = *convexHull.facetArray;
+	*this->cachedEdgeSet = *convexHull.cachedEdgeSet;
+	this->cachedEdgeSetValid = convexHull.cachedEdgeSetValid;
 }
 
 /*virtual*/ ConvexHull::~ConvexHull()
@@ -460,7 +474,7 @@ bool ConvexHull::FindInitialTetrahedron(const List<Vector>& pointCloudList)
 	return false;
 }
 
-bool ConvexHull::Generate(const Camera::Frustum& frustum)
+bool ConvexHull::Generate(const Frustum& frustum)
 {
 	double hfoviRads = FRUMPY_DEGS_TO_RADS(frustum.hfovi);
 	double vfoviRads = FRUMPY_DEGS_TO_RADS(frustum.vfovi);
@@ -482,7 +496,7 @@ bool ConvexHull::Generate(const Camera::Frustum& frustum)
 	pointList.AddTail(Vector(-farX, farY, -frustum._far));
 	pointList.AddTail(Vector(farX, farY, -frustum._far));
 
-	return this->Generate(pointList);
+	return this->Generate(pointList, true);
 }
 
 bool ConvexHull::Generate(const AxisAlignedBoundingBox& aabb)
@@ -498,7 +512,7 @@ bool ConvexHull::Generate(const AxisAlignedBoundingBox& aabb)
 	pointList.AddTail(Vector(aabb.max.x, aabb.max.y, aabb.min.z));
 	pointList.AddTail(aabb.max);
 
-	return this->Generate(pointList);
+	return this->Generate(pointList, true);
 }
 
 void ConvexHull::Transform(const Matrix& transformMatrix)
@@ -560,6 +574,8 @@ bool ConvexHull::OverlapsWith(const ConvexHull& convexHull, double eps /*= FRUMP
 
 	if (convexHull.AnyPointInGivenConvexHull(*this, eps))
 		return true;
+
+	// TODO: There appears to be a bug somewhere around this point.
 
 	if (this->AnyEdgeStraddlesGivenConvexHull(convexHull, eps))
 		return true;

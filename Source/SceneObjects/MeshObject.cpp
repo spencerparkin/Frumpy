@@ -2,6 +2,7 @@
 #include "../Renderer.h"
 #include "../FileAssets/Mesh.h"
 #include "../Triangle.h"
+#include "../Aabb.h"
 
 using namespace Frumpy;
 
@@ -10,16 +11,50 @@ MeshObject::MeshObject()
 	this->mesh = nullptr;
 	this->texture = nullptr;
 	this->sampleMethod = Image::SampleMethod::NEAREST;
+	this->objectSpaceBoundingHullValid = false;
 }
 
 /*virtual*/ MeshObject::~MeshObject()
 {
 }
 
-/*virtual*/ bool MeshObject::IntersectsFrustum(const List<Plane>& frustumPlanesList) const
+/*virtual*/ bool MeshObject::IntersectsFrustum(const ConvexHull& frustumHull, const Matrix& worldToCamera) const
 {
-	// TODO: Base this on an axis-aligned bounding box combined with our world transform?
-	return true;
+	if (!this->objectSpaceBoundingHullValid)
+	{
+		AxisAlignedBoundingBox aabb;
+		for (unsigned int i = 0; i < this->mesh->GetVertexBufferSize(); i++)
+			aabb.MinimallyExpandToContainPoint(this->mesh->GetVertex(i)->objectSpacePoint);
+
+		if (aabb.Width() < FRUMPY_EPS)
+		{
+			aabb.min.x -= 0.5;
+			aabb.max.x += 0.5;
+		}
+
+		if (aabb.Height() < FRUMPY_EPS)
+		{
+			aabb.min.y -= 0.5;
+			aabb.max.y += 0.5;
+		}
+
+		if (aabb.Depth() < FRUMPY_EPS)
+		{
+			aabb.min.z -= 0.5;
+			aabb.max.z += 0.5f;
+		}
+
+		this->objectSpaceBoundingHull.Generate(aabb);
+		this->objectSpaceBoundingHull.RegenerateEdgeSetIfNecessary();
+		this->objectSpaceBoundingHullValid = true;
+	}
+
+	Matrix objectToCamera = worldToCamera * this->objectToWorld;
+
+	ConvexHull cameraSpaceBoundingHull(this->objectSpaceBoundingHull);
+	cameraSpaceBoundingHull.Transform(objectToCamera);
+
+	return cameraSpaceBoundingHull.OverlapsWith(frustumHull);
 }
 
 /*virtual*/ void MeshObject::Render(Renderer& renderer) const
@@ -59,7 +94,7 @@ MeshObject::MeshObject()
 		const Vector& pointB = vertexB.imageSpacePoint;
 		const Vector& pointC = vertexC.imageSpacePoint;
 
-		// TODO: Frustum-cull individual triangles?
+		// TODO: Frustum-cull individual triangles?  Yes, but also clip them against the frustum?
 
 		// Perform back-face culling in image space.
 		Vector triangleNorm;

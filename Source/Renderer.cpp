@@ -115,7 +115,7 @@ void Renderer::RenderScene(const Scene* scene, const Camera* camera)
 		if (this->lightSource->CalcShadowCamera(shadowCamera))
 		{
 			this->graphicsMatrices.Calculate(shadowCamera, *this->shadowBuffer);
-			scene->GenerateVisibleObjectsList(&shadowCamera, visibleObjectList);
+			scene->GenerateVisibleObjectsList(&shadowCamera, visibleObjectList, this->graphicsMatrices.worldToCamera);
 			this->renderPass = RenderPass::SHADOW_PASS;
 			pixel.depth = -(float)shadowCamera.frustum._far;
 			this->shadowBuffer->Clear(pixel);
@@ -134,7 +134,7 @@ void Renderer::RenderScene(const Scene* scene, const Camera* camera)
 
 	visibleObjectList.Clear();
 	this->graphicsMatrices.Calculate(*camera, *this->frameBuffer);
-	scene->GenerateVisibleObjectsList(camera, visibleObjectList);
+	scene->GenerateVisibleObjectsList(camera, visibleObjectList, this->graphicsMatrices.worldToCamera);
 
 	// Clear buffers and get the light source ready for lighting calculations.
 	pixel.depth = -(float)camera->frustum._far;

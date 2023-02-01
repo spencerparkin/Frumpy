@@ -37,45 +37,43 @@ bool Camera::LookAt(const Vector& eyePoint, const Vector& eyeTarget, const Vecto
 	return true;
 }
 
-Camera::Frustum::Frustum()
+Frustum::Frustum()
 {
 	this->_near = 0.1;
 	this->_far = 1000.0;
 	this->hfovi = 60.0;
 	this->vfovi = 50.0;
+	this->frustumHullValid = false;
 }
 
-void Camera::Frustum::AdjustVFoviForAspectRatio(double aspectRatio)
+/*virtual*/ Frustum::~Frustum()
+{
+}
+
+void Frustum::AdjustVFoviForAspectRatio(double aspectRatio)
 {
 	this->vfovi = FRUMPY_RADS_TO_DEGS(2.0 * atan(tan(FRUMPY_DEGS_TO_RADS(this->hfovi) / 2.0) / aspectRatio));
+	this->frustumHullValid = false;
 }
 
-void Camera::Frustum::AdjustHfoviForAspectRatio(double aspectRatio)
+void Frustum::AdjustHfoviForAspectRatio(double aspectRatio)
 {
 	this->vfovi = FRUMPY_RADS_TO_DEGS(2.0 * atan(tan(FRUMPY_DEGS_TO_RADS(this->vfovi) / 2) * aspectRatio));
+	this->frustumHullValid = false;
 }
 
-void Camera::Frustum::GeneratePlanes(List<Plane>& frustumPlanesList) const
-{
-	double hfoviRads = FRUMPY_DEGS_TO_RADS(this->hfovi);
-	double vfoviRads = FRUMPY_DEGS_TO_RADS(this->vfovi);
-
-	frustumPlanesList.Clear();
-
-	// Top/bottom planes:
-	frustumPlanesList.AddTail(Plane(Vector(0.0, sin((vfoviRads + FRUMPY_PI) / 2.0), -cos((vfoviRads + FRUMPY_PI) / 2.0)), Vector(0.0, tan(vfoviRads / 2.0), -1.0)));
-	frustumPlanesList.AddTail(Plane(Vector(0.0, -sin((vfoviRads + FRUMPY_PI) / 2.0), -cos((vfoviRads + FRUMPY_PI) / 2.0)), Vector(0.0, -tan(vfoviRads / 2.0), -1.0)));
-
-	// Left/right planes:
-	frustumPlanesList.AddTail(Plane(Vector(sin((hfoviRads + FRUMPY_PI) / 2.0), -cos((hfoviRads + FRUMPY_PI) / 2.0), 0.0), Vector(tan(hfoviRads / 2.0), 0.0, -1.0)));
-	frustumPlanesList.AddTail(Plane(Vector(-sin((hfoviRads + FRUMPY_PI) / 2.0), -cos((hfoviRads + FRUMPY_PI) / 2.0), 0.0), Vector(-tan(hfoviRads / 2.0), 0.0, -1.0)));
-
-	// Near/far planes:
-	frustumPlanesList.AddTail(Plane(Vector(0.0, 0.0, -this->_near), Vector(0.0, 0.0, 1.0)));
-	frustumPlanesList.AddTail(Plane(Vector(0.0, 0.0, -this->_far), Vector(0.0, 0.0, -1.0)));
-}
-
-void Camera::Frustum::CalcProjectionMatrix(Matrix& projectionMatrix) const
+void Frustum::CalcProjectionMatrix(Matrix& projectionMatrix) const
 {
 	projectionMatrix.Projection(FRUMPY_DEGS_TO_RADS(this->hfovi), FRUMPY_DEGS_TO_RADS(this->vfovi), this->_near, this->_far);
+}
+
+const ConvexHull& Frustum::GetFrustumHull() const
+{
+	if (!this->frustumHullValid)
+	{
+		this->frustumHull.Generate(*this);
+		this->frustumHullValid = true;
+	}
+
+	return this->frustumHull;
 }

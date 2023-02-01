@@ -4,7 +4,6 @@
 #include "Plane.h"
 #include "List.h"
 #include "Matrix.h"
-#include "Camera.h"
 #include "Aabb.h"
 #include <vector>
 #include <set>
@@ -12,11 +11,13 @@
 namespace Frumpy
 {
 	class Mesh;
+	class Frustum;
 
 	class FRUMPY_API ConvexHull
 	{
 	public:
 		ConvexHull();
+		ConvexHull(const ConvexHull& convexHull);
 		virtual ~ConvexHull();
 
 		enum Polyhedron
@@ -29,7 +30,7 @@ namespace Frumpy
 		};
 
 		bool Generate(const List<Vector>& pointCloudList, bool compressFacets = false);
-		bool Generate(const Camera::Frustum& frustum);
+		bool Generate(const Frustum& frustum);
 		bool Generate(const AxisAlignedBoundingBox& aabb);
 		bool Generate(Polyhedron polyhedron, double uniformScale);
 		Mesh* Generate(void) const;
@@ -40,6 +41,7 @@ namespace Frumpy
 		const Vector& GetPoint(int i) const;
 		Vector CalcCenter() const;
 		void CompressFacets();
+		void RegenerateEdgeSetIfNecessary() const;
 
 	private:
 
@@ -86,7 +88,5 @@ namespace Frumpy
 
 		mutable std::set<Edge>* cachedEdgeSet;
 		mutable bool cachedEdgeSetValid;
-
-		void RegenerateEdgeSetIfNecessary() const;
 	};
 }
