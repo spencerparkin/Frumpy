@@ -125,7 +125,7 @@ void Renderer::RenderScene(const Scene* scene, const Camera* camera)
 			{
 				const Scene::Object* object = node->value;
 				if (object->GetRenderFlag(Scene::Object::CASTS_SHADOW))
-					object->Render(*this);
+					object->Render(*this, &shadowCamera);
 			}
 
 			this->WaitForAllJobCompletion();
@@ -149,7 +149,7 @@ void Renderer::RenderScene(const Scene* scene, const Camera* camera)
 	{
 		const Scene::Object* object = node->value;
 		if (object->renderType == Scene::Object::RenderType::RENDER_OPAQUE)
-			object->Render(*this);
+			object->Render(*this, camera);
 	}
 	
 	this->WaitForAllJobCompletion();
@@ -160,7 +160,7 @@ void Renderer::RenderScene(const Scene* scene, const Camera* camera)
 	{
 		const Scene::Object* object = node->value;
 		if (object->renderType == Scene::Object::RenderType::RENDER_TRANSPARENT)
-			object->Render(*this);
+			object->Render(*this, camera);
 	}
 	
 	this->WaitForAllJobCompletion();

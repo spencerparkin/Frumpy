@@ -3,6 +3,7 @@
 #include "../FileAssets/Mesh.h"
 #include "../Triangle.h"
 #include "../Aabb.h"
+#include "../Camera.h"
 
 using namespace Frumpy;
 
@@ -57,7 +58,7 @@ MeshObject::MeshObject()
 	return cameraSpaceBoundingHull.OverlapsWith(frustumHull);
 }
 
-/*virtual*/ void MeshObject::Render(Renderer& renderer) const
+/*virtual*/ void MeshObject::Render(Renderer& renderer, const Camera* camera) const
 {
 	if (!this->mesh)
 		return;
@@ -94,12 +95,19 @@ MeshObject::MeshObject()
 		const Vector& pointB = vertexB.imageSpacePoint;
 		const Vector& pointC = vertexC.imageSpacePoint;
 
-		// TODO: Frustum-cull individual triangles?  Yes, but also clip them against the frustum?
-
 		// Perform back-face culling in image space.
 		Vector triangleNorm;
 		triangleNorm.Cross(pointB - pointA, pointC - pointA);
 		if (triangleNorm.z < 0.0)
+			continue;
+
+		// Cull against the camera frustum.  (Clipping is done in image space.)
+		const ConvexHull& frustumHull = camera->frustum.GetFrustumHull();
+		Triangle triangle;
+		triangle.vertex[0] = vertexA.cameraSpacePoint;
+		triangle.vertex[1] = vertexB.cameraSpacePoint;
+		triangle.vertex[2] = vertexC.cameraSpacePoint;
+		if (!frustumHull.OverlapsWith(triangle))
 			continue;
 
 		// Render by submitting a job to the renderer.

@@ -539,7 +539,7 @@ bool ConvexHull::AnyPointInGivenConvexHull(const ConvexHull& convexHull, double 
 	return false;
 }
 
-bool ConvexHull::AnyEdgeStraddlesGivenConvexHull(const ConvexHull& convexHull, double eps) const
+bool ConvexHull::AnyEdgeHitsGivenConvexHull(const ConvexHull& convexHull, double eps) const
 {
 	this->RegenerateEdgeSetIfNecessary();
 
@@ -548,19 +548,26 @@ bool ConvexHull::AnyEdgeStraddlesGivenConvexHull(const ConvexHull& convexHull, d
 		const Vector& pointA = this->GetPoint(edge.i);
 		const Vector& pointB = this->GetPoint(edge.j);
 
-		for (int i = 0; i < (signed)convexHull.facetArray->size(); i++)
+		if (convexHull.LineSegmentHitsHull(pointA, pointB, eps))
+			return true;
+	}
+
+	return false;
+}
+
+bool ConvexHull::LineSegmentHitsHull(const Vector& pointA, const Vector& pointB, double eps /*= FRUMPY_EPS*/) const
+{
+	for (int i = 0; i < (signed)this->facetArray->size(); i++)
+	{
+		const Facet& facet = (*this->facetArray)[i];
+		const Plane& plane = facet.GetSurfacePlane(*this);
+		Vector rayDirection = pointB - pointA;
+		double lambda = 0.0;
+		if (plane.RayCast(pointA, rayDirection, lambda) && lambda <= 1.0)
 		{
-			const Facet& facet = (*convexHull.facetArray)[i];
-			const Plane& plane = facet.GetSurfacePlane(convexHull);
-			
-			Vector rayDirection = pointB - pointA;
-			double lambda = 0.0;
-			if(plane.RayCast(pointA, rayDirection, lambda) && lambda <= 1.0)
-			{
-				Vector point = pointA + rayDirection * lambda;
-				if (convexHull.ContainsPoint(point, eps))
-					return true;
-			}
+			Vector point = pointA + rayDirection * lambda;
+			if (this->ContainsPoint(point, eps))
+				return true;
 		}
 	}
 
@@ -575,13 +582,31 @@ bool ConvexHull::OverlapsWith(const ConvexHull& convexHull, double eps /*= FRUMP
 	if (convexHull.AnyPointInGivenConvexHull(*this, eps))
 		return true;
 
-	// TODO: There appears to be a bug somewhere around this point.
-
-	if (this->AnyEdgeStraddlesGivenConvexHull(convexHull, eps))
+	if (this->AnyEdgeHitsGivenConvexHull(convexHull, eps))
 		return true;
 
-	if (convexHull.AnyEdgeStraddlesGivenConvexHull(*this, eps))
+	if (convexHull.AnyEdgeHitsGivenConvexHull(*this, eps))
 		return true;
+
+	return false;
+}
+
+bool ConvexHull::OverlapsWith(const Triangle& triangle, double eps /*= FRUMPY_EPS*/) const
+{
+	for (int i = 0; i < 3; i++)
+		if (this->ContainsPoint(triangle.vertex[i]))
+			return true;
+
+	for (int i = 0; i < 3; i++)
+	{
+		int j = (i + 1) % 3;
+
+		const Vector& pointA = triangle.vertex[i];
+		const Vector& pointB = triangle.vertex[j];
+
+		if (this->LineSegmentHitsHull(pointA, pointB, eps))
+			return true;
+	}
 
 	return false;
 }

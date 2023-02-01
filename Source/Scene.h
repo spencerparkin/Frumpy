@@ -35,7 +35,7 @@ namespace Frumpy
 
 			virtual void CalculateWorldTransform(const Matrix& parentToWorld) const;
 			virtual bool IntersectsFrustum(const ConvexHull& frustumHull, const Matrix& worldToCamera) const;
-			virtual void Render(Renderer& renderer) const;
+			virtual void Render(Renderer& renderer, const Camera* camera) const;
 
 			enum RenderType
 			{

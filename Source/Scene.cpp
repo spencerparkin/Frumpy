@@ -98,7 +98,7 @@ bool Scene::Object::GetRenderFlag(RenderFlag renderFlag) const
 	}
 }
 
-/*virtual*/ void Scene::Object::Render(Renderer& renderer) const
+/*virtual*/ void Scene::Object::Render(Renderer& renderer, const Camera* camera) const
 {
 	// This method must be overridden for anything to actually get rendered.
 }

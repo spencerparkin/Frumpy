@@ -12,6 +12,7 @@ namespace Frumpy
 {
 	class Mesh;
 	class Frustum;
+	class Triangle;
 
 	class FRUMPY_API ConvexHull
 	{
@@ -36,18 +37,20 @@ namespace Frumpy
 		Mesh* Generate(void) const;
 		void Transform(const Matrix& transformMatrix);
 		bool OverlapsWith(const ConvexHull& convexHull, double eps = FRUMPY_EPS) const;
+		bool OverlapsWith(const Triangle& triangle, double eps = FRUMPY_EPS) const;
 		bool ContainsPoint(const Vector& point, double eps = FRUMPY_EPS) const;
 		bool AddPoint(const Vector& point, double eps = FRUMPY_EPS);		// Return value indicates whether the hull expanded.
 		const Vector& GetPoint(int i) const;
 		Vector CalcCenter() const;
 		void CompressFacets();
 		void RegenerateEdgeSetIfNecessary() const;
+		bool LineSegmentHitsHull(const Vector& pointA, const Vector& pointB, double eps = FRUMPY_EPS) const;
 
 	private:
 
 		bool FindInitialTetrahedron(const List<Vector>& pointCloudList);
 		bool AnyPointInGivenConvexHull(const ConvexHull& convexHull, double eps) const;
-		bool AnyEdgeStraddlesGivenConvexHull(const ConvexHull& convexHull, double eps) const;
+		bool AnyEdgeHitsGivenConvexHull(const ConvexHull& convexHull, double eps) const;
 
 		struct Facet	// Always a convex polygon with non-zero area.
 		{

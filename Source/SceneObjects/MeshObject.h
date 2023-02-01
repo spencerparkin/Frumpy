@@ -8,6 +8,7 @@ namespace Frumpy
 {
 	class Mesh;
 	class Image;
+	class Camera;
 
 	class FRUMPY_API MeshObject : public Scene::Object
 	{
@@ -16,7 +17,7 @@ namespace Frumpy
 		virtual ~MeshObject();
 
 		virtual bool IntersectsFrustum(const ConvexHull& frustumHull, const Matrix& worldToCamera) const override;
-		virtual void Render(Renderer& renderer) const override;
+		virtual void Render(Renderer& renderer, const Camera* camera) const override;
 
 		void SetMesh(Mesh* mesh) { this->mesh = mesh; }
 		Mesh* GetMesh() { return this->mesh; }
