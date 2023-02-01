@@ -132,7 +132,7 @@ bool ConvexHull::Generate(Polyhedron polyhedron, double uniformScale)
 	for (List<Vector>::Node* node = vertexList.GetHead(); node; node = node->GetNext())
 		node->value.Scale(uniformScale);
 
-	return this->Generate(vertexList, true);
+	return this->Generate(vertexList, false);
 }
 
 Mesh* ConvexHull::Generate(void) const
