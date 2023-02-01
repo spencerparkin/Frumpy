@@ -558,7 +558,7 @@ bool ConvexHull::AnyEdgeStraddlesGivenConvexHull(const ConvexHull& convexHull, d
 			if(plane.RayCast(pointA, rayDirection, lambda) && lambda <= 1.0)
 			{
 				Vector point = pointA + rayDirection * lambda;
-				if (this->ContainsPoint(point, eps))
+				if (convexHull.ContainsPoint(point, eps))
 					return true;
 			}
 		}
