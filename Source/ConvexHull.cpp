@@ -132,7 +132,7 @@ bool ConvexHull::Generate(Polyhedron polyhedron, double uniformScale)
 	for (List<Vector>::Node* node = vertexList.GetHead(); node; node = node->GetNext())
 		node->value.Scale(uniformScale);
 
-	return this->Generate(vertexList);
+	return this->Generate(vertexList, true);
 }
 
 Mesh* ConvexHull::Generate(void) const
@@ -218,7 +218,7 @@ void ConvexHull::CompressFacets()
 	}
 }
 
-bool ConvexHull::CompressFacetPair(Facet& facetA, Facet& facetB, Facet& compressedFacet)
+bool ConvexHull::CompressFacetPair(const Facet& facetA, const Facet& facetB, Facet& compressedFacet)
 {
 	const Plane& planeA = facetA.GetSurfacePlane(*this);
 	const Plane& planeB = facetB.GetSurfacePlane(*this);
@@ -234,58 +234,50 @@ bool ConvexHull::CompressFacetPair(Facet& facetA, Facet& facetB, Facet& compress
 	if (!commonPointFound)
 		return false;
 
-	for (int i = 0; i < (signed)facetA.pointArray.size(); i++)
-	{
-		int j = (i + 1) % facetA.pointArray.size();
-		int k = (i + 2) % facetA.pointArray.size();
+	int j = -1;
+	for (int i = 0; i < (signed)facetA.pointArray.size() && j < 0; i++)
+		if (facetB.FindPoint(facetA.pointArray[i]) < 0)
+			j = i;
 
-		int other_j = facetB.FindPoint(facetA.pointArray[j]);
-
-		if (facetB.FindPoint(facetA.pointArray[i]) >= 0 && other_j >= 0 && facetB.FindPoint(facetA.pointArray[k]) >= 0)
-		{
-			facetA.pointArray.erase(facetA.pointArray.begin() + j);
-			facetB.pointArray.erase(facetB.pointArray.begin() + other_j);
-			i--;
-		}
-	}
+	if (j < 0)
+		return false;
 
 	compressedFacet.pointArray.clear();
 	char facetBeingWalked = 'A';
-	int i = 0;
-	for(int count = 0; count < (signed)(facetA.pointArray.size() + facetB.pointArray.size()) - 2; count++)
+	
+	for(int i = 0; i < (signed)(facetA.pointArray.size() + facetB.pointArray.size()) - 2; i++)
 	{
 		int point = -1;
 		if (facetBeingWalked == 'A')
-			point = facetA.pointArray[i];
+			point = facetA.pointArray[j];
 		else if (facetBeingWalked == 'B')
-			point = facetB.pointArray[i];
+			point = facetB.pointArray[j];
 
 		compressedFacet.pointArray.push_back(point);
 
 		if (facetBeingWalked == 'A')
 		{
-			int j = facetB.FindPoint(point);
-			if (j >= 0)
+			int k = facetB.FindPoint(point);
+			if (k >= 0)
 			{
 				facetBeingWalked = 'B';
-				i = j;
+				j = k;
 			}
 		}
 		else if (facetBeingWalked == 'B')
 		{
-			facetBeingWalked = 'A';
-			int j = facetA.FindPoint(point);
-			if (j >= 0)
+			int k = facetA.FindPoint(point);
+			if (k >= 0)
 			{
 				facetBeingWalked = 'A';
-				i = j;
+				j = k;
 			}
 		}
 
 		if (facetBeingWalked == 'A')
-			i = (i + 1) % facetA.pointArray.size();
+			j = (j + 1) % facetA.pointArray.size();
 		else if (facetBeingWalked == 'B')
-			i = (i + 1) % facetB.pointArray.size();
+			j = (j + 1) % facetB.pointArray.size();
 	}
 
 	compressedFacet.cachedPlane = planeA;

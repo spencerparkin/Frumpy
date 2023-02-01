@@ -62,7 +62,7 @@ namespace Frumpy
 			int FindPoint(int i) const;
 		};
 		
-		bool CompressFacetPair(Facet& facetA, Facet& facetB, Facet& compressedFacet);
+		bool CompressFacetPair(const Facet& facetA, const Facet& facetB, Facet& compressedFacet);
 
 		std::vector<Vector>* pointArray;  // No 3 points should ever by co-linear.
 		std::vector<Facet>* facetArray;
