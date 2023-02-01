@@ -34,7 +34,7 @@ namespace Frumpy
 		bool Generate(Polyhedron polyhedron, double uniformScale);
 		Mesh* Generate(void) const;
 		void Transform(const Matrix& transformMatrix);
-		bool OverlapsWith(const ConvexHull& convexHull) const;
+		bool OverlapsWith(const ConvexHull& convexHull, double eps = FRUMPY_EPS) const;
 		bool ContainsPoint(const Vector& point, double eps = FRUMPY_EPS) const;
 		bool AddPoint(const Vector& point, double eps = FRUMPY_EPS);		// Return value indicates whether the hull expanded.
 		const Vector& GetPoint(int i) const;
@@ -44,8 +44,8 @@ namespace Frumpy
 	private:
 
 		bool FindInitialTetrahedron(const List<Vector>& pointCloudList);
-		bool AnyPointInGivenConvexHull(const ConvexHull& convexHull) const;
-		bool AnyEdgeStraddlesGivenConvexHull(const ConvexHull& convexHull) const;
+		bool AnyPointInGivenConvexHull(const ConvexHull& convexHull, double eps) const;
+		bool AnyEdgeStraddlesGivenConvexHull(const ConvexHull& convexHull, double eps) const;
 
 		struct Facet	// Always a convex polygon with non-zero area.
 		{

@@ -515,16 +515,16 @@ void ConvexHull::Transform(const Matrix& transformMatrix)
 	}
 }
 
-bool ConvexHull::AnyPointInGivenConvexHull(const ConvexHull& convexHull) const
+bool ConvexHull::AnyPointInGivenConvexHull(const ConvexHull& convexHull, double eps) const
 {
 	for (int i = 0; i < (signed)this->pointArray->size(); i++)
-		if (convexHull.ContainsPoint((*this->pointArray)[i]))
+		if (convexHull.ContainsPoint((*this->pointArray)[i], eps))
 			return true;
 
 	return false;
 }
 
-bool ConvexHull::AnyEdgeStraddlesGivenConvexHull(const ConvexHull& convexHull) const
+bool ConvexHull::AnyEdgeStraddlesGivenConvexHull(const ConvexHull& convexHull, double eps) const
 {
 	this->RegenerateEdgeSetIfNecessary();
 
@@ -537,28 +537,33 @@ bool ConvexHull::AnyEdgeStraddlesGivenConvexHull(const ConvexHull& convexHull) c
 		{
 			const Facet& facet = (*convexHull.facetArray)[i];
 			const Plane& plane = facet.GetSurfacePlane(convexHull);
-			double distanceA = plane.SignedDistanceToPoint(pointA);
-			double distanceB = plane.SignedDistanceToPoint(pointB);
-			if (FRUMPY_SIGN(distanceA) != FRUMPY_SIGN(distanceB))
-				return true;
+			
+			Vector rayDirection = pointB - pointA;
+			double lambda = 0.0;
+			if(plane.RayCast(pointA, rayDirection, lambda) && lambda <= 1.0)
+			{
+				Vector point = pointA + rayDirection * lambda;
+				if (this->ContainsPoint(point, eps))
+					return true;
+			}
 		}
 	}
 
 	return false;
 }
 
-bool ConvexHull::OverlapsWith(const ConvexHull& convexHull) const
+bool ConvexHull::OverlapsWith(const ConvexHull& convexHull, double eps /*= FRUMPY_EPS*/) const
 {
-	if (this->AnyPointInGivenConvexHull(convexHull))
+	if (this->AnyPointInGivenConvexHull(convexHull, eps))
 		return true;
 
-	if (convexHull.AnyPointInGivenConvexHull(*this))
+	if (convexHull.AnyPointInGivenConvexHull(*this, eps))
 		return true;
 
-	if (this->AnyEdgeStraddlesGivenConvexHull(convexHull))
+	if (this->AnyEdgeStraddlesGivenConvexHull(convexHull, eps))
 		return true;
 
-	if (convexHull.AnyEdgeStraddlesGivenConvexHull(*this))
+	if (convexHull.AnyEdgeStraddlesGivenConvexHull(*this, eps))
 		return true;
 
 	return false;

@@ -41,6 +41,9 @@ namespace Frumpy
 
 		bool IsEqualTo(const Vector& vector, double eps = FRUMPY_EPS) const;
 
+		void Lerp(const Vector& vectorA, const Vector& vectorB, double alpha);
+		void Slerp(const Vector& vectorA, const Vector& vectorB, double alpha);
+
 		double x, y, z;
 	};
 

@@ -202,6 +202,16 @@ bool Vector::Rotation(const Vector& vector, const Vector& axis, double angle)
 	return true;
 }
 
+void Vector::Lerp(const Vector& vectorA, const Vector& vectorB, double alpha)
+{
+	*this = vectorA * (1.0 - alpha) + vectorB * alpha;
+}
+
+void Vector::Slerp(const Vector& vectorA, const Vector& vectorB, double alpha)
+{
+	//...
+}
+
 namespace Frumpy
 {
 	Vector operator+(const Vector& leftVector, const Vector& rightVector)
