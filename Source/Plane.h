@@ -22,6 +22,7 @@ namespace Frumpy
 		bool ContainsPoint(const Vector& point, double planeThickness) const;
 		bool RayCast(const Vector& rayOrigin, const Vector& rayDirection, double& lambda) const;
 		void Transform(const Matrix& transformMatrix, bool isRigidBodyTransform);
+		bool IsEqualTo(const Plane& plane, double eps = FRUMPY_EPS) const;
 
 		Vector unitNormal;
 		double distance;

@@ -192,7 +192,105 @@ bool ConvexHull::Generate(const List<Vector>& pointCloudList, bool compressFacet
 
 void ConvexHull::CompressFacets()
 {
-	//...
+	// This algorithm isn't very efficient, because it possibly repeats a lot of work unecessarily, but it will work.
+	bool compressed = true;
+	while (compressed)
+	{
+		compressed = false;
+		for (int i = 0; i < (signed)this->facetArray->size() && !compressed; i++)
+		{
+			Facet& facetA = (*this->facetArray)[i];
+			for (int j = i + 1; j < (signed)this->facetArray->size() && !compressed; j++)
+			{
+				Facet& facetB = (*this->facetArray)[j];
+				Facet compressedFacet;
+				if (this->CompressFacetPair(facetA, facetB, compressedFacet))
+				{
+					// Note that the compressed facet might be a concave polygon,
+					// but all facets should be convex when the algorithm terminates.
+					this->facetArray->erase(this->facetArray->begin() + i);
+					this->facetArray->erase(this->facetArray->begin() + j);
+					this->facetArray->push_back(compressedFacet);
+					compressed = true;
+				}
+			}
+		}
+	}
+}
+
+bool ConvexHull::CompressFacetPair(Facet& facetA, Facet& facetB, Facet& compressedFacet)
+{
+	const Plane& planeA = facetA.GetSurfacePlane(*this);
+	const Plane& planeB = facetB.GetSurfacePlane(*this);
+
+	if (!planeA.IsEqualTo(planeB))
+		return false;
+
+	bool commonPointFound = false;
+	for (int i = 0; i < (signed)facetA.pointArray.size() && !commonPointFound; i++)
+		if (facetB.FindPoint(facetA.pointArray[i]) >= 0)
+			commonPointFound = true;
+
+	if (!commonPointFound)
+		return false;
+
+	for (int i = 0; i < (signed)facetA.pointArray.size(); i++)
+	{
+		int j = (i + 1) % facetA.pointArray.size();
+		int k = (i + 2) % facetA.pointArray.size();
+
+		int other_j = facetB.FindPoint(facetA.pointArray[j]);
+
+		if (facetB.FindPoint(facetA.pointArray[i]) >= 0 && other_j >= 0 && facetB.FindPoint(facetA.pointArray[k]) >= 0)
+		{
+			facetA.pointArray.erase(facetA.pointArray.begin() + j);
+			facetB.pointArray.erase(facetB.pointArray.begin() + other_j);
+			i--;
+		}
+	}
+
+	compressedFacet.pointArray.clear();
+	char facetBeingWalked = 'A';
+	int i = 0;
+	for(int count = 0; count < (signed)(facetA.pointArray.size() + facetB.pointArray.size()) - 2; count++)
+	{
+		int point = -1;
+		if (facetBeingWalked == 'A')
+			point = facetA.pointArray[i];
+		else if (facetBeingWalked == 'B')
+			point = facetB.pointArray[i];
+
+		compressedFacet.pointArray.push_back(point);
+
+		if (facetBeingWalked == 'A')
+		{
+			int j = facetB.FindPoint(point);
+			if (j >= 0)
+			{
+				facetBeingWalked = 'B';
+				i = j;
+			}
+		}
+		else if (facetBeingWalked == 'B')
+		{
+			facetBeingWalked = 'A';
+			int j = facetA.FindPoint(point);
+			if (j >= 0)
+			{
+				facetBeingWalked = 'A';
+				i = j;
+			}
+		}
+
+		if (facetBeingWalked == 'A')
+			i = (i + 1) % facetA.pointArray.size();
+		else if (facetBeingWalked == 'B')
+			i = (i + 1) % facetB.pointArray.size();
+	}
+
+	compressedFacet.cachedPlane = planeA;
+	compressedFacet.cachedPlaneValid = true;
+	return true;
 }
 
 bool ConvexHull::AddPoint(const Vector& point, double eps /*= FRUMPY_EPS*/)
@@ -402,7 +500,7 @@ bool ConvexHull::Generate(const AxisAlignedBoundingBox& aabb)
 	return this->Generate(pointList);
 }
 
-void ConvexHull::Transform(const Matrix& transformMatrix, bool isRigidBodyTransform)
+void ConvexHull::Transform(const Matrix& transformMatrix)
 {
 	for (int i = 0; i < (signed)this->pointArray->size(); i++)
 	{
@@ -630,4 +728,13 @@ bool ConvexHull::Facet::Tessellate(const ConvexHull& convexHull, unsigned int*& 
 	}
 
 	return true;
+}
+
+int ConvexHull::Facet::FindPoint(int i) const
+{
+	for (int j = 0; j < (signed)this->pointArray.size(); j++)
+		if (this->pointArray[j] == i)
+			return j;
+
+	return -1;
 }

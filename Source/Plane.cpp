@@ -21,6 +21,17 @@ Plane::Plane(const Vector& point, const Vector& normal)
 {
 }
 
+bool Plane::IsEqualTo(const Plane& plane, double eps /*= FRUMPY_EPS*/) const
+{
+	if (fabs(this->distance - plane.distance) >= eps)
+		return false;
+
+	if (!this->unitNormal.IsEqualTo(plane.unitNormal, eps))
+		return false;
+
+	return true;
+}
+
 bool Plane::SetFromPointAndVector(const Vector& point, const Vector& normal)
 {
 	this->unitNormal = normal;

@@ -39,7 +39,7 @@ namespace Frumpy
 		bool Rejection(const Vector& vectorA, const Vector& vectorB);
 		bool Rotation(const Vector& vector, const Vector& axis, double angle);
 
-		bool IsEqualTo(const Vector& vector, double eps = 1e-4) const;
+		bool IsEqualTo(const Vector& vector, double eps = FRUMPY_EPS) const;
 
 		double x, y, z;
 	};

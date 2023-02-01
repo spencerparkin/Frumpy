@@ -33,7 +33,7 @@ namespace Frumpy
 		bool Generate(const AxisAlignedBoundingBox& aabb);
 		bool Generate(Polyhedron polyhedron, double uniformScale);
 		Mesh* Generate(void) const;
-		void Transform(const Matrix& transformMatrix, bool isRigidBodyTransform);
+		void Transform(const Matrix& transformMatrix);
 		bool OverlapsWith(const ConvexHull& convexHull) const;
 		bool ContainsPoint(const Vector& point, double eps = FRUMPY_EPS) const;
 		bool AddPoint(const Vector& point, double eps = FRUMPY_EPS);		// Return value indicates whether the hull expanded.
@@ -59,8 +59,11 @@ namespace Frumpy
 			const Plane& GetSurfacePlane(const ConvexHull& convexHull) const;
 			bool IsCanceledBy(const Facet& facet) const;
 			bool Tessellate(const ConvexHull& convexHull, unsigned int*& triangleBuffer) const;
+			int FindPoint(int i) const;
 		};
 		
+		bool CompressFacetPair(Facet& facetA, Facet& facetB, Facet& compressedFacet);
+
 		std::vector<Vector>* pointArray;  // No 3 points should ever by co-linear.
 		std::vector<Facet>* facetArray;
 
