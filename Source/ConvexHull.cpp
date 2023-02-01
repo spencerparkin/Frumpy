@@ -208,8 +208,8 @@ void ConvexHull::CompressFacets()
 				{
 					// Note that the compressed facet might be a concave polygon,
 					// but all facets should be convex when the algorithm terminates.
+					this->facetArray->erase(this->facetArray->begin() + j);		// Must do j before i so that i is not invalidated.
 					this->facetArray->erase(this->facetArray->begin() + i);
-					this->facetArray->erase(this->facetArray->begin() + j);
 					this->facetArray->push_back(compressedFacet);
 					compressed = true;
 				}
@@ -223,29 +223,38 @@ bool ConvexHull::CompressFacetPair(const Facet& facetA, const Facet& facetB, Fac
 	const Plane& planeA = facetA.GetSurfacePlane(*this);
 	const Plane& planeB = facetB.GetSurfacePlane(*this);
 
-	if (!planeA.IsEqualTo(planeB))
+	if (!planeA.IsEqualTo(planeB, FRUMPY_EPS))
 		return false;
 
-	bool commonPointFound = false;
-	for (int i = 0; i < (signed)facetA.pointArray.size() && !commonPointFound; i++)
+	int commonPointCount = 0;
+	for (int i = 0; i < (signed)facetA.pointArray.size(); i++)
 		if (facetB.FindPoint(facetA.pointArray[i]) >= 0)
-			commonPointFound = true;
+			commonPointCount++;
 
-	if (!commonPointFound)
+	if (commonPointCount == 0)
 		return false;
 
+	char facetBeingWalked = 'A';
 	int j = -1;
 	for (int i = 0; i < (signed)facetA.pointArray.size() && j < 0; i++)
 		if (facetB.FindPoint(facetA.pointArray[i]) < 0)
 			j = i;
 
 	if (j < 0)
-		return false;
+	{
+		facetBeingWalked = 'B';
+		for (int i = 0; i < (signed)facetB.pointArray.size() && j < 0; i++)
+			if (facetA.FindPoint(facetB.pointArray[i]) < 0)
+				j = i;
+
+		if (j < 0)
+			return false;
+	}
 
 	compressedFacet.pointArray.clear();
-	char facetBeingWalked = 'A';
 	
-	for(int i = 0; i < (signed)(facetA.pointArray.size() + facetB.pointArray.size()) - 2; i++)
+	int mergedPointCount = (signed)(facetA.pointArray.size() + facetB.pointArray.size()) - 2 * commonPointCount + 2;
+	for(int i = 0; i < mergedPointCount; i++)
 	{
 		int point = -1;
 		if (facetBeingWalked == 'A')
@@ -720,7 +729,7 @@ bool ConvexHull::Facet::Tessellate(const ConvexHull& convexHull, unsigned int*& 
 			subFacet.pointArray.push_back(this->pointArray[j]);
 			j = (j + 1) % this->pointArray.size();
 		}
-
+		subFacet.pointArray.push_back(this->pointArray[j]);
 		subFacet.Tessellate(convexHull, triangleBuffer);
 	}
 
