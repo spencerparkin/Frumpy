@@ -1,4 +1,5 @@
 #include "Image.h"
+#include "Math/Vector4.h"
 #include "Math/Vector3.h"
 #include <string.h>
 #include <math.h>
@@ -60,13 +61,14 @@ uint32_t Image::MakeColor(unsigned int r, unsigned int g, unsigned int b, unsign
 	return (r << this->format.rShift) | (g << this->format.gShift) | (b << this->format.bShift) | (a << this->format.aShift);
 }
 
-uint32_t Image::MakeColor(const Vector3& colorVector) const
+uint32_t Image::MakeColor(const Vector4& colorVector) const
 {
-	unsigned int r = FRUMPY_CLAMP((unsigned int)(colorVector.x * 255.0), 0, 255);
-	unsigned int g = FRUMPY_CLAMP((unsigned int)(colorVector.y * 255.0), 0, 255);
-	unsigned int b = FRUMPY_CLAMP((unsigned int)(colorVector.z * 255.0), 0, 255);
+	unsigned int r = FRUMPY_CLAMP((unsigned int)(colorVector.r * 255.0), 0, 255);
+	unsigned int g = FRUMPY_CLAMP((unsigned int)(colorVector.g * 255.0), 0, 255);
+	unsigned int b = FRUMPY_CLAMP((unsigned int)(colorVector.b * 255.0), 0, 255);
+	unsigned int a = FRUMPY_CLAMP((unsigned int)(colorVector.a * 255.0), 0, 255);
 
-	return this->MakeColor(r, g, b, 0);
+	return this->MakeColor(r, g, b, a);
 }
 
 void Image::SetWidthAndHeight(unsigned int width, unsigned int height)
@@ -146,7 +148,7 @@ float Image::SampleDepth(double uCoord, double vCoord) const
 	return pixel->depth;
 }
 
-void Image::SampleColorVector(Vector3& colorVector, const Vector3& texCoords, SampleMethod sampleMethod) const
+void Image::SampleColorVector(Vector4& colorVector, const Vector3& texCoords, SampleMethod sampleMethod) const
 {
 	double approxRow = texCoords.y * double(this->height);
 	double approxCol = texCoords.x * double(this->width);
@@ -177,7 +179,7 @@ void Image::SampleColorVector(Vector3& colorVector, const Vector3& texCoords, Sa
 			unsigned int minColInt = unsigned int(minCol) % this->width;
 			unsigned int maxColInt = unsigned int(maxCol) % this->width;
 
-			Vector3 color00, color01, color10, color11;
+			Vector4 color00, color01, color10, color11;
 
 			this->SampleColorVector(color00, Location{ minRowInt, minColInt });
 			this->SampleColorVector(color01, Location{ minRowInt, maxColInt });
@@ -194,19 +196,20 @@ void Image::SampleColorVector(Vector3& colorVector, const Vector3& texCoords, Sa
 		}
 		default:
 		{
-			colorVector.SetComponents(1.0, 1.0, 1.0);
+			colorVector.SetComponents(1.0, 1.0, 1.0, 0.0);
 			break;
 		}
 	}
 }
 
-void Image::SampleColorVector(Vector3& colorVector, const Location& location) const
+void Image::SampleColorVector(Vector4& colorVector, const Location& location) const
 {
 	const Pixel* pixel = this->GetPixel(location);
 
-	colorVector.x = double((pixel->color & (0xFF << this->format.rShift)) >> this->format.rShift) / 255.0;
-	colorVector.y = double((pixel->color & (0xFF << this->format.gShift)) >> this->format.gShift) / 255.0;
-	colorVector.z = double((pixel->color & (0xFF << this->format.bShift)) >> this->format.bShift) / 255.0;
+	colorVector.r = double((pixel->color & (0xFF << this->format.rShift)) >> this->format.rShift) / 255.0;
+	colorVector.g = double((pixel->color & (0xFF << this->format.gShift)) >> this->format.gShift) / 255.0;
+	colorVector.b = double((pixel->color & (0xFF << this->format.bShift)) >> this->format.bShift) / 255.0;
+	colorVector.a = double((pixel->color & (0xFF << this->format.aShift)) >> this->format.aShift) / 255.0;
 }
 
 void Image::CalcImageMatrix(Matrix4x4& imageMatrix) const
@@ -218,22 +221,24 @@ void Image::CalcImageMatrix(Matrix4x4& imageMatrix) const
 	imageMatrix.ele[1][3] = double(this->height) / 2.0;
 }
 
-void Image::Pixel::GetColorComponents(uint32_t& r, uint32_t& g, uint32_t& b, const Image* image) const
+void Image::Pixel::GetColorComponents(uint32_t& r, uint32_t& g, uint32_t& b, uint32_t& a, const Image* image) const
 {
 	r = (this->color & (0xFF << image->format.rShift)) >> image->format.rShift;
 	g = (this->color & (0xFF << image->format.gShift)) >> image->format.gShift;
 	b = (this->color & (0xFF << image->format.bShift)) >> image->format.bShift;
+	a = (this->color & (0xFF << image->format.aShift)) >> image->format.aShift;
 }
 
-void Image::Pixel::MakeColorVector(Vector3& colorVector, const Image* image) const
+void Image::Pixel::MakeColorVector(Vector4& colorVector, const Image* image) const
 {
-	uint32_t r, g, b;
+	uint32_t r, g, b, a;
 
-	this->GetColorComponents(r, g, b, image);
+	this->GetColorComponents(r, g, b, a, image);
 
-	colorVector.x = double(r) / 255.0;
-	colorVector.y = double(g) / 255.0;
-	colorVector.z = double(b) / 255.0;
+	colorVector.r = double(r) / 255.0;
+	colorVector.g = double(g) / 255.0;
+	colorVector.b = double(b) / 255.0;
+	colorVector.a = double(a) / 255.0;
 }
 
 void Image::ConvertDepthToGreyScale(float depthIgnore)

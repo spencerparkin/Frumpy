@@ -12,7 +12,7 @@ namespace Frumpy
 		virtual ~SpotLight();
 
 		virtual void PrepareForRender(const GraphicsMatrices& graphicsMatrices) const override;
-		virtual void CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector3& surfaceColor, const Image* shadowBuffer) const override;
+		virtual void CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector4& surfaceColor, const Image* shadowBuffer) const override;
 		virtual bool CalcShadowCamera(Camera& shadowCamera) const override;
 
 		Frumpy::Vector3 worldSpaceLocation;

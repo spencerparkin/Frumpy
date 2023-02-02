@@ -74,8 +74,8 @@ namespace Frumpy
 				float depth;
 			};
 
-			void GetColorComponents(uint32_t& r, uint32_t& g, uint32_t& b, const Image* image) const;
-			void MakeColorVector(Vector3& colorVector, const Image* image) const;
+			void GetColorComponents(uint32_t& r, uint32_t& g, uint32_t& b, uint32_t& a, const Image* image) const;
+			void MakeColorVector(Vector4& colorVector, const Image* image) const;
 		};
 
 		void Clear(const Pixel& pixel);
@@ -94,7 +94,7 @@ namespace Frumpy
 		bool SetPixel(const Location& location, uint32_t color);
 
 		uint32_t MakeColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a) const;
-		uint32_t MakeColor(const Vector3& colorVector) const;
+		uint32_t MakeColor(const Vector4& colorVector) const;
 
 		Pixel* GetPixel(unsigned int i)
 		{
@@ -107,8 +107,8 @@ namespace Frumpy
 			BILINEAR
 		};
 
-		void SampleColorVector(Vector3& colorVector, const Vector3& texCoords, SampleMethod sampleMethod) const;
-		void SampleColorVector(Vector3& colorVector, const Location& location) const;
+		void SampleColorVector(Vector4& colorVector, const Vector3& texCoords, SampleMethod sampleMethod) const;
+		void SampleColorVector(Vector4& colorVector, const Location& location) const;
 
 		float SampleDepth(double uCoord, double vCoord) const;
 

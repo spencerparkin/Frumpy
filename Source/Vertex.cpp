@@ -24,9 +24,10 @@ std::string Vertex::MakeKey() const
 		this->texCoords.x << "|" <<
 		this->texCoords.y << "|" <<
 		this->texCoords.z << "|" <<
-		this->color.x << "|" <<
-		this->color.y << "|" <<
-		this->color.z;
+		this->color.r << "|" <<
+		this->color.g << "|" <<
+		this->color.b << "|" <<
+		this->color.a;
 	std::string key = stringStream.str();
 	return key;
 }

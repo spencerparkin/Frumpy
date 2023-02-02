@@ -148,7 +148,7 @@ void Renderer::RenderScene(const Scene* scene, const Camera* camera)
 	for (Scene::ObjectList::Node* node = visibleObjectList.GetHead(); node; node = node->GetNext())
 	{
 		const Scene::Object* object = node->value;
-		if (object->renderType == Scene::Object::RenderType::RENDER_OPAQUE)
+		if (!object->GetRenderFlag(Scene::Object::RenderFlag::HAS_TRANSLUCENCY))
 			object->Render(*this, camera);
 	}
 	
@@ -159,7 +159,7 @@ void Renderer::RenderScene(const Scene* scene, const Camera* camera)
 	for (Scene::ObjectList::Node* node = visibleObjectList.GetHead(); node; node = node->GetNext())
 	{
 		const Scene::Object* object = node->value;
-		if (object->renderType == Scene::Object::RenderType::RENDER_TRANSPARENT)
+		if (object->GetRenderFlag(Scene::Object::RenderFlag::HAS_TRANSLUCENCY))
 			object->Render(*this, camera);
 	}
 	
@@ -237,6 +237,7 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 	this->texture = nullptr;
 	this->sampleMethod = Image::SampleMethod::NEAREST;
 	this->canBeShadowed = false;
+	this->isLit = true;
 }
 
 /*virtual*/ Renderer::TriangleRenderJob::~TriangleRenderJob()
@@ -481,11 +482,33 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 
 			surfaceProperties.cameraSpaceNormal.Normalize();
 
-			Vector3 surfaceColor;
-			thread->renderer->lightSource->CalcSurfaceColor(surfaceProperties, surfaceColor, this->canBeShadowed ? thread->renderer->shadowBuffer : nullptr);
+			Vector4 surfaceColor;
 
-			// TODO: Support alpha blending.  We'll have to do an opaque pass then an alpha pass.
-			uint32_t color = frameBuffer->MakeColor(surfaceColor);
+			if (this->isLit)
+				thread->renderer->lightSource->CalcSurfaceColor(surfaceProperties, surfaceColor, this->canBeShadowed ? thread->renderer->shadowBuffer : nullptr);
+			else
+				surfaceColor = surfaceProperties.diffuseColor;
+
+			uint32_t color = 0;
+
+			if (thread->renderer->renderPass == RenderPass::TRANSPARENT_PASS)
+			{
+				Vector4 existingColor;
+				frameBuffer->GetPixel(location)->MakeColorVector(existingColor, frameBuffer);
+
+				Vector4 blentColor;
+				blentColor.r = existingColor.r * (1.0 - surfaceColor.a) + surfaceColor.r * surfaceColor.a;
+				blentColor.g = existingColor.g * (1.0 - surfaceColor.a) + surfaceColor.g * surfaceColor.a;
+				blentColor.b = existingColor.b * (1.0 - surfaceColor.a) + surfaceColor.b * surfaceColor.a;
+				blentColor.a = 0.0;
+
+				color = frameBuffer->MakeColor(blentColor);
+			}
+			else
+			{
+				color = frameBuffer->MakeColor(surfaceColor);
+			}
+
 			frameBuffer->SetPixel(location, color);
 		}
 	}

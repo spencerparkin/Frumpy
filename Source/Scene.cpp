@@ -52,6 +52,8 @@ void Scene::GenerateVisibleObjectsList(const Camera* camera, ObjectList& visible
 	// Go determine the list of objects visible to the viewing frustum of the given camera.  This, of
 	// course, does not account for any kind of occlusion that may be taking place.  The depth buffer will
 	// take care of any occlusion, so we're not able to necessarily skip anything fully occluded here.
+	// Note that in the future, some sort of spatial partitioning data-structure may be helpful here, such
+	// as a binary-space partition tree.
 	const ConvexHull& frustumHull = camera->frustum.GetFrustumHull();
 	const_cast<Scene*>(this)->ForAllObjects([&visibleObjectList, &frustumHull, &worldToCamera](Object* object) -> bool {
 		if (object->GetRenderFlag(Object::VISIBLE) && object->IntersectsFrustum(frustumHull, worldToCamera))
@@ -63,8 +65,7 @@ void Scene::GenerateVisibleObjectsList(const Camera* camera, ObjectList& visible
 Scene::Object::Object()
 {
 	this->name[0] = '\0';
-	this->renderType = RenderType::RENDER_OPAQUE;
-	this->renderFlags = RenderFlag::VISIBLE;
+	this->renderFlags = RenderFlag::VISIBLE | RenderFlag::IS_LIT;
 }
 
 /*virtual*/ Scene::Object::~Object()

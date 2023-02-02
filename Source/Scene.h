@@ -37,17 +37,13 @@ namespace Frumpy
 			virtual bool IntersectsFrustum(const ConvexHull& frustumHull, const Matrix4x4& worldToCamera) const;
 			virtual void Render(Renderer& renderer, const Camera* camera) const;
 
-			enum RenderType
-			{
-				RENDER_OPAQUE,
-				RENDER_TRANSPARENT
-			};
-
 			enum RenderFlag
 			{
-				VISIBLE			= 0x00000001,
-				CASTS_SHADOW	= 0x00000002,
-				CAN_BE_SHADOWED	= 0x00000004
+				VISIBLE				= 0x00000001,
+				CASTS_SHADOW		= 0x00000002,
+				CAN_BE_SHADOWED		= 0x00000004,
+				HAS_TRANSLUCENCY	= 0x00000008,
+				IS_LIT				= 0x00000010
 			};
 
 			void SetRenderFlag(RenderFlag renderFlag, bool enabled);
@@ -57,7 +53,6 @@ namespace Frumpy
 			Matrix4x4 childToParent;
 			mutable Matrix4x4 objectToWorld;
 			ObjectList childObjectList;
-			RenderType renderType;
 			uint32_t renderFlags;
 		};
 

@@ -163,9 +163,9 @@ void PPMFormat::Tokenize(FILE* file, std::vector<Token>& tokenArray, std::vector
 		for (unsigned int j = 0; j < image->GetWidth(); j++)
 		{
 			const Image::Pixel* pixel = image->GetPixel(Image::Location{ image->GetHeight() - 1 - i, j });
-			uint32_t r, g, b;
-			pixel->GetColorComponents(r, g, b, image);
-			fprintf(file, "%03d %03d %03d\t", r, g, b);
+			uint32_t r, g, b, a;
+			pixel->GetColorComponents(r, g, b, a, image);
+			fprintf(file, "%03d %03d %03d\t", r, g, b);		// TODO: Alpha support?
 		}
 
 		fprintf(file, "\n");

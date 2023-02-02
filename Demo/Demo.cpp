@@ -117,7 +117,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Teapot001")));
-    object->GetMesh()->SetColor(Frumpy::Vector3(1.0, 0.0, 0.0));
+    object->SetColor(Frumpy::Vector4(1.0, 0.0, 0.0, 0.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
@@ -128,7 +128,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Torus001")));
-    object->GetMesh()->SetColor(Frumpy::Vector3(0.0, 1.0, 0.0));
+    object->SetColor(Frumpy::Vector4(0.0, 1.0, 0.0, 0.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
     object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, -10.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
@@ -139,7 +139,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Box001")));
-    object->GetMesh()->SetColor(Frumpy::Vector3(0.0, 0.0, 1.0));
+    object->SetColor(Frumpy::Vector4(0.0, 0.0, 1.0, 0.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
     object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 10.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
@@ -150,7 +150,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Plane001")));
-    object->GetMesh()->SetColor(Frumpy::Vector3(1.0, 1.0, 1.0));
+    object->SetColor(Frumpy::Vector4(1.0, 1.0, 1.0, 0.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, false);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, true);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, true);
@@ -159,7 +159,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Tetrahedron")));
-    object->GetMesh()->SetColor(Frumpy::Vector3(1.0, 1.0, 0.0));
+    object->SetColor(Frumpy::Vector4(1.0, 1.0, 0.0, 0.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
@@ -169,7 +169,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Hexadron")));
-    object->GetMesh()->SetColor(Frumpy::Vector3(0.0, 1.0, 1.0));
+    object->SetColor(Frumpy::Vector4(0.0, 1.0, 1.0, 0.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
@@ -179,7 +179,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Octahedron")));
-    object->GetMesh()->SetColor(Frumpy::Vector3(1.0, 0.0, 1.0));
+    object->SetColor(Frumpy::Vector4(1.0, 0.0, 1.0, 0.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
@@ -189,17 +189,18 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Icosahedron")));
-    object->GetMesh()->SetColor(Frumpy::Vector3(0.0, 0.5, 1.0));
+    object->SetColor(Frumpy::Vector4(0.0, 0.5, 1.0, 0.5));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
+    object->SetRenderFlag(Frumpy::MeshObject::IS_LIT, false);
     object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
     strcpy_s(object->name, "icosahedron");
     this->scene->objectList.AddTail(object);
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Dodecahedron")));
-    object->GetMesh()->SetColor(Frumpy::Vector3(0.5, 1.0, 0.5));
+    object->SetColor(Frumpy::Vector4(0.5, 1.0, 0.5, 0.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);

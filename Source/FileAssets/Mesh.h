@@ -25,7 +25,7 @@ namespace Frumpy
 		unsigned int GetIndex(unsigned int i) const;
 		bool SetIndex(unsigned int i, unsigned int index);
 
-		void SetColor(const Vector3& color);
+		void SetColor(const Vector4& color);
 
 		Vertex* GetRawVertexBuffer() { return this->vertexBuffer; }
 		unsigned int* GetRawIndexBuffer() { return this->indexBuffer; }

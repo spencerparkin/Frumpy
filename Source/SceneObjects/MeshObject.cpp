@@ -19,6 +19,15 @@ MeshObject::MeshObject()
 {
 }
 
+void MeshObject::SetColor(const Vector4& color)
+{
+	if (this->mesh)
+	{
+		this->mesh->SetColor(color);
+		this->SetRenderFlag(RenderFlag::HAS_TRANSLUCENCY, color.a != 0.0);
+	}
+}
+
 /*virtual*/ bool MeshObject::IntersectsFrustum(const ConvexHull& frustumHull, const Matrix4x4& worldToCamera) const
 {
 	if (!this->objectSpaceBoundingHullValid)
@@ -118,6 +127,7 @@ MeshObject::MeshObject()
 		job->texture = this->texture;
 		job->sampleMethod = this->sampleMethod;
 		job->canBeShadowed = this->GetRenderFlag(Scene::Object::CAN_BE_SHADOWED);
+		job->isLit = this->GetRenderFlag(Scene::Object::IS_LIT);
 		renderer.SubmitJob(job);
 	}
 }

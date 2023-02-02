@@ -93,6 +93,7 @@ namespace Frumpy
 			const Image* texture;
 			Image::SampleMethod sampleMethod;
 			bool canBeShadowed;
+			bool isLit;
 		};
 
 		enum RenderPass

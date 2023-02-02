@@ -2,6 +2,7 @@
 
 #include "Defines.h"
 #include "Math/Vector3.h"
+#include "Math/Vector4.h"
 #include <string>
 
 namespace Frumpy
@@ -14,7 +15,7 @@ namespace Frumpy
 
 		Vector3 objectSpacePoint;
 		Vector3 objectSpaceNormal;
-		Vector3 color;
+		Vector4 color;
 		Vector3 texCoords;
 
 		mutable Vector3 cameraSpacePoint;

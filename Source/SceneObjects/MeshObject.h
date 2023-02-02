@@ -28,6 +28,8 @@ namespace Frumpy
 		void SetSampleMethod(Image::SampleMethod sampleMethod) { this->sampleMethod = sampleMethod; }
 		Image::SampleMethod GetSampleMethod() const { return this->sampleMethod; }
 
+		void SetColor(const Vector4& color);
+
 	private:
 		Mesh* mesh;
 		Image* texture;
