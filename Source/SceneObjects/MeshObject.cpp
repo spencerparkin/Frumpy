@@ -1,9 +1,9 @@
 #include "MeshObject.h"
-#include "../Renderer.h"
-#include "../FileAssets/Mesh.h"
-#include "../Triangle.h"
-#include "../Aabb.h"
-#include "../Camera.h"
+#include "Renderer.h"
+#include "FileAssets/Mesh.h"
+#include "Math/Triangle.h"
+#include "Math/Aabb.h"
+#include "Camera.h"
 
 using namespace Frumpy;
 

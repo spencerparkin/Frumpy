@@ -17,6 +17,12 @@
     <Filter Include="Source\LightSources">
       <UniqueIdentifier>{5a722af7-bc3e-4e41-8097-bacb43746e65}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Math">
+      <UniqueIdentifier>{c51a79af-58c1-4de5-b24c-e79de543e1b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Containers">
+      <UniqueIdentifier>{ae670b29-bec0-4d70-8061-7b28b39be327}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Defines.h">
@@ -25,25 +31,10 @@
     <ClInclude Include="Source\Scene.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Matrix4x4.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Vector3.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\List.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Camera.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Plane.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Vertex.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Triangle.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\Renderer.h">
@@ -82,36 +73,39 @@
     <ClInclude Include="Source\AssetManager.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Map.h">
-      <Filter>Source</Filter>
+    <ClInclude Include="Source\Math\Aabb.h">
+      <Filter>Source\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Aabb.h">
-      <Filter>Source</Filter>
+    <ClInclude Include="Source\Math\ConvexHull.h">
+      <Filter>Source\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ConvexHull.h">
-      <Filter>Source</Filter>
+    <ClInclude Include="Source\Math\Matrix4x4.h">
+      <Filter>Source\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Math\Plane.h">
+      <Filter>Source\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Math\Triangle.h">
+      <Filter>Source\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Math\Vector3.h">
+      <Filter>Source\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Containers\List.h">
+      <Filter>Source\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Containers\Map.h">
+      <Filter>Source\Containers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Scene.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Matrix4x4.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Vector3.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Camera.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Plane.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Vertex.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Triangle.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Renderer.cpp">
@@ -150,11 +144,23 @@
     <ClCompile Include="Source\AssetManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Aabb.cpp">
-      <Filter>Source</Filter>
+    <ClCompile Include="Source\Math\Aabb.cpp">
+      <Filter>Source\Math</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ConvexHull.cpp">
-      <Filter>Source</Filter>
+    <ClCompile Include="Source\Math\ConvexHull.cpp">
+      <Filter>Source\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Matrix4x4.cpp">
+      <Filter>Source\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Plane.cpp">
+      <Filter>Source\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Triangle.cpp">
+      <Filter>Source\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Vector3.cpp">
+      <Filter>Source\Math</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

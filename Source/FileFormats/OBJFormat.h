@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../AssetManager.h"
-#include "../Vector3.h"
-#include "../Vertex.h"
+#include "AssetManager.h"
+#include "Math/Vector3.h"
+#include "Vertex.h"
 #include <fstream>
 #include <sstream>
 #include <vector>

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Defines.h"
-#include "Matrix4x4.h"
-#include "Plane.h"
-#include "List.h"
-#include "ConvexHull.h"
+#include "Math/Matrix4x4.h"
+#include "Math/Plane.h"
+#include "Containers/List.h"
+#include "Math/ConvexHull.h"
 
 namespace Frumpy
 {

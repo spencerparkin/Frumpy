@@ -1,4 +1,4 @@
-#include "Triangle.h"
+#include "Math/Triangle.h"
 #include <float.h>
 
 using namespace Frumpy;

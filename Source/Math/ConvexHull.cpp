@@ -1,5 +1,5 @@
-#include "ConvexHull.h"
-#include "Triangle.h"
+#include "Math/ConvexHull.h"
+#include "Math/Triangle.h"
 #include "FileAssets/Mesh.h"
 #include "Camera.h"
 #include <math.h>

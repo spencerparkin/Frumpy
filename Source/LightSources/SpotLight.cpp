@@ -1,6 +1,6 @@
 #include "SpotLight.h"
-#include "../Renderer.h"
-#include "../Camera.h"
+#include "Renderer.h"
+#include "Camera.h"
 #include <math.h>
 
 using namespace Frumpy;

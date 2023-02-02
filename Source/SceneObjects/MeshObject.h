@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../Scene.h"
-#include "../FileAssets/Image.h"
-#include "../ConvexHull.h"
+#include "Scene.h"
+#include "FileAssets/Image.h"
+#include "Math/ConvexHull.h"
 
 namespace Frumpy
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../AssetManager.h"
+#include "AssetManager.h"
 #include <stdio.h>
 #include <vector>
 

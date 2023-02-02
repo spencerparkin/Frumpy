@@ -13,7 +13,7 @@
 #include "LightSources/SpotLight.h"
 #include "LightSources/DirectionalLight.h"
 #include "LightSources/AmbientLight.h"
-#include "ConvexHull.h"
+#include "Math/ConvexHull.h"
 #include "ProfileBlock.h"
 #include <time.h>
 

@@ -1,10 +1,10 @@
 #include "Renderer.h"
-#include "Vector3.h"
+#include "Math/Vector3.h"
 #include "FileAssets/Image.h"
 #include "LightSource.h"
 #include "Vertex.h"
-#include "Triangle.h"
-#include "Plane.h"
+#include "Math/Triangle.h"
+#include "Math/Plane.h"
 #include "Scene.h"
 #include "Camera.h"
 #include <math.h>

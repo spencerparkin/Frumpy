@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Defines.h"
-#include "List.h"
-#include "Matrix4x4.h"
+#include "Containers/List.h"
+#include "Math/Matrix4x4.h"
 #include "LightSources/AmbientLight.h"
 #include "FileAssets/Image.h"
 #include <mutex>

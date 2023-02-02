@@ -19,10 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Aabb.h" />
     <ClInclude Include="Source\AssetManager.h" />
     <ClInclude Include="Source\Camera.h" />
-    <ClInclude Include="Source\ConvexHull.h" />
+    <ClInclude Include="Source\Containers\List.h" />
+    <ClInclude Include="Source\Containers\Map.h" />
     <ClInclude Include="Source\FileAssets\Image.h" />
     <ClInclude Include="Source\FileAssets\Mesh.h" />
     <ClInclude Include="Source\FileFormats\OBJFormat.h" />
@@ -32,23 +32,21 @@
     <ClInclude Include="Source\LightSources\AmbientLight.h" />
     <ClInclude Include="Source\LightSources\DirectionalLight.h" />
     <ClInclude Include="Source\LightSources\SpotLight.h" />
-    <ClInclude Include="Source\List.h" />
-    <ClInclude Include="Source\Map.h" />
-    <ClInclude Include="Source\Matrix4x4.h" />
-    <ClInclude Include="Source\Plane.h" />
+    <ClInclude Include="Source\Math\Aabb.h" />
+    <ClInclude Include="Source\Math\ConvexHull.h" />
+    <ClInclude Include="Source\Math\Matrix4x4.h" />
+    <ClInclude Include="Source\Math\Plane.h" />
+    <ClInclude Include="Source\Math\Triangle.h" />
+    <ClInclude Include="Source\Math\Vector3.h" />
     <ClInclude Include="Source\Renderer.h" />
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\SceneObjects\MeshObject.h" />
     <ClInclude Include="Source\Stream.h" />
-    <ClInclude Include="Source\Triangle.h" />
-    <ClInclude Include="Source\Vector3.h" />
     <ClInclude Include="Source\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Aabb.cpp" />
     <ClCompile Include="Source\AssetManager.cpp" />
     <ClCompile Include="Source\Camera.cpp" />
-    <ClCompile Include="Source\ConvexHull.cpp" />
     <ClCompile Include="Source\FileAssets\Image.cpp" />
     <ClCompile Include="Source\FileAssets\Mesh.cpp" />
     <ClCompile Include="Source\FileFormats\OBJFormat.cpp" />
@@ -57,14 +55,16 @@
     <ClCompile Include="Source\LightSources\AmbientLight.cpp" />
     <ClCompile Include="Source\LightSources\DirectionalLight.cpp" />
     <ClCompile Include="Source\LightSources\SpotLight.cpp" />
-    <ClCompile Include="Source\Matrix4x4.cpp" />
-    <ClCompile Include="Source\Plane.cpp" />
+    <ClCompile Include="Source\Math\Aabb.cpp" />
+    <ClCompile Include="Source\Math\ConvexHull.cpp" />
+    <ClCompile Include="Source\Math\Matrix4x4.cpp" />
+    <ClCompile Include="Source\Math\Plane.cpp" />
+    <ClCompile Include="Source\Math\Triangle.cpp" />
+    <ClCompile Include="Source\Math\Vector3.cpp" />
     <ClCompile Include="Source\Renderer.cpp" />
     <ClCompile Include="Source\Scene.cpp" />
     <ClCompile Include="Source\SceneObjects\MeshObject.cpp" />
     <ClCompile Include="Source\Stream.cpp" />
-    <ClCompile Include="Source\Triangle.cpp" />
-    <ClCompile Include="Source\Vector3.cpp" />
     <ClCompile Include="Source\Vertex.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -140,7 +140,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -161,7 +161,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -182,7 +182,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -203,7 +203,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

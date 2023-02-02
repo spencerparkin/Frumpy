@@ -1,6 +1,6 @@
 #include "OBJFormat.h"
-#include "../FileAssets/Mesh.h"
-#include "../Triangle.h"
+#include "FileAssets/Mesh.h"
+#include "Math/Triangle.h"
 #include <map>
 
 using namespace Frumpy;

@@ -1,5 +1,5 @@
 #include "PPMFormat.h"
-#include "../FileAssets/Image.h"
+#include "FileAssets/Image.h"
 #include <stdio.h>
 
 using namespace Frumpy;

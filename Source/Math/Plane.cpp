@@ -1,7 +1,7 @@
-#include "Plane.h"
-#include "Vector3.h"
-#include "Triangle.h"
-#include "Matrix4x4.h"
+#include "Math/Plane.h"
+#include "Math/Vector3.h"
+#include "Math/Triangle.h"
+#include "Math/Matrix4x4.h"
 #include <math.h>
 
 using namespace Frumpy;

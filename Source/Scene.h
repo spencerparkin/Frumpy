@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Defines.h"
-#include "Matrix4x4.h"
-#include "List.h"
-#include "Plane.h"
+#include "Math/Matrix4x4.h"
+#include "Containers/List.h"
+#include "Math/Plane.h"
 #include <functional>
 
 namespace Frumpy

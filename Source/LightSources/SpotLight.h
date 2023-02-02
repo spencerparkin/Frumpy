@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../LightSource.h"
-#include "../Vector3.h"
+#include "LightSource.h"
+#include "Math/Vector3.h"
 
 namespace Frumpy
 {

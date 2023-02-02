@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../Defines.h"
-#include "../Matrix4x4.h"
-#include "../AssetManager.h"
+#include "Defines.h"
+#include "Math/Matrix4x4.h"
+#include "AssetManager.h"
 #include <stdint.h>
 
 namespace Frumpy
