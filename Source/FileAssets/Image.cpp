@@ -148,8 +148,8 @@ float Image::SampleDepth(double uCoord, double vCoord) const
 
 void Image::SampleColorVector(Vector& colorVector, const Vector& texCoords, SampleMethod sampleMethod) const
 {
-	double approxRow = texCoords.y * double(this->height - 1);
-	double approxCol = texCoords.x * double(this->width - 1);
+	double approxRow = texCoords.y * double(this->height);
+	double approxCol = texCoords.x * double(this->width);
 
 	switch (sampleMethod)
 	{
