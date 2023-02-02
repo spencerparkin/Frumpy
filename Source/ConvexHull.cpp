@@ -8,7 +8,7 @@ using namespace Frumpy;
 
 ConvexHull::ConvexHull()
 {
-	this->pointArray = new std::vector<Vector>();
+	this->pointArray = new std::vector<Vector3>();
 	this->facetArray = new std::vector<Facet>();
 	this->cachedEdgeSet = new std::set<Edge>();
 	this->cachedEdgeSetValid = false;
@@ -16,7 +16,7 @@ ConvexHull::ConvexHull()
 
 ConvexHull::ConvexHull(const ConvexHull& convexHull)
 {
-	this->pointArray = new std::vector<Vector>();
+	this->pointArray = new std::vector<Vector3>();
 	this->facetArray = new std::vector<Facet>();
 	this->cachedEdgeSet = new std::set<Edge>();
 	this->cachedEdgeSetValid = false;
@@ -34,9 +34,9 @@ ConvexHull::ConvexHull(const ConvexHull& convexHull)
 	delete this->cachedEdgeSet;
 }
 
-Vector ConvexHull::CalcCenter() const
+Vector3 ConvexHull::CalcCenter() const
 {
-	Vector center(0.0, 0.0, 0.0);
+	Vector3 center(0.0, 0.0, 0.0);
 	for (int i = 0; i < (signed)this->pointArray->size(); i++)
 		center += (*this->pointArray)[i];
 	if (this->pointArray->size() > 0)
@@ -46,7 +46,7 @@ Vector ConvexHull::CalcCenter() const
 
 bool ConvexHull::Generate(Polyhedron polyhedron, double uniformScale)
 {
-	List<Vector> vertexList;
+	List<Vector3> vertexList;
 
 	double goldenRatio = (1.0 + sqrt(5.0)) / 2.0;
 
@@ -58,8 +58,8 @@ bool ConvexHull::Generate(Polyhedron polyhedron, double uniformScale)
 			{
 				double signA = (i == 0) ? 1.0 : -1.0;
 
-				vertexList.AddTail(Vector(signA, 0.0, -1.0 / sqrt(2.0)));
-				vertexList.AddTail(Vector(0.0, signA, 1.0 / sqrt(2.0)));
+				vertexList.AddTail(Vector3(signA, 0.0, -1.0 / sqrt(2.0)));
+				vertexList.AddTail(Vector3(0.0, signA, 1.0 / sqrt(2.0)));
 			}
 
 			break;
@@ -78,7 +78,7 @@ bool ConvexHull::Generate(Polyhedron polyhedron, double uniformScale)
 					{
 						double signC = (k == 0) ? 1.0 : -1.0;
 
-						vertexList.AddTail(Vector(signA, signB, signC));
+						vertexList.AddTail(Vector3(signA, signB, signC));
 					}
 				}
 			}
@@ -91,9 +91,9 @@ bool ConvexHull::Generate(Polyhedron polyhedron, double uniformScale)
 			{
 				double signA = (i == 0) ? 1.0 : -1.0;
 
-				vertexList.AddTail(Vector(signA, 0.0, 0.0));
-				vertexList.AddTail(Vector(0.0, signA, 0.0));
-				vertexList.AddTail(Vector(0.0, 0.0, signA));
+				vertexList.AddTail(Vector3(signA, 0.0, 0.0));
+				vertexList.AddTail(Vector3(0.0, signA, 0.0));
+				vertexList.AddTail(Vector3(0.0, 0.0, signA));
 			}
 
 			break;
@@ -108,9 +108,9 @@ bool ConvexHull::Generate(Polyhedron polyhedron, double uniformScale)
 				{
 					double signB = (j == 0) ? 1.0 : -1.0;
 
-					vertexList.AddTail(Vector(0.0, signA, signB * goldenRatio));
-					vertexList.AddTail(Vector(signA, signB * goldenRatio, 0.0));
-					vertexList.AddTail(Vector(signB * goldenRatio, 0.0, signA));
+					vertexList.AddTail(Vector3(0.0, signA, signB * goldenRatio));
+					vertexList.AddTail(Vector3(signA, signB * goldenRatio, 0.0));
+					vertexList.AddTail(Vector3(signB * goldenRatio, 0.0, signA));
 				}
 			}
 
@@ -126,15 +126,15 @@ bool ConvexHull::Generate(Polyhedron polyhedron, double uniformScale)
 				{
 					double signB = (j == 0) ? 1.0 : -1.0;
 
-					vertexList.AddTail(Vector(0.0, signA * goldenRatio, signB * (1.0 / goldenRatio)));
-					vertexList.AddTail(Vector(signA * goldenRatio, signB * (1.0 / goldenRatio), 0.0));
-					vertexList.AddTail(Vector(signB * (1.0 / goldenRatio), 0.0, signA * goldenRatio));
+					vertexList.AddTail(Vector3(0.0, signA * goldenRatio, signB * (1.0 / goldenRatio)));
+					vertexList.AddTail(Vector3(signA * goldenRatio, signB * (1.0 / goldenRatio), 0.0));
+					vertexList.AddTail(Vector3(signB * (1.0 / goldenRatio), 0.0, signA * goldenRatio));
 
 					for (int k = 0; k < 2; k++)
 					{
 						double signC = (k == 0) ? 1.0 : -1.0;
 
-						vertexList.AddTail(Vector(signA, signB, signC));
+						vertexList.AddTail(Vector3(signA, signB, signC));
 					}
 				}
 			}
@@ -143,7 +143,7 @@ bool ConvexHull::Generate(Polyhedron polyhedron, double uniformScale)
 		}
 	}
 
-	for (List<Vector>::Node* node = vertexList.GetHead(); node; node = node->GetNext())
+	for (List<Vector3>::Node* node = vertexList.GetHead(); node; node = node->GetNext())
 		node->value.Scale(uniformScale);
 
 	return this->Generate(vertexList, false);
@@ -155,7 +155,7 @@ Mesh* ConvexHull::Generate(void) const
 
 	// Load up the vertices of the mesh.  Approximate the normals based on the hull's center.
 	mesh->SetVertexBufferSize(this->pointArray->size());
-	Vector center = this->CalcCenter();
+	Vector3 center = this->CalcCenter();
 	for (int i = 0; i < (signed)this->pointArray->size(); i++)
 	{
 		Vertex* vertex = mesh->GetVertex(i);
@@ -185,7 +185,7 @@ Mesh* ConvexHull::Generate(void) const
 	return mesh;
 }
 
-bool ConvexHull::Generate(const List<Vector>& pointCloudList, bool compressFacets /*= false*/)
+bool ConvexHull::Generate(const List<Vector3>& pointCloudList, bool compressFacets /*= false*/)
 {
 	if (pointCloudList.GetCount() < 4)
 		return false;
@@ -193,7 +193,7 @@ bool ConvexHull::Generate(const List<Vector>& pointCloudList, bool compressFacet
 	if (!this->FindInitialTetrahedron(pointCloudList))
 		return false;
 
-	for (const List<Vector>::Node* node = pointCloudList.GetHead(); node; node = node->GetNext())
+	for (const List<Vector3>::Node* node = pointCloudList.GetHead(); node; node = node->GetNext())
 		this->AddPoint(node->value);
 
 	// At this point, all facets are triangles, but some could be coplanar with other facets.
@@ -308,7 +308,7 @@ bool ConvexHull::CompressFacetPair(const Facet& facetA, const Facet& facetB, Fac
 	return true;
 }
 
-bool ConvexHull::AddPoint(const Vector& point, double eps /*= FRUMPY_EPS*/)
+bool ConvexHull::AddPoint(const Vector3& point, double eps /*= FRUMPY_EPS*/)
 {
 	if (this->ContainsPoint(point, eps))
 		return false;
@@ -322,17 +322,17 @@ bool ConvexHull::AddPoint(const Vector& point, double eps /*= FRUMPY_EPS*/)
 	{
 		const Facet& oldFacet = (*this->facetArray)[i];
 		
-		const Vector& pointA = this->GetPoint(oldFacet.pointArray[0]);
-		const Vector& pointB = this->GetPoint(oldFacet.pointArray[1]);
-		const Vector& pointC = this->GetPoint(oldFacet.pointArray[2]);
+		const Vector3& pointA = this->GetPoint(oldFacet.pointArray[0]);
+		const Vector3& pointB = this->GetPoint(oldFacet.pointArray[1]);
+		const Vector3& pointC = this->GetPoint(oldFacet.pointArray[2]);
 		
-		Vector edgeX = pointA - point;
-		Vector edgeY = pointB - point;
-		Vector edgeZ = pointC - point;
+		Vector3 edgeX = pointA - point;
+		Vector3 edgeY = pointB - point;
+		Vector3 edgeZ = pointC - point;
 
-		Vector crossProduct;
+		Vector3 crossProduct;
 		crossProduct.Cross(edgeX, edgeY);
-		double dotProduct = Vector::Dot(crossProduct, edgeZ);
+		double dotProduct = Vector3::Dot(crossProduct, edgeZ);
 
 		if (dotProduct < 0.0)
 		{
@@ -381,7 +381,7 @@ bool ConvexHull::AddPoint(const Vector& point, double eps /*= FRUMPY_EPS*/)
 	return true;
 }
 
-bool ConvexHull::FindInitialTetrahedron(const List<Vector>& pointCloudList)
+bool ConvexHull::FindInitialTetrahedron(const List<Vector3>& pointCloudList)
 {
 	this->pointArray->clear();
 	this->facetArray->clear();
@@ -389,29 +389,29 @@ bool ConvexHull::FindInitialTetrahedron(const List<Vector>& pointCloudList)
 	// Find an initial tetrahedron from the given point-cloud.
 	// If the given list contained a billion points, all co-planar, co-linear, or all the same point, then
 	// this would take forever before we realized no hull could be generated.
-	for (const List<Vector>::Node* nodeA = pointCloudList.GetHead(); nodeA; nodeA = nodeA->GetNext())
+	for (const List<Vector3>::Node* nodeA = pointCloudList.GetHead(); nodeA; nodeA = nodeA->GetNext())
 	{
-		const Vector& pointA = nodeA->value;
+		const Vector3& pointA = nodeA->value;
 
-		for (const List<Vector>::Node* nodeB = nodeA->GetNext(); nodeB; nodeB = nodeB->GetNext())
+		for (const List<Vector3>::Node* nodeB = nodeA->GetNext(); nodeB; nodeB = nodeB->GetNext())
 		{
-			const Vector& pointB = nodeB->value;
+			const Vector3& pointB = nodeB->value;
 
-			for (const List<Vector>::Node* nodeC = nodeB->GetNext(); nodeC; nodeC = nodeC->GetNext())
+			for (const List<Vector3>::Node* nodeC = nodeB->GetNext(); nodeC; nodeC = nodeC->GetNext())
 			{
-				const Vector& pointC = nodeC->value;
+				const Vector3& pointC = nodeC->value;
 
-				for (const List<Vector>::Node* nodeD = nodeC->GetNext(); nodeD; nodeD = nodeD->GetNext())
+				for (const List<Vector3>::Node* nodeD = nodeC->GetNext(); nodeD; nodeD = nodeD->GetNext())
 				{
-					const Vector& pointD = nodeD->value;
+					const Vector3& pointD = nodeD->value;
 
-					Vector edgeX = pointB - pointA;
-					Vector edgeY = pointC - pointA;
-					Vector edgeZ = pointD - pointA;
+					Vector3 edgeX = pointB - pointA;
+					Vector3 edgeY = pointC - pointA;
+					Vector3 edgeZ = pointD - pointA;
 
-					Vector crossProduct;
+					Vector3 crossProduct;
 					crossProduct.Cross(edgeX, edgeY);
-					double dotProduct = Vector::Dot(crossProduct, edgeZ);
+					double dotProduct = Vector3::Dot(crossProduct, edgeZ);
 
 					if (fabs(dotProduct) > 0.0)
 					{
@@ -484,42 +484,42 @@ bool ConvexHull::Generate(const Frustum& frustum)
 	double nearY = tan(vfoviRads / 2.0) * frustum._near;
 	double farY = tan(vfoviRads / 2.0) * frustum._far;
 	
-	List<Vector> pointList;
+	List<Vector3> pointList;
 
-	pointList.AddTail(Vector(-nearX, -nearY, -frustum._near));
-	pointList.AddTail(Vector(nearX, -nearY, -frustum._near));
-	pointList.AddTail(Vector(-nearX, nearY, -frustum._near));
-	pointList.AddTail(Vector(nearX, nearY, -frustum._near));
+	pointList.AddTail(Vector3(-nearX, -nearY, -frustum._near));
+	pointList.AddTail(Vector3(nearX, -nearY, -frustum._near));
+	pointList.AddTail(Vector3(-nearX, nearY, -frustum._near));
+	pointList.AddTail(Vector3(nearX, nearY, -frustum._near));
 
-	pointList.AddTail(Vector(-farX, -farY, -frustum._far));
-	pointList.AddTail(Vector(farX, -farY, -frustum._far));
-	pointList.AddTail(Vector(-farX, farY, -frustum._far));
-	pointList.AddTail(Vector(farX, farY, -frustum._far));
+	pointList.AddTail(Vector3(-farX, -farY, -frustum._far));
+	pointList.AddTail(Vector3(farX, -farY, -frustum._far));
+	pointList.AddTail(Vector3(-farX, farY, -frustum._far));
+	pointList.AddTail(Vector3(farX, farY, -frustum._far));
 
 	return this->Generate(pointList, true);
 }
 
 bool ConvexHull::Generate(const AxisAlignedBoundingBox& aabb)
 {
-	List<Vector> pointList;
+	List<Vector3> pointList;
 
 	pointList.AddTail(aabb.min);
-	pointList.AddTail(Vector(aabb.min.x, aabb.min.y, aabb.max.z));
-	pointList.AddTail(Vector(aabb.min.x, aabb.max.y, aabb.min.z));
-	pointList.AddTail(Vector(aabb.min.x, aabb.max.y, aabb.max.z));
-	pointList.AddTail(Vector(aabb.max.x, aabb.min.y, aabb.min.z));
-	pointList.AddTail(Vector(aabb.max.x, aabb.min.y, aabb.max.z));
-	pointList.AddTail(Vector(aabb.max.x, aabb.max.y, aabb.min.z));
+	pointList.AddTail(Vector3(aabb.min.x, aabb.min.y, aabb.max.z));
+	pointList.AddTail(Vector3(aabb.min.x, aabb.max.y, aabb.min.z));
+	pointList.AddTail(Vector3(aabb.min.x, aabb.max.y, aabb.max.z));
+	pointList.AddTail(Vector3(aabb.max.x, aabb.min.y, aabb.min.z));
+	pointList.AddTail(Vector3(aabb.max.x, aabb.min.y, aabb.max.z));
+	pointList.AddTail(Vector3(aabb.max.x, aabb.max.y, aabb.min.z));
 	pointList.AddTail(aabb.max);
 
 	return this->Generate(pointList, true);
 }
 
-void ConvexHull::Transform(const Matrix& transformMatrix)
+void ConvexHull::Transform(const Matrix4x4& transformMatrix)
 {
 	for (int i = 0; i < (signed)this->pointArray->size(); i++)
 	{
-		Vector& point = (*this->pointArray)[i];
+		Vector3& point = (*this->pointArray)[i];
 		transformMatrix.TransformPoint(point, point);
 	}
 
@@ -545,8 +545,8 @@ bool ConvexHull::AnyEdgeHitsGivenConvexHull(const ConvexHull& convexHull, double
 
 	for (const Edge& edge : *this->cachedEdgeSet)
 	{
-		const Vector& pointA = this->GetPoint(edge.i);
-		const Vector& pointB = this->GetPoint(edge.j);
+		const Vector3& pointA = this->GetPoint(edge.i);
+		const Vector3& pointB = this->GetPoint(edge.j);
 
 		if (convexHull.LineSegmentHitsHull(pointA, pointB, eps))
 			return true;
@@ -555,17 +555,17 @@ bool ConvexHull::AnyEdgeHitsGivenConvexHull(const ConvexHull& convexHull, double
 	return false;
 }
 
-bool ConvexHull::LineSegmentHitsHull(const Vector& pointA, const Vector& pointB, double eps /*= FRUMPY_EPS*/) const
+bool ConvexHull::LineSegmentHitsHull(const Vector3& pointA, const Vector3& pointB, double eps /*= FRUMPY_EPS*/) const
 {
 	for (int i = 0; i < (signed)this->facetArray->size(); i++)
 	{
 		const Facet& facet = (*this->facetArray)[i];
 		const Plane& plane = facet.GetSurfacePlane(*this);
-		Vector rayDirection = pointB - pointA;
+		Vector3 rayDirection = pointB - pointA;
 		double lambda = 0.0;
 		if (plane.RayCast(pointA, rayDirection, lambda) && lambda <= 1.0)
 		{
-			Vector point = pointA + rayDirection * lambda;
+			Vector3 point = pointA + rayDirection * lambda;
 			if (this->ContainsPoint(point, eps))
 				return true;
 		}
@@ -601,8 +601,8 @@ bool ConvexHull::OverlapsWith(const Triangle& triangle, double eps /*= FRUMPY_EP
 	{
 		int j = (i + 1) % 3;
 
-		const Vector& pointA = triangle.vertex[i];
-		const Vector& pointB = triangle.vertex[j];
+		const Vector3& pointA = triangle.vertex[i];
+		const Vector3& pointB = triangle.vertex[j];
 
 		if (this->LineSegmentHitsHull(pointA, pointB, eps))
 			return true;
@@ -611,7 +611,7 @@ bool ConvexHull::OverlapsWith(const Triangle& triangle, double eps /*= FRUMPY_EP
 	return false;
 }
 
-bool ConvexHull::ContainsPoint(const Vector& point, double eps /*= FRUMPY_EPS*/) const
+bool ConvexHull::ContainsPoint(const Vector3& point, double eps /*= FRUMPY_EPS*/) const
 {
 	for (int i = 0; i < (signed)this->facetArray->size(); i++)
 	{
@@ -648,7 +648,7 @@ void ConvexHull::RegenerateEdgeSetIfNecessary() const
 	this->cachedEdgeSetValid = true;
 }
 
-const Vector& ConvexHull::GetPoint(int i) const
+const Vector3& ConvexHull::GetPoint(int i) const
 {
 	i = i % this->pointArray->size();
 	if (i < 0)

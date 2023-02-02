@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Defines.h"
-#include "Matrix.h"
-#include "Vector.h"
+#include "Matrix4x4.h"
+#include "Vector3.h"
 
 namespace Frumpy
 {
@@ -18,13 +18,13 @@ namespace Frumpy
 
 		struct SurfaceProperties
 		{
-			Vector diffuseColor;
-			Vector cameraSpacePoint;
-			Vector cameraSpaceNormal;
+			Vector3 diffuseColor;
+			Vector3 cameraSpacePoint;
+			Vector3 cameraSpaceNormal;
 		};
 
 		virtual void PrepareForRender(const GraphicsMatrices& graphicsMatrices) const = 0;
-		virtual void CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector& surfaceColor, const Image* shadowBuffer) const = 0;
+		virtual void CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector3& surfaceColor, const Image* shadowBuffer) const = 0;
 		virtual bool CalcShadowCamera(Camera& shadowCamera) const;
 
 		double mainIntensity;

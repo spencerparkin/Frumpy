@@ -1,40 +1,40 @@
-#include "Matrix.h"
-#include "Vector.h"
+#include "Matrix4x4.h"
+#include "Vector3.h"
 #include <math.h>
 
 using namespace Frumpy;
 
-Matrix::Matrix()
+Matrix4x4::Matrix4x4()
 {
 	this->Identity();
 }
 
-Matrix::Matrix(const Matrix& matrix)
+Matrix4x4::Matrix4x4(const Matrix4x4& matrix)
 {
 	for (int i = 0; i < 4; i++)
 		for (int j = 0; j < 4; j++)
 			this->ele[i][j] = matrix.ele[i][j];
 }
 
-/*virtual*/ Matrix::~Matrix()
+/*virtual*/ Matrix4x4::~Matrix4x4()
 {
 }
 
-void Matrix::operator=(const Matrix& matrix)
+void Matrix4x4::operator=(const Matrix4x4& matrix)
 {
 	for (int i = 0; i < 4; i++)
 		for (int j = 0; j < 4; j++)
 			this->ele[i][j] = matrix.ele[i][j];
 }
 
-void Matrix::Identity()
+void Matrix4x4::Identity()
 {
 	for (int i = 0; i < 4; i++)
 		for (int j = 0; j < 4; j++)
 			this->ele[i][j] = (i == j) ? 1.0 : 0.0;
 }
 
-bool Matrix::SetCol(int col, const Vector& vector)
+bool Matrix4x4::SetCol(int col, const Vector3& vector)
 {
 	if (col < 0 || col > 3)
 		return false;
@@ -45,7 +45,7 @@ bool Matrix::SetCol(int col, const Vector& vector)
 	return true;
 }
 
-bool Matrix::GetCol(int col, Vector& vector) const
+bool Matrix4x4::GetCol(int col, Vector3& vector) const
 {
 	if (col < 0 || col > 3)
 		return false;
@@ -56,21 +56,21 @@ bool Matrix::GetCol(int col, Vector& vector) const
 	return true;
 }
 
-void Matrix::GetAxes(Vector& xAxis, Vector& yAxis, Vector& zAxis) const
+void Matrix4x4::GetAxes(Vector3& xAxis, Vector3& yAxis, Vector3& zAxis) const
 {
 	this->GetCol(0, xAxis);
 	this->GetCol(1, yAxis);
 	this->GetCol(2, zAxis);
 }
 
-void Matrix::SetAxes(const Vector& xAxis, const Vector& yAxis, const Vector& zAxis)
+void Matrix4x4::SetAxes(const Vector3& xAxis, const Vector3& yAxis, const Vector3& zAxis)
 {
 	this->SetCol(0, xAxis);
 	this->SetCol(1, yAxis);
 	this->SetCol(2, zAxis);
 }
 
-void Matrix::TransformVector(const Vector& vector, Vector& vectorTransformed) const
+void Matrix4x4::TransformVector(const Vector3& vector, Vector3& vectorTransformed) const
 {
 	vectorTransformed.SetComponents(
 		vector.x * this->ele[0][0] +
@@ -84,7 +84,7 @@ void Matrix::TransformVector(const Vector& vector, Vector& vectorTransformed) co
 		vector.z * this->ele[2][2]);
 }
 
-void Matrix::TransformPoint(const Vector& point, Vector& pointTransformed) const
+void Matrix4x4::TransformPoint(const Vector3& point, Vector3& pointTransformed) const
 {
 	pointTransformed.SetComponents(
 		point.x * this->ele[0][0] +
@@ -114,7 +114,7 @@ void Matrix::TransformPoint(const Vector& point, Vector& pointTransformed) const
 	}
 }
 
-void Matrix::Multiply(const Matrix& leftMatrix, const Matrix& rightMatrix)
+void Matrix4x4::Multiply(const Matrix4x4& leftMatrix, const Matrix4x4& rightMatrix)
 {
 	for (int i = 0; i < 4; i++)
 	{
@@ -129,9 +129,9 @@ void Matrix::Multiply(const Matrix& leftMatrix, const Matrix& rightMatrix)
 	}
 }
 
-bool Matrix::Divide(const Matrix& leftMatrix, const Matrix& rightMatrix)
+bool Matrix4x4::Divide(const Matrix4x4& leftMatrix, const Matrix4x4& rightMatrix)
 {
-	Matrix rightMatrixInverted;
+	Matrix4x4 rightMatrixInverted;
 	if (!rightMatrixInverted.Invert(rightMatrix))
 		return false;
 
@@ -139,7 +139,7 @@ bool Matrix::Divide(const Matrix& leftMatrix, const Matrix& rightMatrix)
 	return true;
 }
 
-bool Matrix::Invert(const Matrix& matrix)
+bool Matrix4x4::Invert(const Matrix4x4& matrix)
 {
 	double det = matrix.Determinant();
 	if (det == 0.0)
@@ -165,7 +165,7 @@ bool Matrix::Invert(const Matrix& matrix)
 	return true;
 }
 
-double Matrix::Determinant() const
+double Matrix4x4::Determinant() const
 {
 	double det =
 		this->ele[0][0] * (
@@ -205,34 +205,34 @@ double Matrix::Determinant() const
 	return det;
 }
 
-void Matrix::SetTranslation(const Vector& translation)
+void Matrix4x4::SetTranslation(const Vector3& translation)
 {
 	this->ele[0][3] = translation.x;
 	this->ele[1][3] = translation.y;
 	this->ele[2][3] = translation.z;
 }
 
-void Matrix::SetScale(const Vector& scale)
+void Matrix4x4::SetScale(const Vector3& scale)
 {
-	this->SetCol(0, Vector(scale.x, 0.0, 0.0));
-	this->SetCol(1, Vector(0.0, scale.y, 0.0));
-	this->SetCol(2, Vector(0.0, 0.0, scale.z));
+	this->SetCol(0, Vector3(scale.x, 0.0, 0.0));
+	this->SetCol(1, Vector3(0.0, scale.y, 0.0));
+	this->SetCol(2, Vector3(0.0, 0.0, scale.z));
 }
 
-void Matrix::SetUniformScale(double scale)
+void Matrix4x4::SetUniformScale(double scale)
 {
-	this->SetCol(0, Vector(scale, 0.0, 0.0));
-	this->SetCol(1, Vector(0.0, scale, 0.0));
-	this->SetCol(2, Vector(0.0, 0.0, scale));
+	this->SetCol(0, Vector3(scale, 0.0, 0.0));
+	this->SetCol(1, Vector3(0.0, scale, 0.0));
+	this->SetCol(2, Vector3(0.0, 0.0, scale));
 }
 
-void Matrix::SetRotation(const Vector& axis, double angle)
+void Matrix4x4::SetRotation(const Vector3& axis, double angle)
 {
-	Vector xAxis(1.0, 0.0, 0.0);
-	Vector yAxis(0.0, 1.0, 0.0);
-	Vector zAxis(0.0, 0.0, 1.0);
+	Vector3 xAxis(1.0, 0.0, 0.0);
+	Vector3 yAxis(0.0, 1.0, 0.0);
+	Vector3 zAxis(0.0, 0.0, 1.0);
 
-	Vector xAxisRotated, yAxisRotated, zAxisRotated;
+	Vector3 xAxisRotated, yAxisRotated, zAxisRotated;
 
 	xAxisRotated.Rotation(xAxis, axis, angle);
 	yAxisRotated.Rotation(yAxis, axis, angle);
@@ -243,18 +243,18 @@ void Matrix::SetRotation(const Vector& axis, double angle)
 	this->SetCol(2, zAxisRotated);
 }
 
-void Matrix::RigidBodyMotion(const Vector& axis, double angle, const Vector& delta)
+void Matrix4x4::RigidBodyMotion(const Vector3& axis, double angle, const Vector3& delta)
 {
-	Matrix rotation;
+	Matrix4x4 rotation;
 	rotation.SetRotation(axis, angle);
 
-	Matrix translation;
+	Matrix4x4 translation;
 	translation.SetTranslation(delta);
 
 	*this = translation * rotation;
 }
 
-void Matrix::Projection(double hfovi, double vfovi, double near, double far)
+void Matrix4x4::Projection(double hfovi, double vfovi, double near, double far)
 {
 	this->Identity();
 	this->ele[0][0] = 1.0 / tan(hfovi / 2.0);
@@ -265,9 +265,9 @@ void Matrix::Projection(double hfovi, double vfovi, double near, double far)
 	this->ele[3][2] = -1.0;
 }
 
-bool Matrix::OrthonormalizeOrientation()
+bool Matrix4x4::OrthonormalizeOrientation()
 {
-	Vector xAxis, yAxis, zAxis;
+	Vector3 xAxis, yAxis, zAxis;
 	this->GetAxes(xAxis, yAxis, zAxis);
 
 	if (!xAxis.Normalize())
@@ -288,9 +288,9 @@ bool Matrix::OrthonormalizeOrientation()
 
 namespace Frumpy
 {
-	Matrix operator*(const Matrix& leftMatrix, const Matrix& rightMatrix)
+	Matrix4x4 operator*(const Matrix4x4& leftMatrix, const Matrix4x4& rightMatrix)
 	{
-		Matrix product;
+		Matrix4x4 product;
 		product.Multiply(leftMatrix, rightMatrix);
 		return product;
 	}

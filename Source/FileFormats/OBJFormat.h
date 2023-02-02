@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../AssetManager.h"
-#include "../Vector.h"
+#include "../Vector3.h"
 #include "../Vertex.h"
 #include <fstream>
 #include <sstream>
@@ -34,10 +34,10 @@ namespace Frumpy
 
 		struct Data
 		{
-			std::vector<Vector> pointArray;
-			std::vector<Vector> normalArray;
-			std::vector<Vector> colorArray;
-			std::vector<Vector> texCoordsArray;
+			std::vector<Vector3> pointArray;
+			std::vector<Vector3> normalArray;
+			std::vector<Vector3> colorArray;
+			std::vector<Vector3> texCoordsArray;
 			std::vector<ConvexPolygon> polygonArray;
 			std::string name;
 		};
@@ -48,7 +48,7 @@ namespace Frumpy
 
 		void TokenizeLine(const std::string& line, char delimeter, std::vector<std::string>& tokenArray, bool stripEmptyTokens);
 		void ProcessTokenizedLine(const std::vector<std::string>& tokenArray, List<AssetManager::Asset*>& assetList);
-		void LookupAndAssign(const std::vector<Vector>& vectorArray, int i, Vector& result);
+		void LookupAndAssign(const std::vector<Vector3>& vectorArray, int i, Vector3& result);
 		void FlushMesh(List<AssetManager::Asset*>& assetList);
 		void DumpMesh(std::ofstream& fileStream, const Mesh* mesh);
 		//void DumpPolyline(std::ofstream& fileStream, const Polyline* polyline);

@@ -37,14 +37,14 @@ void AxisAlignedBoundingBox::operator=(const AxisAlignedBoundingBox& aabb)
 	this->max = aabb.max;
 }
 
-bool AxisAlignedBoundingBox::ContainsPoint(const Vector& point, double eps /*= 0.0*/) const
+bool AxisAlignedBoundingBox::ContainsPoint(const Vector3& point, double eps /*= 0.0*/) const
 {
 	return (-eps + this->min.x <= point.x && point.x <= this->max.x + eps) &&
 			(-eps + this->min.y <= point.y && point.y <= this->max.y + eps) &&
 			(-eps + this->min.z <= point.z && point.z <= this->max.z + eps);
 }
 
-void AxisAlignedBoundingBox::MinimallyExpandToContainPoint(const Vector& point)
+void AxisAlignedBoundingBox::MinimallyExpandToContainPoint(const Vector3& point)
 {
 	if (!this->IsValid())
 		this->min = this->max = point;
@@ -143,7 +143,7 @@ bool AxisAlignedBoundingBox::Intersect(const AxisAlignedBoundingBox& aabb0, cons
 	return false;
 }
 
-Vector AxisAlignedBoundingBox::Center() const
+Vector3 AxisAlignedBoundingBox::Center() const
 {
 	return this->min + (this->max - this->min) * 0.5;
 }

@@ -7,7 +7,7 @@
 #include "FileAssets/Mesh.h"
 #include "Renderer.h"
 #include "ProfileBlock.h"
-#include "Vector.h"
+#include "Vector3.h"
 
 #define MAX_LOADSTRING 100
 

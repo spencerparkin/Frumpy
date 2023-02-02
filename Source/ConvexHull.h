@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Vector.h"
+#include "Vector3.h"
 #include "Plane.h"
 #include "List.h"
-#include "Matrix.h"
+#include "Matrix4x4.h"
 #include "Aabb.h"
 #include <vector>
 #include <set>
@@ -30,25 +30,25 @@ namespace Frumpy
 			REGULAR_DODECAHEDRON
 		};
 
-		bool Generate(const List<Vector>& pointCloudList, bool compressFacets = false);
+		bool Generate(const List<Vector3>& pointCloudList, bool compressFacets = false);
 		bool Generate(const Frustum& frustum);
 		bool Generate(const AxisAlignedBoundingBox& aabb);
 		bool Generate(Polyhedron polyhedron, double uniformScale);
 		Mesh* Generate(void) const;
-		void Transform(const Matrix& transformMatrix);
+		void Transform(const Matrix4x4& transformMatrix);
 		bool OverlapsWith(const ConvexHull& convexHull, double eps = FRUMPY_EPS) const;
 		bool OverlapsWith(const Triangle& triangle, double eps = FRUMPY_EPS) const;
-		bool ContainsPoint(const Vector& point, double eps = FRUMPY_EPS) const;
-		bool AddPoint(const Vector& point, double eps = FRUMPY_EPS);		// Return value indicates whether the hull expanded.
-		const Vector& GetPoint(int i) const;
-		Vector CalcCenter() const;
+		bool ContainsPoint(const Vector3& point, double eps = FRUMPY_EPS) const;
+		bool AddPoint(const Vector3& point, double eps = FRUMPY_EPS);		// Return value indicates whether the hull expanded.
+		const Vector3& GetPoint(int i) const;
+		Vector3 CalcCenter() const;
 		void CompressFacets();
 		void RegenerateEdgeSetIfNecessary() const;
-		bool LineSegmentHitsHull(const Vector& pointA, const Vector& pointB, double eps = FRUMPY_EPS) const;
+		bool LineSegmentHitsHull(const Vector3& pointA, const Vector3& pointB, double eps = FRUMPY_EPS) const;
 
 	private:
 
-		bool FindInitialTetrahedron(const List<Vector>& pointCloudList);
+		bool FindInitialTetrahedron(const List<Vector3>& pointCloudList);
 		bool AnyPointInGivenConvexHull(const ConvexHull& convexHull, double eps) const;
 		bool AnyEdgeHitsGivenConvexHull(const ConvexHull& convexHull, double eps) const;
 
@@ -69,7 +69,7 @@ namespace Frumpy
 		
 		bool CompressFacetPair(const Facet& facetA, const Facet& facetB, Facet& compressedFacet);
 
-		std::vector<Vector>* pointArray;  // No 3 points should ever by co-linear.
+		std::vector<Vector3>* pointArray;  // No 3 points should ever by co-linear.
 		std::vector<Facet>* facetArray;
 
 		struct Edge

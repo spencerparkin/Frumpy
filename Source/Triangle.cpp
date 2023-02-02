@@ -11,30 +11,30 @@ Triangle::Triangle()
 {
 }
 
-bool Triangle::CalcBarycentricCoordinates(const Vector& interiorPoint, Vector& baryCoords) const
+bool Triangle::CalcBarycentricCoordinates(const Vector3& interiorPoint, Vector3& baryCoords) const
 {
-	Vector edgeU = this->vertex[1] - this->vertex[0];
-	Vector edgeV = this->vertex[2] - this->vertex[0];
-	Vector point = interiorPoint - this->vertex[0];
+	Vector3 edgeU = this->vertex[1] - this->vertex[0];
+	Vector3 edgeV = this->vertex[2] - this->vertex[0];
+	Vector3 point = interiorPoint - this->vertex[0];
 
-	Vector xAxis = edgeU;
+	Vector3 xAxis = edgeU;
 	if (!xAxis.Normalize())
 		return false;
 
-	Vector yAxis = edgeV;
+	Vector3 yAxis = edgeV;
 	if (!yAxis.Normalize())
 		return false;
 
-	yAxis = yAxis - xAxis * Vector::Dot(yAxis, xAxis);
+	yAxis = yAxis - xAxis * Vector3::Dot(yAxis, xAxis);
 	if (!yAxis.Normalize())
 		return false;
 
-	double px = Vector::Dot(point, xAxis);
-	double py = Vector::Dot(point, yAxis);
-	double ux = Vector::Dot(edgeU, xAxis);
-	double uy = Vector::Dot(edgeU, yAxis);
-	double vx = Vector::Dot(edgeV, xAxis);
-	double vy = Vector::Dot(edgeV, yAxis);
+	double px = Vector3::Dot(point, xAxis);
+	double py = Vector3::Dot(point, yAxis);
+	double ux = Vector3::Dot(edgeU, xAxis);
+	double uy = Vector3::Dot(edgeU, yAxis);
+	double vx = Vector3::Dot(edgeV, xAxis);
+	double vy = Vector3::Dot(edgeV, yAxis);
 
 	double det = ux * vy - uy * vx;
 	if (det == 0.0)
@@ -57,7 +57,7 @@ bool Triangle::CalcBarycentricCoordinates(const Vector& interiorPoint, Vector& b
 
 double Triangle::Area() const
 {
-	Vector product;
+	Vector3 product;
 	product.Cross(this->vertex[1] - this->vertex[0], this->vertex[2] - this->vertex[0]);
 	return product.Length() / 2.0;
 }
@@ -67,11 +67,11 @@ double Triangle::SmallestInteriorAngle() const
 	double smallestAngle = FLT_MAX;
 	for (int i = 0; i < 3; i++)
 	{
-		const Vector& vertexA = this->vertex[i];
-		const Vector& vertexB = this->vertex[(i + 1) % 3];
-		const Vector& vertexC = this->vertex[(i + 2) % 3];
+		const Vector3& vertexA = this->vertex[i];
+		const Vector3& vertexB = this->vertex[(i + 1) % 3];
+		const Vector3& vertexC = this->vertex[(i + 2) % 3];
 
-		double angle = Vector::AngleBetween(vertexB - vertexA, vertexC - vertexA);
+		double angle = Vector3::AngleBetween(vertexB - vertexA, vertexC - vertexA);
 		if (angle < smallestAngle)
 			smallestAngle = angle;
 	}
@@ -79,7 +79,7 @@ double Triangle::SmallestInteriorAngle() const
 	return smallestAngle;
 }
 
-bool Triangle::CalcNormal(Vector& normal) const
+bool Triangle::CalcNormal(Vector3& normal) const
 {
 	normal.Cross(this->vertex[1] - this->vertex[0], this->vertex[2] - this->vertex[0]);
 	return normal.Normalize();

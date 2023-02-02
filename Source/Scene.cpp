@@ -47,7 +47,7 @@ void Scene::ForAllObjects(std::function<bool(Object*)> lambda)
 	}
 }
 
-void Scene::GenerateVisibleObjectsList(const Camera* camera, ObjectList& visibleObjectList, const Matrix& worldToCamera) const
+void Scene::GenerateVisibleObjectsList(const Camera* camera, ObjectList& visibleObjectList, const Matrix4x4& worldToCamera) const
 {
 	// Go determine the list of objects visible to the viewing frustum of the given camera.  This, of
 	// course, does not account for any kind of occlusion that may be taking place.  The depth buffer will
@@ -87,7 +87,7 @@ bool Scene::Object::GetRenderFlag(RenderFlag renderFlag) const
 	return (this->renderFlags & flagBit) != 0;
 }
 
-/*virtual*/ void Scene::Object::CalculateWorldTransform(const Matrix& parentToWorld) const
+/*virtual*/ void Scene::Object::CalculateWorldTransform(const Matrix4x4& parentToWorld) const
 {
 	this->objectToWorld = parentToWorld * this->childToParent;
 
@@ -103,7 +103,7 @@ bool Scene::Object::GetRenderFlag(RenderFlag renderFlag) const
 	// This method must be overridden for anything to actually get rendered.
 }
 
-/*virtual*/ bool Scene::Object::IntersectsFrustum(const ConvexHull& frustumHull, const Matrix& worldToCamera) const
+/*virtual*/ bool Scene::Object::IntersectsFrustum(const ConvexHull& frustumHull, const Matrix4x4& worldToCamera) const
 {
 	// Deriviative classes should override this function as well.
 	return true;

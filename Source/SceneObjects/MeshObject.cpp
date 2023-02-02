@@ -19,7 +19,7 @@ MeshObject::MeshObject()
 {
 }
 
-/*virtual*/ bool MeshObject::IntersectsFrustum(const ConvexHull& frustumHull, const Matrix& worldToCamera) const
+/*virtual*/ bool MeshObject::IntersectsFrustum(const ConvexHull& frustumHull, const Matrix4x4& worldToCamera) const
 {
 	if (!this->objectSpaceBoundingHullValid)
 	{
@@ -50,7 +50,7 @@ MeshObject::MeshObject()
 		this->objectSpaceBoundingHullValid = true;
 	}
 
-	Matrix objectToCamera = worldToCamera * this->objectToWorld;
+	Matrix4x4 objectToCamera = worldToCamera * this->objectToWorld;
 
 	ConvexHull cameraSpaceBoundingHull(this->objectSpaceBoundingHull);
 	cameraSpaceBoundingHull.Transform(objectToCamera);
@@ -63,8 +63,8 @@ MeshObject::MeshObject()
 	if (!this->mesh)
 		return;
 
-	Matrix objectToImage = renderer.GetGraphicsMatrices().worldToImage * this->objectToWorld;
-	Matrix objectToCamera = renderer.GetGraphicsMatrices().worldToCamera * this->objectToWorld;
+	Matrix4x4 objectToImage = renderer.GetGraphicsMatrices().worldToImage * this->objectToWorld;
+	Matrix4x4 objectToCamera = renderer.GetGraphicsMatrices().worldToCamera * this->objectToWorld;
 
 	for (unsigned int i = 0; i < this->mesh->GetVertexBufferSize(); i++)
 	{
@@ -91,12 +91,12 @@ MeshObject::MeshObject()
 		const Vertex& vertexB = *this->mesh->GetVertex(indexB);
 		const Vertex& vertexC = *this->mesh->GetVertex(indexC);
 
-		const Vector& pointA = vertexA.imageSpacePoint;
-		const Vector& pointB = vertexB.imageSpacePoint;
-		const Vector& pointC = vertexC.imageSpacePoint;
+		const Vector3& pointA = vertexA.imageSpacePoint;
+		const Vector3& pointB = vertexB.imageSpacePoint;
+		const Vector3& pointC = vertexC.imageSpacePoint;
 
 		// Perform back-face culling in image space.
-		Vector triangleNorm;
+		Vector3 triangleNorm;
 		triangleNorm.Cross(pointB - pointA, pointC - pointA);
 		if (triangleNorm.z < 0.0)
 			continue;

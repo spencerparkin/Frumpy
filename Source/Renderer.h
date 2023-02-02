@@ -2,7 +2,7 @@
 
 #include "Defines.h"
 #include "List.h"
-#include "Matrix.h"
+#include "Matrix4x4.h"
 #include "LightSources/AmbientLight.h"
 #include "FileAssets/Image.h"
 #include <mutex>
@@ -21,11 +21,11 @@ namespace Frumpy
 	{
 		void Calculate(const Camera& camera, const Image& target);
 
-		Matrix worldToCamera;
-		Matrix cameraToProjection;
-		Matrix projectionToImage;
-		Matrix worldToImage;
-		Matrix imageToCamera;
+		Matrix4x4 worldToCamera;
+		Matrix4x4 cameraToProjection;
+		Matrix4x4 projectionToImage;
+		Matrix4x4 worldToImage;
+		Matrix4x4 imageToCamera;
 	};
 
 	class FRUMPY_API Renderer
@@ -53,7 +53,7 @@ namespace Frumpy
 		void SetShadowBuffer(Image* shadowBuffer) { this->shadowBuffer = shadowBuffer; }
 		Image* GetShadowBuffer() { return this->shadowBuffer; }
 
-		void SetClearColor(const Vector& clearColor);
+		void SetClearColor(const Vector3& clearColor);
 
 		const GraphicsMatrices& GetGraphicsMatrices() const { return this->graphicsMatrices; }
 

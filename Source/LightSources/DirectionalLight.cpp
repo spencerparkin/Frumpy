@@ -17,9 +17,9 @@ DirectionalLight::DirectionalLight()
 	graphicsMatrices.worldToCamera.TransformVector(this->worldSpaceDirection, this->cameraSpaceDirection);
 }
 
-/*virtual*/ void DirectionalLight::CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector& surfaceColor, const Image* shadowBuffer) const
+/*virtual*/ void DirectionalLight::CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector3& surfaceColor, const Image* shadowBuffer) const
 {
-	double dot = Vector::Dot(surfaceProperties.cameraSpaceNormal, this->cameraSpaceDirection);
+	double dot = Vector3::Dot(surfaceProperties.cameraSpaceNormal, this->cameraSpaceDirection);
 	if (dot < 0.0)
 		surfaceColor = surfaceProperties.diffuseColor * -dot * this->mainIntensity;
 

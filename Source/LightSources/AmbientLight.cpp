@@ -15,7 +15,7 @@ AmbientLight::AmbientLight()
 {
 }
 
-/*virtual*/ void AmbientLight::CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector& surfaceColor, const Image* shadowBuffer) const
+/*virtual*/ void AmbientLight::CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector3& surfaceColor, const Image* shadowBuffer) const
 {
 	surfaceColor = surfaceProperties.diffuseColor * this->ambientIntensity;
 

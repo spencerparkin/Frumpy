@@ -1,30 +1,30 @@
 #pragma once
 
 #include "Defines.h"
-#include "Vector.h"
+#include "Vector3.h"
 
 namespace Frumpy
 {
 	class Triangle;
-	class Matrix;
+	class Matrix4x4;
 
 	class FRUMPY_API Plane
 	{
 	public:
 		Plane();
-		Plane(const Vector& point, const Vector& normal);
+		Plane(const Vector3& point, const Vector3& normal);
 		virtual ~Plane();
 
-		bool SetFromPointAndVector(const Vector& point, const Vector& normal);
-		bool GetToPointAndVector(Vector& point, Vector& normal) const;
+		bool SetFromPointAndVector(const Vector3& point, const Vector3& normal);
+		bool GetToPointAndVector(Vector3& point, Vector3& normal) const;
 		void SetFromTriangle(const Triangle& triangle);
-		double SignedDistanceToPoint(const Vector& point) const;
-		bool ContainsPoint(const Vector& point, double planeThickness) const;
-		bool RayCast(const Vector& rayOrigin, const Vector& rayDirection, double& lambda) const;
-		void Transform(const Matrix& transformMatrix, bool isRigidBodyTransform);
+		double SignedDistanceToPoint(const Vector3& point) const;
+		bool ContainsPoint(const Vector3& point, double planeThickness) const;
+		bool RayCast(const Vector3& rayOrigin, const Vector3& rayDirection, double& lambda) const;
+		void Transform(const Matrix4x4& transformMatrix, bool isRigidBodyTransform);
 		bool IsEqualTo(const Plane& plane, double eps = FRUMPY_EPS) const;
 
-		Vector unitNormal;
+		Vector3 unitNormal;
 		double distance;
 	};
 }

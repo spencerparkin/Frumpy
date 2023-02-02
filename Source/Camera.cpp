@@ -12,20 +12,20 @@ Camera::Camera()
 {
 }
 
-bool Camera::LookAt(const Vector& eyePoint, const Vector& eyeTarget, const Vector& upDirection)
+bool Camera::LookAt(const Vector3& eyePoint, const Vector3& eyeTarget, const Vector3& upDirection)
 {
-	Vector zAxis = eyePoint - eyeTarget;
+	Vector3 zAxis = eyePoint - eyeTarget;
 	if (!zAxis.Normalize())
 		return false;
 
-	Vector yAxis;
+	Vector3 yAxis;
 	if (!yAxis.Rejection(upDirection, zAxis))
 		return false;
 
 	if (!yAxis.Normalize())
 		return false;
 
-	Vector xAxis;
+	Vector3 xAxis;
 	xAxis.Cross(yAxis, zAxis);
 
 	this->worldTransform.Identity();
@@ -62,7 +62,7 @@ void Frustum::AdjustHfoviForAspectRatio(double aspectRatio)
 	this->frustumHullValid = false;
 }
 
-void Frustum::CalcProjectionMatrix(Matrix& projectionMatrix) const
+void Frustum::CalcProjectionMatrix(Matrix4x4& projectionMatrix) const
 {
 	projectionMatrix.Projection(FRUMPY_DEGS_TO_RADS(this->hfovi), FRUMPY_DEGS_TO_RADS(this->vfovi), this->_near, this->_far);
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Defines.h"
-#include "Matrix.h"
+#include "Matrix4x4.h"
 #include "Plane.h"
 #include "List.h"
 #include "ConvexHull.h"
@@ -22,7 +22,7 @@ namespace Frumpy
 		void AdjustVFoviForAspectRatio(double aspectRatio);
 		void AdjustHfoviForAspectRatio(double aspectRatio);
 
-		void CalcProjectionMatrix(Matrix& projectionMatrix) const;
+		void CalcProjectionMatrix(Matrix4x4& projectionMatrix) const;
 
 		const ConvexHull& GetFrustumHull() const;
 
@@ -39,9 +39,9 @@ namespace Frumpy
 		Camera();
 		virtual ~Camera();
 
-		bool LookAt(const Vector& eyePoint, const Vector& eyeTarget, const Vector& upDirection);
+		bool LookAt(const Vector3& eyePoint, const Vector3& eyeTarget, const Vector3& upDirection);
 
-		Matrix worldTransform;
+		Matrix4x4 worldTransform;
 		Frustum frustum;
 	};
 }

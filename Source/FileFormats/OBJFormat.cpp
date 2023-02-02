@@ -66,7 +66,7 @@ void OBJFormat::ProcessTokenizedLine(const std::vector<std::string>& tokenArray,
 
 	if (tokenArray[0] == "v")
 	{
-		Vector point;
+		Vector3 point;
 		point.x = (tokenArray.size() > 1) ? ::atof(tokenArray[1].c_str()) : 0.0;
 		point.y = (tokenArray.size() > 2) ? ::atof(tokenArray[2].c_str()) : 0.0;
 		point.z = (tokenArray.size() > 3) ? ::atof(tokenArray[3].c_str()) : 0.0;
@@ -74,7 +74,7 @@ void OBJFormat::ProcessTokenizedLine(const std::vector<std::string>& tokenArray,
 	}
 	else if (tokenArray[0] == "vt")
 	{
-		Vector texCoords;
+		Vector3 texCoords;
 		texCoords.x = (tokenArray.size() > 1) ? ::atof(tokenArray[1].c_str()) : 0.0;
 		texCoords.y = (tokenArray.size() > 2) ? ::atof(tokenArray[2].c_str()) : 0.0;
 		texCoords.z = (tokenArray.size() > 3) ? ::atof(tokenArray[3].c_str()) : 0.0;
@@ -82,7 +82,7 @@ void OBJFormat::ProcessTokenizedLine(const std::vector<std::string>& tokenArray,
 	}
 	else if (tokenArray[0] == "vn")
 	{
-		Vector normal;
+		Vector3 normal;
 		normal.x = (tokenArray.size() > 1) ? ::atof(tokenArray[1].c_str()) : 0.0;
 		normal.y = (tokenArray.size() > 2) ? ::atof(tokenArray[2].c_str()) : 0.0;
 		normal.z = (tokenArray.size() > 3) ? ::atof(tokenArray[3].c_str()) : 0.0;
@@ -186,7 +186,7 @@ void OBJFormat::FlushMesh(List<AssetManager::Asset*>& assetList)
 	}
 }
 
-void OBJFormat::LookupAndAssign(const std::vector<Vector>& vectorArray, int i, Vector& result)
+void OBJFormat::LookupAndAssign(const std::vector<Vector3>& vectorArray, int i, Vector3& result)
 {
 	if (vectorArray.size() > 0 && i != INT_MAX)
 	{
@@ -334,7 +334,7 @@ void OBJFormat::DumpPolyline(std::ofstream& fileStream, const Polyline* polyline
 {
 	for (int i = 0; i < (int)polyline->vertexArray->size(); i++)
 	{
-		const Vector& vertex = (*polyline->vertexArray)[i];
+		const Vector3& vertex = (*polyline->vertexArray)[i];
 		fileStream << "v " << vertex.x << " " << vertex.y << " " << vertex.z << "\n";
 	}
 

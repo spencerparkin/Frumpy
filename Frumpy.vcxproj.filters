@@ -25,10 +25,10 @@
     <ClInclude Include="Source\Scene.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Matrix.h">
+    <ClInclude Include="Source\Matrix4x4.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Vector.h">
+    <ClInclude Include="Source\Vector3.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\List.h">
@@ -96,10 +96,10 @@
     <ClCompile Include="Source\Scene.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Matrix.cpp">
+    <ClCompile Include="Source\Matrix4x4.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Vector.cpp">
+    <ClCompile Include="Source\Vector3.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Camera.cpp">

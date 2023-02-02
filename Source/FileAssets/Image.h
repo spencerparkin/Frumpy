@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Defines.h"
-#include "../Matrix.h"
+#include "../Matrix4x4.h"
 #include "../AssetManager.h"
 #include <stdint.h>
 
@@ -54,7 +54,7 @@ namespace Frumpy
 
 		double GetAspectRatio() const { return double(this->width) / double(this->height); }
 
-		void CalcImageMatrix(Matrix& imageMatrix) const;
+		void CalcImageMatrix(Matrix4x4& imageMatrix) const;
 
 		void SetAsCopyOf(const Image* image);
 
@@ -75,7 +75,7 @@ namespace Frumpy
 			};
 
 			void GetColorComponents(uint32_t& r, uint32_t& g, uint32_t& b, const Image* image) const;
-			void MakeColorVector(Vector& colorVector, const Image* image) const;
+			void MakeColorVector(Vector3& colorVector, const Image* image) const;
 		};
 
 		void Clear(const Pixel& pixel);
@@ -94,7 +94,7 @@ namespace Frumpy
 		bool SetPixel(const Location& location, uint32_t color);
 
 		uint32_t MakeColor(unsigned int r, unsigned int g, unsigned int b, unsigned int a) const;
-		uint32_t MakeColor(const Vector& colorVector) const;
+		uint32_t MakeColor(const Vector3& colorVector) const;
 
 		Pixel* GetPixel(unsigned int i)
 		{
@@ -107,8 +107,8 @@ namespace Frumpy
 			BILINEAR
 		};
 
-		void SampleColorVector(Vector& colorVector, const Vector& texCoords, SampleMethod sampleMethod) const;
-		void SampleColorVector(Vector& colorVector, const Location& location) const;
+		void SampleColorVector(Vector3& colorVector, const Vector3& texCoords, SampleMethod sampleMethod) const;
+		void SampleColorVector(Vector3& colorVector, const Location& location) const;
 
 		float SampleDepth(double uCoord, double vCoord) const;
 

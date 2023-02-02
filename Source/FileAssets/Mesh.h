@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../AssetManager.h"
-#include "../Vector.h"
+#include "../Vector3.h"
 #include "../Vertex.h"
 
 namespace Frumpy
@@ -25,7 +25,7 @@ namespace Frumpy
 		unsigned int GetIndex(unsigned int i) const;
 		bool SetIndex(unsigned int i, unsigned int index);
 
-		void SetColor(const Vector& color);
+		void SetColor(const Vector3& color);
 
 		Vertex* GetRawVertexBuffer() { return this->vertexBuffer; }
 		unsigned int* GetRawIndexBuffer() { return this->indexBuffer; }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Defines.h"
-#include "Vector.h"
+#include "Vector3.h"
 #include <string>
 
 namespace Frumpy
@@ -12,14 +12,14 @@ namespace Frumpy
 		Vertex();
 		virtual ~Vertex();
 
-		Vector objectSpacePoint;
-		Vector objectSpaceNormal;
-		Vector color;
-		Vector texCoords;
+		Vector3 objectSpacePoint;
+		Vector3 objectSpaceNormal;
+		Vector3 color;
+		Vector3 texCoords;
 
-		mutable Vector cameraSpacePoint;
-		mutable Vector imageSpacePoint;
-		mutable Vector cameraSpaceNormal;
+		mutable Vector3 cameraSpacePoint;
+		mutable Vector3 imageSpacePoint;
+		mutable Vector3 cameraSpaceNormal;
 
 		std::string MakeKey() const;
 	};

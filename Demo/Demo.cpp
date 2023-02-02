@@ -111,26 +111,26 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->scene = new Frumpy::Scene();
 
     this->camera = new Frumpy::Camera();
-    this->camera->LookAt(Frumpy::Vector(100.0, 100.0, 0.0), Frumpy::Vector(0.0, 20.0, 0.0), Frumpy::Vector(0.0, 1.0, 0.0));
+    this->camera->LookAt(Frumpy::Vector3(100.0, 100.0, 0.0), Frumpy::Vector3(0.0, 20.0, 0.0), Frumpy::Vector3(0.0, 1.0, 0.0));
 
     Frumpy::MeshObject* object = nullptr;
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Teapot001")));
-    object->GetMesh()->SetColor(Frumpy::Vector(1.0, 0.0, 0.0));
+    object->GetMesh()->SetColor(Frumpy::Vector3(1.0, 0.0, 0.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
-    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, 0.0));
+    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
     strcpy_s(object->name, "teapot");
     this->scene->objectList.AddTail(object);
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Torus001")));
-    object->GetMesh()->SetColor(Frumpy::Vector(0.0, 1.0, 0.0));
+    object->GetMesh()->SetColor(Frumpy::Vector3(0.0, 1.0, 0.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
-    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, -10.0));
+    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, -10.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
@@ -139,9 +139,9 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Box001")));
-    object->GetMesh()->SetColor(Frumpy::Vector(0.0, 0.0, 1.0));
+    object->GetMesh()->SetColor(Frumpy::Vector3(0.0, 0.0, 1.0));
     object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
-    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, 10.0));
+    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 10.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
@@ -150,7 +150,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Plane001")));
-    object->GetMesh()->SetColor(Frumpy::Vector(1.0, 1.0, 1.0));
+    object->GetMesh()->SetColor(Frumpy::Vector3(1.0, 1.0, 1.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, false);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, true);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, true);
@@ -159,51 +159,51 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Tetrahedron")));
-    object->GetMesh()->SetColor(Frumpy::Vector(1.0, 1.0, 0.0));
+    object->GetMesh()->SetColor(Frumpy::Vector3(1.0, 1.0, 0.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
-    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, 0.0));
+    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
     strcpy_s(object->name, "tetrahedron");
     this->scene->objectList.AddTail(object);
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Hexadron")));
-    object->GetMesh()->SetColor(Frumpy::Vector(0.0, 1.0, 1.0));
+    object->GetMesh()->SetColor(Frumpy::Vector3(0.0, 1.0, 1.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
-    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, 0.0));
+    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
     strcpy_s(object->name, "hexadron");
     this->scene->objectList.AddTail(object);
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Octahedron")));
-    object->GetMesh()->SetColor(Frumpy::Vector(1.0, 0.0, 1.0));
+    object->GetMesh()->SetColor(Frumpy::Vector3(1.0, 0.0, 1.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
-    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, 0.0));
+    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
     strcpy_s(object->name, "octahedron");
     this->scene->objectList.AddTail(object);
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Icosahedron")));
-    object->GetMesh()->SetColor(Frumpy::Vector(0.0, 0.5, 1.0));
+    object->GetMesh()->SetColor(Frumpy::Vector3(0.0, 0.5, 1.0));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
-    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, 0.0));
+    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
     strcpy_s(object->name, "icosahedron");
     this->scene->objectList.AddTail(object);
 
     object = new Frumpy::MeshObject();
     object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Dodecahedron")));
-    object->GetMesh()->SetColor(Frumpy::Vector(0.5, 1.0, 0.5));
+    object->GetMesh()->SetColor(Frumpy::Vector3(0.5, 1.0, 0.5));
     object->SetRenderFlag(Frumpy::MeshObject::CASTS_SHADOW, true);
     object->SetRenderFlag(Frumpy::MeshObject::CAN_BE_SHADOWED, false);
     object->SetRenderFlag(Frumpy::MeshObject::VISIBLE, false);
-    object->childToParent.SetTranslation(Frumpy::Vector(0.0, 20.0, 0.0));
+    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
     strcpy_s(object->name, "dodecahedron");
     this->scene->objectList.AddTail(object);
 
@@ -301,8 +301,8 @@ void Demo::Run()
             this->scene->ForAllObjects([=, &i](Frumpy::Scene::Object* object) -> bool {
                 if (0 != strcmp(object->name, "ground_plane"))
                 {
-                    Frumpy::Vector translation;
-                    Frumpy::Vector axis;
+                    Frumpy::Vector3 translation;
+                    Frumpy::Vector3 axis;
                     if (i == 0)
                         axis.SetComponents(1.0, 0.0, 0.0);
                     else if (i == 1)
@@ -322,9 +322,9 @@ void Demo::Run()
         {
             this->cameraRotationAngle += this->cameraRotationRate * deltaTimeSeconds;
             static double radius = 100.0;
-            Frumpy::Vector upDirection(0.0, 1.0, 0.0);
-            Frumpy::Vector eyePoint(radius * cos(FRUMPY_DEGS_TO_RADS(this->cameraRotationAngle)), 100.0, radius * sin(FRUMPY_DEGS_TO_RADS(this->cameraRotationAngle)));
-            Frumpy::Vector eyeTarget(0.0, 0.0, 0.0);
+            Frumpy::Vector3 upDirection(0.0, 1.0, 0.0);
+            Frumpy::Vector3 eyePoint(radius * cos(FRUMPY_DEGS_TO_RADS(this->cameraRotationAngle)), 100.0, radius * sin(FRUMPY_DEGS_TO_RADS(this->cameraRotationAngle)));
+            Frumpy::Vector3 eyeTarget(0.0, 0.0, 0.0);
             this->camera->LookAt(eyePoint, eyeTarget, upDirection);
         }
         else
@@ -415,11 +415,11 @@ void Demo::HandleKeyboardInput(double deltaTimeSeconds)
 {
     if (this->hWnd == GetFocus())
     {
-        Frumpy::Vector cameraRight, cameraForward, cameraUp;
+        Frumpy::Vector3 cameraRight, cameraForward, cameraUp;
         this->camera->worldTransform.GetAxes(cameraRight, cameraUp, cameraForward);
         cameraForward *= -1.0;
 
-        Frumpy::Vector cameraVelocity;
+        Frumpy::Vector3 cameraVelocity;
         double cameraSpeed = 20.0;
 
         if ((GetAsyncKeyState('E') & 0x8000) != 0x0000)
@@ -431,7 +431,7 @@ void Demo::HandleKeyboardInput(double deltaTimeSeconds)
         if ((GetAsyncKeyState('F') & 0x8000) != 0x0000)
             cameraVelocity += cameraRight * cameraSpeed;
 
-        Frumpy::Vector cameraPosition;
+        Frumpy::Vector3 cameraPosition;
         this->camera->worldTransform.GetCol(3, cameraPosition);
         cameraPosition += cameraVelocity * deltaTimeSeconds;
         this->camera->worldTransform.SetCol(3, cameraPosition);
@@ -863,10 +863,10 @@ LRESULT Demo::HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
                     double yawDelta = -deltaX * mouseSensativity;
                     double pitchDelta = -deltaY * mouseSensativity;
 
-                    Frumpy::Vector cameraRight, cameraUp, cameraForward;
+                    Frumpy::Vector3 cameraRight, cameraUp, cameraForward;
                     this->camera->worldTransform.GetAxes(cameraRight, cameraUp, cameraForward);
 
-                    Frumpy::Vector upVector(0.0, 1.0, 0.0);
+                    Frumpy::Vector3 upVector(0.0, 1.0, 0.0);
                     cameraRight.Rotation(cameraRight, upVector, yawDelta);
                     cameraUp.Rotation(cameraUp, upVector, yawDelta);
                     cameraForward.Rotation(cameraForward, upVector, yawDelta);

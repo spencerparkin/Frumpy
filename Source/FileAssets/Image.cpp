@@ -1,5 +1,5 @@
 #include "Image.h"
-#include "../Vector.h"
+#include "../Vector3.h"
 #include <string.h>
 #include <math.h>
 
@@ -60,7 +60,7 @@ uint32_t Image::MakeColor(unsigned int r, unsigned int g, unsigned int b, unsign
 	return (r << this->format.rShift) | (g << this->format.gShift) | (b << this->format.bShift) | (a << this->format.aShift);
 }
 
-uint32_t Image::MakeColor(const Vector& colorVector) const
+uint32_t Image::MakeColor(const Vector3& colorVector) const
 {
 	unsigned int r = FRUMPY_CLAMP((unsigned int)(colorVector.x * 255.0), 0, 255);
 	unsigned int g = FRUMPY_CLAMP((unsigned int)(colorVector.y * 255.0), 0, 255);
@@ -146,7 +146,7 @@ float Image::SampleDepth(double uCoord, double vCoord) const
 	return pixel->depth;
 }
 
-void Image::SampleColorVector(Vector& colorVector, const Vector& texCoords, SampleMethod sampleMethod) const
+void Image::SampleColorVector(Vector3& colorVector, const Vector3& texCoords, SampleMethod sampleMethod) const
 {
 	double approxRow = texCoords.y * double(this->height);
 	double approxCol = texCoords.x * double(this->width);
@@ -177,7 +177,7 @@ void Image::SampleColorVector(Vector& colorVector, const Vector& texCoords, Samp
 			unsigned int minColInt = unsigned int(minCol) % this->width;
 			unsigned int maxColInt = unsigned int(maxCol) % this->width;
 
-			Vector color00, color01, color10, color11;
+			Vector3 color00, color01, color10, color11;
 
 			this->SampleColorVector(color00, Location{ minRowInt, minColInt });
 			this->SampleColorVector(color01, Location{ minRowInt, maxColInt });
@@ -200,7 +200,7 @@ void Image::SampleColorVector(Vector& colorVector, const Vector& texCoords, Samp
 	}
 }
 
-void Image::SampleColorVector(Vector& colorVector, const Location& location) const
+void Image::SampleColorVector(Vector3& colorVector, const Location& location) const
 {
 	const Pixel* pixel = this->GetPixel(location);
 
@@ -209,7 +209,7 @@ void Image::SampleColorVector(Vector& colorVector, const Location& location) con
 	colorVector.z = double((pixel->color & (0xFF << this->format.bShift)) >> this->format.bShift) / 255.0;
 }
 
-void Image::CalcImageMatrix(Matrix& imageMatrix) const
+void Image::CalcImageMatrix(Matrix4x4& imageMatrix) const
 {
 	imageMatrix.Identity();
 	imageMatrix.ele[0][0] = double(this->width) / 2.0;
@@ -225,7 +225,7 @@ void Image::Pixel::GetColorComponents(uint32_t& r, uint32_t& g, uint32_t& b, con
 	b = (this->color & (0xFF << image->format.bShift)) >> image->format.bShift;
 }
 
-void Image::Pixel::MakeColorVector(Vector& colorVector, const Image* image) const
+void Image::Pixel::MakeColorVector(Vector3& colorVector, const Image* image) const
 {
 	uint32_t r, g, b;
 
@@ -266,14 +266,14 @@ void Image::ConvertDepthToGreyScale(float depthIgnore)
 			float depth = -pixel->depth;
 			if (depth == depthIgnore)
 			{
-				Vector colorVector(1.0, 0.0, 0.0);
+				Vector3 colorVector(1.0, 0.0, 0.0);
 				pixel->color = this->MakeColor(colorVector);
 			}
 			else
 			{
 				float scale = (depth - minZ) / (maxZ - minZ);
 				scale = FRUMPY_CLAMP(scale, 0.0f, 1.0f);
-				Vector colorVector(scale, scale, scale);
+				Vector3 colorVector(scale, scale, scale);
 				pixel->color = this->MakeColor(colorVector);
 			}
 		}

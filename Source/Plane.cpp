@@ -1,7 +1,7 @@
 #include "Plane.h"
-#include "Vector.h"
+#include "Vector3.h"
 #include "Triangle.h"
-#include "Matrix.h"
+#include "Matrix4x4.h"
 #include <math.h>
 
 using namespace Frumpy;
@@ -12,7 +12,7 @@ Plane::Plane()
 	this->distance = 0.0;
 }
 
-Plane::Plane(const Vector& point, const Vector& normal)
+Plane::Plane(const Vector3& point, const Vector3& normal)
 {
 	this->SetFromPointAndVector(point, normal);
 }
@@ -32,17 +32,17 @@ bool Plane::IsEqualTo(const Plane& plane, double eps /*= FRUMPY_EPS*/) const
 	return true;
 }
 
-bool Plane::SetFromPointAndVector(const Vector& point, const Vector& normal)
+bool Plane::SetFromPointAndVector(const Vector3& point, const Vector3& normal)
 {
 	this->unitNormal = normal;
 	if (!this->unitNormal.Normalize())
 		return false;
 
-	this->distance = Vector::Dot(point, this->unitNormal);
+	this->distance = Vector3::Dot(point, this->unitNormal);
 	return true;
 }
 
-bool Plane::GetToPointAndVector(Vector& point, Vector& normal) const
+bool Plane::GetToPointAndVector(Vector3& point, Vector3& normal) const
 {
 	normal = this->unitNormal;
 	point = this->unitNormal;
@@ -52,35 +52,35 @@ bool Plane::GetToPointAndVector(Vector& point, Vector& normal) const
 
 void Plane::SetFromTriangle(const Triangle& triangle)
 {
-	Vector normal;
+	Vector3 normal;
 	normal.Cross(triangle.vertex[1] - triangle.vertex[0], triangle.vertex[2] - triangle.vertex[0]);
 	this->SetFromPointAndVector(triangle.vertex[0], normal);
 }
 
-double Plane::SignedDistanceToPoint(const Vector& point) const
+double Plane::SignedDistanceToPoint(const Vector3& point) const
 {
-	return Vector::Dot(point, this->unitNormal) - this->distance;
+	return Vector3::Dot(point, this->unitNormal) - this->distance;
 }
 
-bool Plane::ContainsPoint(const Vector& point, double planeThickness) const
+bool Plane::ContainsPoint(const Vector3& point, double planeThickness) const
 {
 	double distance = this->SignedDistanceToPoint(point);
 	return fabs(distance) <= planeThickness;
 }
 
-bool Plane::RayCast(const Vector& rayOrigin, const Vector& rayDirection, double& lambda) const
+bool Plane::RayCast(const Vector3& rayOrigin, const Vector3& rayDirection, double& lambda) const
 {
-	double numer = this->distance - Vector::Dot(rayOrigin, this->unitNormal);
-	double denom = Vector::Dot(rayDirection, this->unitNormal);
+	double numer = this->distance - Vector3::Dot(rayOrigin, this->unitNormal);
+	double denom = Vector3::Dot(rayDirection, this->unitNormal);
 	lambda = numer / denom;
 	if (lambda != lambda || lambda < 0.0)
 		return false;
 	return true;
 }
 
-void Plane::Transform(const Matrix& transformMatrix, bool isRigidBodyTransform)
+void Plane::Transform(const Matrix4x4& transformMatrix, bool isRigidBodyTransform)
 {
-	Vector point, normal;
+	Vector3 point, normal;
 	this->GetToPointAndVector(point, normal);
 
 	if (isRigidBodyTransform)

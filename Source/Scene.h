@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Defines.h"
-#include "Matrix.h"
+#include "Matrix4x4.h"
 #include "List.h"
 #include "Plane.h"
 #include <functional>
@@ -24,7 +24,7 @@ namespace Frumpy
 
 		Object* FindObjectByName(const char* name);
 		void ForAllObjects(std::function<bool(Object*)> lambda);
-		void GenerateVisibleObjectsList(const Camera* camera, ObjectList& visibleObjectList, const Matrix& worldToCamera) const;
+		void GenerateVisibleObjectsList(const Camera* camera, ObjectList& visibleObjectList, const Matrix4x4& worldToCamera) const;
 
 		// Derivatives of this are anything that might get rendered in the scene.
 		class FRUMPY_API Object
@@ -33,8 +33,8 @@ namespace Frumpy
 			Object();
 			virtual ~Object();
 
-			virtual void CalculateWorldTransform(const Matrix& parentToWorld) const;
-			virtual bool IntersectsFrustum(const ConvexHull& frustumHull, const Matrix& worldToCamera) const;
+			virtual void CalculateWorldTransform(const Matrix4x4& parentToWorld) const;
+			virtual bool IntersectsFrustum(const ConvexHull& frustumHull, const Matrix4x4& worldToCamera) const;
 			virtual void Render(Renderer& renderer, const Camera* camera) const;
 
 			enum RenderType
@@ -54,8 +54,8 @@ namespace Frumpy
 			bool GetRenderFlag(RenderFlag renderFlag) const;
 
 			char name[128];
-			Matrix childToParent;
-			mutable Matrix objectToWorld;
+			Matrix4x4 childToParent;
+			mutable Matrix4x4 objectToWorld;
 			ObjectList childObjectList;
 			RenderType renderType;
 			uint32_t renderFlags;

@@ -1,48 +1,48 @@
-#include "Vector.h"
+#include "Vector3.h"
 #include <math.h>
 
 using namespace Frumpy;
 
-Vector::Vector()
+Vector3::Vector3()
 {
 	this->x = 0.0;
 	this->y = 0.0;
 	this->z = 0.0;
 }
 
-Vector::Vector(double x, double y, double z)
+Vector3::Vector3(double x, double y, double z)
 {
 	this->x = x;
 	this->y = y;
 	this->z = z;
 }
 
-Vector::Vector(const Vector& vector)
+Vector3::Vector3(const Vector3& vector)
 {
 	this->x = vector.x;
 	this->y = vector.y;
 	this->z = vector.z;
 }
 
-/*virtual*/ Vector::~Vector()
+/*virtual*/ Vector3::~Vector3()
 {
 }
 
-void Vector::SetComponents(double x, double y, double z)
+void Vector3::SetComponents(double x, double y, double z)
 {
 	this->x = x;
 	this->y = y;
 	this->z = z;
 }
 
-void Vector::GetComponents(double& x, double& y, double& z) const
+void Vector3::GetComponents(double& x, double& y, double& z) const
 {
 	x = this->x;
 	y = this->y;
 	z = this->z;
 }
 
-Vector& Vector::operator=(const Vector& vector)
+Vector3& Vector3::operator=(const Vector3& vector)
 {
 	this->x = vector.x;
 	this->y = vector.y;
@@ -51,61 +51,61 @@ Vector& Vector::operator=(const Vector& vector)
 	return *this;
 }
 
-void Vector::operator+=(const Vector& vector)
+void Vector3::operator+=(const Vector3& vector)
 {
 	this->x += vector.x;
 	this->y += vector.y;
 	this->z += vector.z;
 }
 
-void Vector::operator-=(const Vector& vector)
+void Vector3::operator-=(const Vector3& vector)
 {
 	this->x -= vector.x;
 	this->y -= vector.y;
 	this->z -= vector.z;
 }
 
-void Vector::operator*=(double scalar)
+void Vector3::operator*=(double scalar)
 {
 	this->x *= scalar;
 	this->y *= scalar;
 	this->z *= scalar;
 }
 
-void Vector::operator/=(double scalar)
+void Vector3::operator/=(double scalar)
 {
 	this->x /= scalar;
 	this->y /= scalar;
 	this->z /= scalar;
 }
 
-void Vector::Add(const Vector& leftVector, const Vector& rightVector)
+void Vector3::Add(const Vector3& leftVector, const Vector3& rightVector)
 {
 	this->x = leftVector.x + rightVector.x;
 	this->y = leftVector.y + rightVector.y;
 	this->z = leftVector.z + rightVector.z;
 }
 
-void Vector::Subtract(const Vector& leftVector, const Vector& rightVector)
+void Vector3::Subtract(const Vector3& leftVector, const Vector3& rightVector)
 {
 	this->x = leftVector.x - rightVector.x;
 	this->y = leftVector.y - rightVector.y;
 	this->z = leftVector.z - rightVector.z;
 }
 
-void Vector::Cross(const Vector& leftVector, const Vector& rightVector)
+void Vector3::Cross(const Vector3& leftVector, const Vector3& rightVector)
 {
 	this->x = leftVector.y * rightVector.z - leftVector.z * rightVector.y;
 	this->y = leftVector.z * rightVector.x - leftVector.x * rightVector.z;
 	this->z = leftVector.x * rightVector.y - leftVector.y * rightVector.x;
 }
 
-bool Vector::IsEqualTo(const Vector& vector, double eps /*= FRUMPY_EPS*/) const
+bool Vector3::IsEqualTo(const Vector3& vector, double eps /*= FRUMPY_EPS*/) const
 {
 	return fabs(this->x - vector.x) < eps && fabs(this->y - vector.y) < eps && fabs(this->z - vector.z) < eps;
 }
 
-/*static*/ double Vector::Dot(const Vector& leftVector, const Vector& rightVector)
+/*static*/ double Vector3::Dot(const Vector3& leftVector, const Vector3& rightVector)
 {
 	double dot =
 		leftVector.x * rightVector.x +
@@ -115,30 +115,30 @@ bool Vector::IsEqualTo(const Vector& vector, double eps /*= FRUMPY_EPS*/) const
 	return dot;
 }
 
-/*static*/ double Vector::AngleBetween(const Vector& vectorA, const Vector& vectorB)
+/*static*/ double Vector3::AngleBetween(const Vector3& vectorA, const Vector3& vectorB)
 {
-	Vector unitVectorA = vectorA;
-	Vector unitVectorB = vectorB;
+	Vector3 unitVectorA = vectorA;
+	Vector3 unitVectorB = vectorB;
 
 	unitVectorA.Normalize();
 	unitVectorB.Normalize();
 
-	return acos(Vector::Dot(unitVectorA, unitVectorB));
+	return acos(Vector3::Dot(unitVectorA, unitVectorB));
 }
 
-double Vector::Length() const
+double Vector3::Length() const
 {
 	return sqrt(Dot(*this, *this));
 }
 
-void Vector::Scale(double scalar)
+void Vector3::Scale(double scalar)
 {
 	this->x *= scalar;
 	this->y *= scalar;
 	this->z *= scalar;
 }
 
-bool Vector::Normalize()
+bool Vector3::Normalize()
 {
 	double length = this->Length();
 	if (length == 0.0)
@@ -152,7 +152,7 @@ bool Vector::Normalize()
 	return true;
 }
 
-bool Vector::Projection(const Vector& vectorA, const Vector& vectorB)
+bool Vector3::Projection(const Vector3& vectorA, const Vector3& vectorB)
 {
 	*this = vectorB;
 	if (!this->Normalize())
@@ -163,9 +163,9 @@ bool Vector::Projection(const Vector& vectorA, const Vector& vectorB)
 	return true;
 }
 
-bool Vector::Rejection(const Vector& vectorA, const Vector& vectorB)
+bool Vector3::Rejection(const Vector3& vectorA, const Vector3& vectorB)
 {
-	Vector projection;
+	Vector3 projection;
 	if (!projection.Projection(vectorA, vectorB))
 		return false;
 
@@ -173,14 +173,14 @@ bool Vector::Rejection(const Vector& vectorA, const Vector& vectorB)
 	return true;
 }
 
-bool Vector::Rotation(const Vector& vector, const Vector& axis, double angle)
+bool Vector3::Rotation(const Vector3& vector, const Vector3& axis, double angle)
 {
-	Vector unitAxis(axis);
+	Vector3 unitAxis(axis);
 	if (!unitAxis.Normalize())
 		return false;
 
-	Vector projection = unitAxis * Vector::Dot(vector, unitAxis);
-	Vector rejection = vector - projection;
+	Vector3 projection = unitAxis * Vector3::Dot(vector, unitAxis);
+	Vector3 rejection = vector - projection;
 	double length = rejection.Length();
 	if(length == 0.0)
 	{
@@ -188,11 +188,11 @@ bool Vector::Rotation(const Vector& vector, const Vector& axis, double angle)
 		return true;
 	}
 
-	Vector xAxis(rejection);
+	Vector3 xAxis(rejection);
 	if (!xAxis.Normalize())
 		return false;
 
-	Vector yAxis;
+	Vector3 yAxis;
 	yAxis.Cross(axis, xAxis);
 	if (!yAxis.Normalize())
 		return false;
@@ -202,49 +202,49 @@ bool Vector::Rotation(const Vector& vector, const Vector& axis, double angle)
 	return true;
 }
 
-void Vector::Lerp(const Vector& vectorA, const Vector& vectorB, double alpha)
+void Vector3::Lerp(const Vector3& vectorA, const Vector3& vectorB, double alpha)
 {
 	*this = vectorA * (1.0 - alpha) + vectorB * alpha;
 }
 
-void Vector::Slerp(const Vector& vectorA, const Vector& vectorB, double alpha)
+void Vector3::Slerp(const Vector3& vectorA, const Vector3& vectorB, double alpha)
 {
 	//...
 }
 
 namespace Frumpy
 {
-	Vector operator+(const Vector& leftVector, const Vector& rightVector)
+	Vector3 operator+(const Vector3& leftVector, const Vector3& rightVector)
 	{
-		Vector result;
+		Vector3 result;
 		result.Add(leftVector, rightVector);
 		return result;
 	}
 
-	Vector operator-(const Vector& leftVector, const Vector& rightVector)
+	Vector3 operator-(const Vector3& leftVector, const Vector3& rightVector)
 	{
-		Vector result;
+		Vector3 result;
 		result.Subtract(leftVector, rightVector);
 		return result;
 	}
 
-	Vector operator*(const Vector& vector, double scalar)
+	Vector3 operator*(const Vector3& vector, double scalar)
 	{
-		Vector result(vector);
+		Vector3 result(vector);
 		result.Scale(scalar);
 		return result;
 	}
 
-	Vector operator*(double scalar, const Vector& vector)
+	Vector3 operator*(double scalar, const Vector3& vector)
 	{
-		Vector result(vector);
+		Vector3 result(vector);
 		result.Scale(scalar);
 		return result;
 	}
 
-	Vector operator/(const Vector& vector, double scalar)
+	Vector3 operator/(const Vector3& vector, double scalar)
 	{
-		Vector result(vector);
+		Vector3 result(vector);
 		result.Scale(1.0 / scalar);
 		return result;
 	}

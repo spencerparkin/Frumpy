@@ -80,7 +80,7 @@ bool Mesh::SetIndex(unsigned int i, unsigned int index)
 	return true;
 }
 
-void Mesh::SetColor(const Vector& color)
+void Mesh::SetColor(const Vector3& color)
 {
 	for (unsigned int i = 0; i < this->vertexBufferSize; i++)
 		this->vertexBuffer[i].color = color;

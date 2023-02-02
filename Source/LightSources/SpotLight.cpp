@@ -28,17 +28,17 @@ SpotLight::SpotLight()
 	graphicsMatrices.worldToCamera.TransformVector(this->shadowMapZAxis, shadowMapZAxis);
 }
 
-/*virtual*/ void SpotLight::CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector& surfaceColor, const Image* shadowBuffer) const
+/*virtual*/ void SpotLight::CalcSurfaceColor(const SurfaceProperties& surfaceProperties, Vector3& surfaceColor, const Image* shadowBuffer) const
 {
 	surfaceColor = surfaceProperties.diffuseColor * this->ambientIntensity;
 
-	double dot = Vector::Dot(surfaceProperties.cameraSpaceNormal, this->cameraSpaceDirection);
+	double dot = Vector3::Dot(surfaceProperties.cameraSpaceNormal, this->cameraSpaceDirection);
 	if (dot < 0.0)
 	{
-		Vector vectorFromLightSource = surfaceProperties.cameraSpacePoint - this->cameraSpaceLocation;
+		Vector3 vectorFromLightSource = surfaceProperties.cameraSpacePoint - this->cameraSpaceLocation;
 		double distanceToLightSource = vectorFromLightSource.Length();	// TODO: This would factor in with the attenuation radius.  Use inverse square fall-off?
-		Vector unitVectorFromLightSource = vectorFromLightSource / distanceToLightSource;
-		double projectedLength = Vector::Dot(unitVectorFromLightSource, this->cameraSpaceDirection);
+		Vector3 unitVectorFromLightSource = vectorFromLightSource / distanceToLightSource;
+		double projectedLength = Vector3::Dot(unitVectorFromLightSource, this->cameraSpaceDirection);
 		double angleDegs = FRUMPY_RADS_TO_DEGS(acos(projectedLength));
 
 		double spotLightFactor = 0.0;
@@ -50,9 +50,9 @@ SpotLight::SpotLight()
 		double shadowFactor = 1.0;
 		if (shadowBuffer && angleDegs <= this->outerConeAngle)
 		{
-			Vector shadowMapPoint = unitVectorFromLightSource + this->shadowMapZAxis * projectedLength;
-			double shadowMapXComponent = Vector::Dot(shadowMapPoint, this->shadowMapXAxis);
-			double shadowMapYComponent = Vector::Dot(shadowMapPoint, this->shadowMapYAxis);
+			Vector3 shadowMapPoint = unitVectorFromLightSource + this->shadowMapZAxis * projectedLength;
+			double shadowMapXComponent = Vector3::Dot(shadowMapPoint, this->shadowMapXAxis);
+			double shadowMapYComponent = Vector3::Dot(shadowMapPoint, this->shadowMapYAxis);
 			double uCoord = (shadowMapXComponent + this->shadowMapExtent) / (2.0 * this->shadowMapExtent);
 			double vCoord = (shadowMapYComponent + this->shadowMapExtent) / (2.0 * this->shadowMapExtent);
 			double shortestLengthToLightSource = -shadowBuffer->SampleDepth(uCoord, vCoord);
@@ -74,7 +74,7 @@ SpotLight::SpotLight()
 
 /*virtual*/ bool SpotLight::CalcShadowCamera(Camera& shadowCamera) const
 {
-	if (!shadowCamera.LookAt(this->worldSpaceLocation, this->worldSpaceLocation + this->worldSpaceDirection, Vector(0.0, 1.0, 0.0)))
+	if (!shadowCamera.LookAt(this->worldSpaceLocation, this->worldSpaceLocation + this->worldSpaceDirection, Vector3(0.0, 1.0, 0.0)))
 		return false;
 
 	shadowCamera.frustum._near = 0.1;

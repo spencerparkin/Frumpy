@@ -16,7 +16,7 @@ namespace Frumpy
 		MeshObject();
 		virtual ~MeshObject();
 
-		virtual bool IntersectsFrustum(const ConvexHull& frustumHull, const Matrix& worldToCamera) const override;
+		virtual bool IntersectsFrustum(const ConvexHull& frustumHull, const Matrix4x4& worldToCamera) const override;
 		virtual void Render(Renderer& renderer, const Camera* camera) const override;
 
 		void SetMesh(Mesh* mesh) { this->mesh = mesh; }

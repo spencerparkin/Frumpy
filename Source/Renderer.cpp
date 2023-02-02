@@ -1,5 +1,5 @@
 #include "Renderer.h"
-#include "Vector.h"
+#include "Vector3.h"
 #include "FileAssets/Image.h"
 #include "LightSource.h"
 #include "Vertex.h"
@@ -95,7 +95,7 @@ void GraphicsMatrices::Calculate(const Camera& camera, const Image& target)
 void Renderer::RenderScene(const Scene* scene, const Camera* camera)
 {
 	// First, resolve the object-to-world transform for each object in the scene hierarchy.
-	Matrix parentToWorld;
+	Matrix4x4 parentToWorld;
 	parentToWorld.Identity();
 	for (const Scene::ObjectList::Node* node = scene->objectList.GetHead(); node; node = node->GetNext())
 	{
@@ -192,7 +192,7 @@ void Renderer::WaitForAllJobCompletion()
 	}
 }
 
-void Renderer::SetClearColor(const Vector& clearColor)
+void Renderer::SetClearColor(const Vector3& clearColor)
 {
 	this->clearPixel.color = this->frameBuffer->MakeColor(clearColor);
 }
@@ -296,8 +296,8 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 
 	struct Edge
 	{
-		const Vector* vertexA;
-		const Vector* vertexB;
+		const Vector3* vertexA;
+		const Vector3* vertexB;
 	};
 
 	Edge minEdges[2];
@@ -423,17 +423,17 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 		{
 			Image::Location location{ unsigned(row), unsigned(col) };
 
-			Vector imagePointA(double(col), double(row), 0.0);
-			Vector imagePointB(double(col), double(row), -1.0);
+			Vector3 imagePointA(double(col), double(row), 0.0);
+			Vector3 imagePointB(double(col), double(row), -1.0);
 
-			Vector cameraPointA, cameraPointB;
+			Vector3 cameraPointA, cameraPointB;
 
 			graphicsMatrices.imageToCamera.TransformPoint(imagePointA, cameraPointA);
 			graphicsMatrices.imageToCamera.TransformPoint(imagePointB, cameraPointB);
 
 			LightSource::SurfaceProperties surfaceProperties;
 
-			Vector rayDirection = cameraPointB - cameraPointA;	// Not sure why we can't just use cameraPointA = <0,0,0>.
+			Vector3 rayDirection = cameraPointB - cameraPointA;	// Not sure why we can't just use cameraPointA = <0,0,0>.
 			double lambda = 0.0;
 			if (planeOfTriangle.RayCast(cameraPointA, rayDirection, lambda))
 				surfaceProperties.cameraSpacePoint = cameraPointA + rayDirection * lambda;
@@ -449,13 +449,13 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 			if (thread->renderer->renderPass == RenderPass::SHADOW_PASS)
 				continue;
 
-			Vector baryCoords;
+			Vector3 baryCoords;
 			if (!triangle.CalcBarycentricCoordinates(surfaceProperties.cameraSpacePoint, baryCoords))
 				continue;
 
 			if (this->texture)
 			{
-				Vector interpolatedTexCoords =
+				Vector3 interpolatedTexCoords =
 					vertexA.texCoords * baryCoords.x +
 					vertexB.texCoords * baryCoords.y +
 					vertexC.texCoords * baryCoords.z;
@@ -481,7 +481,7 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 
 			surfaceProperties.cameraSpaceNormal.Normalize();
 
-			Vector surfaceColor;
+			Vector3 surfaceColor;
 			thread->renderer->lightSource->CalcSurfaceColor(surfaceProperties, surfaceColor, this->canBeShadowed ? thread->renderer->shadowBuffer : nullptr);
 
 			// TODO: Support alpha blending.  We'll have to do an opaque pass then an alpha pass.
