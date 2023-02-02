@@ -1,4 +1,5 @@
 #include "Math/Vector3.h"
+#include "Math/Vector4.h"
 #include <math.h>
 
 using namespace Frumpy;
@@ -22,6 +23,13 @@ Vector3::Vector3(const Vector3& vector)
 	this->x = vector.x;
 	this->y = vector.y;
 	this->z = vector.z;
+}
+
+Vector3::Vector3(const Vector4& vector)
+{
+	this->x = vector.x / vector.w;
+	this->y = vector.y / vector.w;
+	this->z = vector.z / vector.w;
 }
 
 /*virtual*/ Vector3::~Vector3()
@@ -209,7 +217,11 @@ void Vector3::Lerp(const Vector3& vectorA, const Vector3& vectorB, double alpha)
 
 void Vector3::Slerp(const Vector3& vectorA, const Vector3& vectorB, double alpha)
 {
-	//...
+	double angle = AngleBetween(vectorA, vectorB);
+	if (angle == 0.0)
+		this->Lerp(vectorA, vectorB, alpha);
+	else
+		*this = (vectorA * sin((1.0 - alpha) * angle) + vectorB * sin(alpha * angle)) / sin(angle);
 }
 
 namespace Frumpy

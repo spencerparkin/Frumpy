@@ -4,6 +4,8 @@
 
 namespace Frumpy
 {
+	class Vector4;
+
 	// These are 3-dimensional vectors geared toward 3D computer graphics applications.
 	class FRUMPY_API Vector3
 	{
@@ -11,6 +13,7 @@ namespace Frumpy
 		Vector3();
 		Vector3(double x, double y, double z);
 		Vector3(const Vector3& vector);
+		Vector3(const Vector4& vector);
 		virtual ~Vector3();
 
 		Vector3& operator=(const Vector3& vector);

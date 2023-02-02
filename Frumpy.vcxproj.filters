@@ -97,6 +97,9 @@
     <ClInclude Include="Source\Containers\Map.h">
       <Filter>Source\Containers</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Math\Vector4.h">
+      <Filter>Source\Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Scene.cpp">
@@ -160,6 +163,9 @@
       <Filter>Source\Math</Filter>
     </ClCompile>
     <ClCompile Include="Source\Math\Vector3.cpp">
+      <Filter>Source\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Vector4.cpp">
       <Filter>Source\Math</Filter>
     </ClCompile>
   </ItemGroup>

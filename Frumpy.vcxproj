@@ -38,6 +38,7 @@
     <ClInclude Include="Source\Math\Plane.h" />
     <ClInclude Include="Source\Math\Triangle.h" />
     <ClInclude Include="Source\Math\Vector3.h" />
+    <ClInclude Include="Source\Math\Vector4.h" />
     <ClInclude Include="Source\Renderer.h" />
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\SceneObjects\MeshObject.h" />
@@ -61,6 +62,7 @@
     <ClCompile Include="Source\Math\Plane.cpp" />
     <ClCompile Include="Source\Math\Triangle.cpp" />
     <ClCompile Include="Source\Math\Vector3.cpp" />
+    <ClCompile Include="Source\Math\Vector4.cpp" />
     <ClCompile Include="Source\Renderer.cpp" />
     <ClCompile Include="Source\Scene.cpp" />
     <ClCompile Include="Source\SceneObjects\MeshObject.cpp" />

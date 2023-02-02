@@ -5,6 +5,7 @@
 namespace Frumpy
 {
 	class Vector3;
+	class Vector4;
 
 	// These are 4x4 matrices geared toward 3D computer graphics applications.
 	class FRUMPY_API Matrix4x4
@@ -26,11 +27,13 @@ namespace Frumpy
 		// the inverse transpose of a matrix in order to transform vectors, I think.
 		void TransformVector(const Vector3& vector, Vector3& vectorTransformed) const;
 		void TransformPoint(const Vector3& point, Vector3& pointTransformed) const;
+		void TransformVector(const Vector4& vector, Vector4& vectorTransformed) const;
 
 		void Multiply(const Matrix4x4& leftMatrix, const Matrix4x4& rightMatrix);
 		bool Divide(const Matrix4x4& leftMatrix, const Matrix4x4& rightMatrix);
 
 		bool Invert(const Matrix4x4& matrix);
+		void Transpose(const Matrix4x4& matrix);
 
 		double Determinant() const;
 

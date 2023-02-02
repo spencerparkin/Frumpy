@@ -1,5 +1,6 @@
 #include "Math/Matrix4x4.h"
 #include "Math/Vector3.h"
+#include "Math/Vector4.h"
 #include <math.h>
 
 using namespace Frumpy;
@@ -114,6 +115,27 @@ void Matrix4x4::TransformPoint(const Vector3& point, Vector3& pointTransformed) 
 	}
 }
 
+void Matrix4x4::TransformVector(const Vector4& vector, Vector4& vectorTransformed) const
+{
+	vectorTransformed.SetComponents(
+		this->ele[0][0] * vector.x +
+		this->ele[0][1] * vector.y +
+		this->ele[0][2] * vector.z +
+		this->ele[0][3] * vector.w,
+		this->ele[1][0] * vector.x +
+		this->ele[1][1] * vector.y +
+		this->ele[1][2] * vector.z +
+		this->ele[1][3] * vector.w,
+		this->ele[2][0] * vector.x +
+		this->ele[2][1] * vector.y +
+		this->ele[2][2] * vector.z +
+		this->ele[2][3] * vector.w,
+		this->ele[3][0] * vector.x +
+		this->ele[3][1] * vector.y +
+		this->ele[3][2] * vector.z +
+		this->ele[3][3] * vector.w);
+}
+
 void Matrix4x4::Multiply(const Matrix4x4& leftMatrix, const Matrix4x4& rightMatrix)
 {
 	for (int i = 0; i < 4; i++)
@@ -163,6 +185,13 @@ bool Matrix4x4::Invert(const Matrix4x4& matrix)
 	this->ele[3][3] = (matrix.ele[0][0] * (matrix.ele[1][1] * matrix.ele[2][2] - matrix.ele[2][1] * matrix.ele[1][2]) - matrix.ele[0][1] * (matrix.ele[1][0] * matrix.ele[2][2] - matrix.ele[2][0] * matrix.ele[1][2]) + matrix.ele[0][2] * (matrix.ele[1][0] * matrix.ele[2][1] - matrix.ele[2][0] * matrix.ele[1][1])) / det;
 
 	return true;
+}
+
+void Matrix4x4::Transpose(const Matrix4x4& matrix)
+{
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+			this->ele[i][j] = matrix.ele[j][i];
 }
 
 double Matrix4x4::Determinant() const
