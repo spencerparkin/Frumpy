@@ -368,9 +368,12 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 		maxEdges[1].vertexB = &vertexB.imageSpacePoint;
 	}
 
-	int minRow = int(minY);
-	int maxRow = int(maxY);
-	int midRow = int(midY);
+	int minRow = int(::ceil(minY));
+	int maxRow = int(::floor(maxY));
+	int midRow = int(::ceil(midY));
+
+	if (double(maxRow) == maxY)
+		maxRow--;
 
 	minRow = FRUMPY_CLAMP(minRow, int(thread->minScanline), int(thread->maxScanline));
 	maxRow = FRUMPY_CLAMP(maxRow, int(thread->minScanline), int(thread->maxScanline));
@@ -414,8 +417,11 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 		double minX = FRUMPY_MIN(x0, x1);
 		double maxX = FRUMPY_MAX(x0, x1);
 
-		int minCol = int(minX);
-		int maxCol = int(maxX);
+		int minCol = int(::ceil(minX));
+		int maxCol = int(::floor(maxX));
+
+		if (double(maxCol) == maxX)
+			maxCol--;
 
 		minCol = FRUMPY_MAX(minCol, 0);
 		maxCol = FRUMPY_MIN(maxCol, int(frameBuffer->GetWidth() - 1));
