@@ -61,6 +61,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->assetManager->LoadAssets("Meshes/Cube.obj");
     this->assetManager->LoadAssets("Meshes/Torus.obj");
     this->assetManager->LoadAssets("Meshes/GroundPlane.obj");
+    this->assetManager->LoadAssets("Meshes/TubeSkeleton.fbx");
 
     Frumpy::ConvexHull convexHull;
     Frumpy::Mesh* mesh = nullptr;

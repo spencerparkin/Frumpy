@@ -1,6 +1,7 @@
 #include "AssetManager.h"
 #include "FileFormats/OBJFormat.h"
 #include "FileFormats/PPMFormat.h"
+#include "FileFormats/FBXFormat.h"
 
 using namespace Frumpy;
 
@@ -10,6 +11,7 @@ AssetManager::AssetManager()
 {
 	this->fileFormatList.AddTail(new OBJFormat());
 	this->fileFormatList.AddTail(new PPMFormat());
+	this->fileFormatList.AddTail(new FBXFormat());
 }
 
 /*virtual*/ AssetManager::~AssetManager()

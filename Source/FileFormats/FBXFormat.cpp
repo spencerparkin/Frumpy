@@ -184,6 +184,10 @@ bool FBXFormat::EatTokensFromLine(const char* buffer, int bufferSize, std::list<
 		while (i < bufferSize && ::isspace(buffer[i]))
 			i++;
 
+		// Reached end of line?
+		if (i >= bufferSize)
+			return true;
+
 		// We're done in this case, because the remainder of the line is a comment.
 		if (buffer[i] == ';')
 			return true;
@@ -192,10 +196,10 @@ bool FBXFormat::EatTokensFromLine(const char* buffer, int bufferSize, std::list<
 		Token token;
 		token.data = "";
 
-		if (::isalpha(buffer[i]))	// Bite off an identifier.
+		if (::isalpha(buffer[i]) || buffer[i] == '_')	// Bite off an identifier.
 		{
 			token.type = Token::IDENTIFIER;
-			while (i < bufferSize && ::isalnum(buffer[i]))
+			while (i < bufferSize && (::isalnum(buffer[i]) || buffer[i] == '_'))
 				token.data += buffer[i++];
 		}
 		else if (::isdigit(buffer[i]) || buffer[i] == '-' || buffer[i] == '*')	// Bite off a number.
@@ -203,7 +207,7 @@ bool FBXFormat::EatTokensFromLine(const char* buffer, int bufferSize, std::list<
 			token.type = Token::NUMBER;
 			while (i < bufferSize && (::isdigit(buffer[i]) || buffer[i] == '-' || buffer[i] == '*' || buffer[i] == '.'))
 			{
-				if (buffer[i] != '*')
+				if (buffer[i] != '*')	// TODO: What does the star mean?
 					token.data += buffer[i];
 				i++;
 			}
