@@ -100,6 +100,9 @@
     <ClInclude Include="Source\Math\Vector4.h">
       <Filter>Source\Math</Filter>
     </ClInclude>
+    <ClInclude Include="Source\FileFormats\FBXFormat.h">
+      <Filter>Source\FileFormats</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Scene.cpp">
@@ -167,6 +170,9 @@
     </ClCompile>
     <ClCompile Include="Source\Math\Vector4.cpp">
       <Filter>Source\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FileFormats\FBXFormat.cpp">
+      <Filter>Source\FileFormats</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -25,6 +25,7 @@
     <ClInclude Include="Source\Containers\Map.h" />
     <ClInclude Include="Source\FileAssets\Image.h" />
     <ClInclude Include="Source\FileAssets\Mesh.h" />
+    <ClInclude Include="Source\FileFormats\FBXFormat.h" />
     <ClInclude Include="Source\FileFormats\OBJFormat.h" />
     <ClInclude Include="Source\Defines.h" />
     <ClInclude Include="Source\FileFormats\PPMFormat.h" />
@@ -50,6 +51,7 @@
     <ClCompile Include="Source\Camera.cpp" />
     <ClCompile Include="Source\FileAssets\Image.cpp" />
     <ClCompile Include="Source\FileAssets\Mesh.cpp" />
+    <ClCompile Include="Source\FileFormats\FBXFormat.cpp" />
     <ClCompile Include="Source\FileFormats\OBJFormat.cpp" />
     <ClCompile Include="Source\FileFormats\PPMFormat.cpp" />
     <ClCompile Include="Source\LightSource.cpp" />
