@@ -96,11 +96,11 @@ namespace Frumpy
 			std::string data;
 		};
 
-		bool ParseAsciiFbxFile(const char* filePath, std::vector<Node*>& nodeArray);
+		Node* ParseAsciiFbxFile(const char* filePath);
 		bool TokenizeAsciiFbxFile(const char* filePath, std::list<Token>& tokenList);
 		bool EatTokensFromLine(const char* buffer, int bufferSize, std::list<Token>& tokenList);
 		bool ParseNodeArray(std::list<Token>& tokenList, std::vector<Node*>& nodeArray);
 		bool ParseNode(std::list<Token>& tokenList, Node* node);
-		bool LoadAssetsFromTree(const std::vector<Node*>& nodeArray, List<AssetManager::Asset*>& assetList);
+		bool LoadAssetsFromTree(const Node* rootNode, List<AssetManager::Asset*>& assetList);
 	};
 }

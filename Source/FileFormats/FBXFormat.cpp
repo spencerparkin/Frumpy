@@ -18,15 +18,12 @@ FBXFormat::FBXFormat()
 
 /*virtual*/ bool FBXFormat::LoadAssets(const char* filePath, List<AssetManager::Asset*>& assetList)
 {
-	std::vector<Node*> nodeArray;
-	if (!ParseAsciiFbxFile(filePath, nodeArray))
+	Node* rootNode = ParseAsciiFbxFile(filePath);
+	if (!rootNode)
 		return false;
 
-	bool success = this->LoadAssetsFromTree(nodeArray, assetList);
-
-	for (int i = 0; i < (signed)nodeArray.size(); i++)
-		delete nodeArray[i];
-
+	bool success = this->LoadAssetsFromTree(rootNode, assetList);
+	delete rootNode;
 	return success;
 }
 
@@ -36,20 +33,28 @@ FBXFormat::FBXFormat()
 	return false;
 }
 
-bool FBXFormat::LoadAssetsFromTree(const std::vector<Node*>& nodeArray, List<AssetManager::Asset*>& assetList)
+bool FBXFormat::LoadAssetsFromTree(const Node* rootNode, List<AssetManager::Asset*>& assetList)
 {
 	// TODO: Decipher the FBX data here.
 
 	return true;
 }
 
-bool FBXFormat::ParseAsciiFbxFile(const char* filePath, std::vector<Node*>& nodeArray)
+FBXFormat::Node* FBXFormat::ParseAsciiFbxFile(const char* filePath)
 {
 	std::list<Token> tokenList;
 	if (!this->TokenizeAsciiFbxFile(filePath, tokenList))
-		return false;
+		return nullptr;
 
-	return this->ParseNodeArray(tokenList, nodeArray);
+	Node* rootNode = new Node();
+	rootNode->name = "root";
+	if (!this->ParseNodeArray(tokenList, rootNode->childrenArray))
+	{
+		delete rootNode;
+		rootNode = nullptr;
+	}
+
+	return rootNode;
 }
 
 bool FBXFormat::ParseNodeArray(std::list<Token>& tokenList, std::vector<Node*>& nodeArray)
@@ -57,6 +62,10 @@ bool FBXFormat::ParseNodeArray(std::list<Token>& tokenList, std::vector<Node*>& 
 	nodeArray.clear();
 	while (tokenList.size() > 0)
 	{
+		Token token = *tokenList.begin();
+		if (token.type == Token::CLOSE_CURLY)
+			break;
+
 		Node* node = new Node();
 		if (this->ParseNode(tokenList, node))
 			nodeArray.push_back(node);
@@ -91,10 +100,18 @@ bool FBXFormat::ParseNode(std::list<Token>& tokenList, Node* node)
 	tokenList.erase(tokenList.begin());
 	while (tokenList.size() > 0)
 	{
+		// Are we at the end of the property list?
 		token = *tokenList.begin();
 		if (token.type == Token::OPEN_CURLY || token.type == Token::IDENTIFIER)
 		{
-			tokenList.erase(tokenList.begin());
+			// Special case: Some property lists consist of a single identifier.
+			if (node->propertyArray.size() == 0 && token.type == Token::IDENTIFIER)
+			{
+				tokenList.erase(tokenList.begin());
+				node->propertyArray.push_back(new PropertyString(token.data));
+				continue;
+			}
+
 			break;
 		}
 
@@ -144,6 +161,8 @@ bool FBXFormat::ParseNode(std::list<Token>& tokenList, Node* node)
 	// Are there sub-nodes?
 	if (token.type == Token::OPEN_CURLY)
 	{
+		tokenList.erase(tokenList.begin());
+
 		this->ParseNodeArray(tokenList, node->childrenArray);
 
 		if (tokenList.size() == 0)
@@ -202,10 +221,10 @@ bool FBXFormat::EatTokensFromLine(const char* buffer, int bufferSize, std::list<
 			while (i < bufferSize && (::isalnum(buffer[i]) || buffer[i] == '_'))
 				token.data += buffer[i++];
 		}
-		else if (::isdigit(buffer[i]) || buffer[i] == '-' || buffer[i] == '*')	// Bite off a number.
+		else if (::isdigit(buffer[i]) || buffer[i] == '-' || buffer[i] == '*' || buffer[i] == 'e')	// Bite off a number.
 		{
 			token.type = Token::NUMBER;
-			while (i < bufferSize && (::isdigit(buffer[i]) || buffer[i] == '-' || buffer[i] == '*' || buffer[i] == '.'))
+			while (i < bufferSize && (::isdigit(buffer[i]) || buffer[i] == '-' || buffer[i] == '*' || buffer[i] == '.' || buffer[i] == 'e'))
 			{
 				if (buffer[i] != '*')	// TODO: What does the star mean?
 					token.data += buffer[i];
