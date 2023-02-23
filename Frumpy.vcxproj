@@ -23,8 +23,10 @@
     <ClInclude Include="Source\Camera.h" />
     <ClInclude Include="Source\Containers\List.h" />
     <ClInclude Include="Source\Containers\Map.h" />
+    <ClInclude Include="Source\FileAssets\Animation.h" />
     <ClInclude Include="Source\FileAssets\Image.h" />
     <ClInclude Include="Source\FileAssets\Mesh.h" />
+    <ClInclude Include="Source\FileAssets\Skeleton.h" />
     <ClInclude Include="Source\FileFormats\FBXFormat.h" />
     <ClInclude Include="Source\FileFormats\OBJFormat.h" />
     <ClInclude Include="Source\Defines.h" />
@@ -35,8 +37,10 @@
     <ClInclude Include="Source\LightSources\SpotLight.h" />
     <ClInclude Include="Source\Math\Aabb.h" />
     <ClInclude Include="Source\Math\ConvexHull.h" />
+    <ClInclude Include="Source\Math\Matrix3x3.h" />
     <ClInclude Include="Source\Math\Matrix4x4.h" />
     <ClInclude Include="Source\Math\Plane.h" />
+    <ClInclude Include="Source\Math\Quaternion.h" />
     <ClInclude Include="Source\Math\Triangle.h" />
     <ClInclude Include="Source\Math\Vector3.h" />
     <ClInclude Include="Source\Math\Vector4.h" />
@@ -49,8 +53,10 @@
   <ItemGroup>
     <ClCompile Include="Source\AssetManager.cpp" />
     <ClCompile Include="Source\Camera.cpp" />
+    <ClCompile Include="Source\FileAssets\Animation.cpp" />
     <ClCompile Include="Source\FileAssets\Image.cpp" />
     <ClCompile Include="Source\FileAssets\Mesh.cpp" />
+    <ClCompile Include="Source\FileAssets\Skeleton.cpp" />
     <ClCompile Include="Source\FileFormats\FBXFormat.cpp" />
     <ClCompile Include="Source\FileFormats\OBJFormat.cpp" />
     <ClCompile Include="Source\FileFormats\PPMFormat.cpp" />
@@ -60,8 +66,10 @@
     <ClCompile Include="Source\LightSources\SpotLight.cpp" />
     <ClCompile Include="Source\Math\Aabb.cpp" />
     <ClCompile Include="Source\Math\ConvexHull.cpp" />
+    <ClCompile Include="Source\Math\Matrix3x3.cpp" />
     <ClCompile Include="Source\Math\Matrix4x4.cpp" />
     <ClCompile Include="Source\Math\Plane.cpp" />
+    <ClCompile Include="Source\Math\Quaternion.cpp" />
     <ClCompile Include="Source\Math\Triangle.cpp" />
     <ClCompile Include="Source\Math\Vector3.cpp" />
     <ClCompile Include="Source\Math\Vector4.cpp" />

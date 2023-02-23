@@ -1,4 +1,5 @@
 #include "Math/Matrix4x4.h"
+#include "Math/Matrix3x3.h"
 #include "Math/Vector3.h"
 #include "Math/Vector4.h"
 #include <math.h>
@@ -15,6 +16,45 @@ Matrix4x4::Matrix4x4(const Matrix4x4& matrix)
 	for (int i = 0; i < 4; i++)
 		for (int j = 0; j < 4; j++)
 			this->ele[i][j] = matrix.ele[i][j];
+}
+
+Matrix4x4::Matrix4x4(const Matrix3x3& matrix)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			if (i < 3 && j < 3)
+				this->ele[i][j] = matrix.ele[i][j];
+			else
+				this->ele[i][j] = (i == j) ? 1.0 : 0.0;
+		}
+	}
+}
+
+Matrix4x4::Matrix4x4(const Matrix3x3& matrix, const Vector3& translation)
+{
+	this->ele[0][0] = matrix.ele[0][0];
+	this->ele[1][0] = matrix.ele[1][0];
+	this->ele[2][0] = matrix.ele[2][0];
+
+	this->ele[0][1] = matrix.ele[0][1];
+	this->ele[1][1] = matrix.ele[1][1];
+	this->ele[2][1] = matrix.ele[2][1];
+
+	this->ele[0][2] = matrix.ele[0][2];
+	this->ele[1][2] = matrix.ele[1][2];
+	this->ele[2][2] = matrix.ele[2][2];
+
+	this->ele[0][3] = translation.x;
+	this->ele[1][3] = translation.y;
+	this->ele[2][3] = translation.z;
+
+	this->ele[3][0] = 0.0;
+	this->ele[3][1] = 0.0;
+	this->ele[3][2] = 0.0;
+
+	this->ele[3][3] = 1.0;
 }
 
 /*virtual*/ Matrix4x4::~Matrix4x4()

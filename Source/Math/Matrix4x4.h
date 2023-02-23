@@ -6,6 +6,7 @@ namespace Frumpy
 {
 	class Vector3;
 	class Vector4;
+	class Matrix3x3;
 
 	// These are 4x4 matrices geared toward 3D computer graphics applications.
 	class FRUMPY_API Matrix4x4
@@ -13,6 +14,8 @@ namespace Frumpy
 	public:
 		Matrix4x4();
 		Matrix4x4(const Matrix4x4& matrix);
+		Matrix4x4(const Matrix3x3& matrix);
+		Matrix4x4(const Matrix3x3& matrix, const Vector3& translation);
 		virtual ~Matrix4x4();
 
 		void Identity();

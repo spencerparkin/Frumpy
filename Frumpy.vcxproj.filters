@@ -103,6 +103,18 @@
     <ClInclude Include="Source\FileFormats\FBXFormat.h">
       <Filter>Source\FileFormats</Filter>
     </ClInclude>
+    <ClInclude Include="Source\FileAssets\Skeleton.h">
+      <Filter>Source\FileAssets</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FileAssets\Animation.h">
+      <Filter>Source\FileAssets</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Math\Matrix3x3.h">
+      <Filter>Source\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Math\Quaternion.h">
+      <Filter>Source\Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Scene.cpp">
@@ -173,6 +185,18 @@
     </ClCompile>
     <ClCompile Include="Source\FileFormats\FBXFormat.cpp">
       <Filter>Source\FileFormats</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FileAssets\Skeleton.cpp">
+      <Filter>Source\FileAssets</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FileAssets\Animation.cpp">
+      <Filter>Source\FileAssets</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Quaternion.cpp">
+      <Filter>Source\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Matrix3x3.cpp">
+      <Filter>Source\Math</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
