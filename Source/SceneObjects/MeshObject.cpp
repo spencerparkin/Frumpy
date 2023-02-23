@@ -72,16 +72,7 @@ void MeshObject::SetColor(const Vector4& color)
 	if (!this->mesh)
 		return;
 
-	Matrix4x4 objectToImage = renderer.GetGraphicsMatrices().worldToImage * this->objectToWorld;
-	Matrix4x4 objectToCamera = renderer.GetGraphicsMatrices().worldToCamera * this->objectToWorld;
-
-	for (unsigned int i = 0; i < this->mesh->GetVertexBufferSize(); i++)
-	{
-		const Vertex& vertex = *this->mesh->GetVertex(i);
-		objectToImage.TransformPoint(vertex.objectSpacePoint, vertex.imageSpacePoint);
-		objectToCamera.TransformPoint(vertex.objectSpacePoint, vertex.cameraSpacePoint);
-		objectToCamera.TransformVector(vertex.objectSpaceNormal, vertex.cameraSpaceNormal);
-	}
+	this->mesh->TransformMeshVertices(renderer, this->objectToWorld);
 
 	for (unsigned int i = 0; i < this->mesh->GetIndexBufferSize(); i += 3)
 	{

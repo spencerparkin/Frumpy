@@ -115,6 +115,12 @@
     <ClInclude Include="Source\Math\Quaternion.h">
       <Filter>Source\Math</Filter>
     </ClInclude>
+    <ClInclude Include="Source\FileAssets\Skin.h">
+      <Filter>Source\FileAssets</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SceneObjects\SkeletonObject.h">
+      <Filter>Source\SceneObjects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Scene.cpp">
@@ -197,6 +203,12 @@
     </ClCompile>
     <ClCompile Include="Source\Math\Matrix3x3.cpp">
       <Filter>Source\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FileAssets\Skin.cpp">
+      <Filter>Source\FileAssets</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\SceneObjects\SkeletonObject.cpp">
+      <Filter>Source\SceneObjects</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -17,7 +17,6 @@ namespace Frumpy
 		Vector3 objectSpaceNormal;
 		Vector4 color;
 		Vector3 texCoords;
-		// TODO: Add optional pointer here to bone weights?
 
 		mutable Vector3 cameraSpacePoint;
 		mutable Vector3 imageSpacePoint;

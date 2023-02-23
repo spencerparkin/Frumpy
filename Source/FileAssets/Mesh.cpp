@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include "Renderer.h"
 
 using namespace Frumpy;
 
@@ -16,15 +17,46 @@ Mesh::Mesh()
 	this->SetIndexBufferSize(0);
 }
 
+/*virtual*/ Vertex* Mesh::AllocVertex()
+{
+	return new Vertex();
+}
+
+/*virtual*/ void Mesh::DeallocVertex(Vertex* vertex)
+{
+	delete vertex;
+}
+
+/*virtual*/ void Mesh::TransformMeshVertices(Renderer& renderer, const Matrix4x4& objectToWorld) const
+{
+	Matrix4x4 objectToImage = renderer.GetGraphicsMatrices().worldToImage * objectToWorld;
+	Matrix4x4 objectToCamera = renderer.GetGraphicsMatrices().worldToCamera * objectToWorld;
+
+	for (unsigned int i = 0; i < this->vertexBufferSize; i++)
+	{
+		const Vertex& vertex = *this->vertexBuffer[i];
+
+		objectToImage.TransformPoint(vertex.objectSpacePoint, vertex.imageSpacePoint);
+		objectToCamera.TransformPoint(vertex.objectSpacePoint, vertex.cameraSpacePoint);
+		objectToCamera.TransformVector(vertex.objectSpaceNormal, vertex.cameraSpaceNormal);
+	}
+}
+
 void Mesh::SetVertexBufferSize(unsigned int vertexBufferSize)
 {
+	for (unsigned int i = 0; i < this->vertexBufferSize; i++)
+		this->DeallocVertex(this->vertexBuffer[i]);
+
 	delete[] this->vertexBuffer;
 	this->vertexBufferSize = 0;
 
 	if (vertexBufferSize > 0)
 	{
-		this->vertexBuffer = new Vertex[vertexBufferSize];
+		this->vertexBuffer = new Vertex*[vertexBufferSize];
 		this->vertexBufferSize = vertexBufferSize;
+
+		for (unsigned int i = 0; i < this->vertexBufferSize; i++)
+			this->vertexBuffer[i] = this->AllocVertex();
 	}
 }
 
@@ -55,7 +87,7 @@ Vertex* Mesh::GetVertex(unsigned int i)
 	if (i >= this->vertexBufferSize)
 		return nullptr;
 
-	return &this->vertexBuffer[i];
+	return this->vertexBuffer[i];
 }
 
 const Vertex* Mesh::GetVertex(unsigned int i) const
@@ -83,5 +115,5 @@ bool Mesh::SetIndex(unsigned int i, unsigned int index)
 void Mesh::SetColor(const Vector4& color)
 {
 	for (unsigned int i = 0; i < this->vertexBufferSize; i++)
-		this->vertexBuffer[i].color = color;
+		this->vertexBuffer[i]->color = color;
 }

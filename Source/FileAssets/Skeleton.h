@@ -1,7 +1,9 @@
 #pragma once
 
-#include "../Defines.h"
-#include "../Math/Matrix4x4.h"
+#include "Defines.h"
+#include "Math/Matrix3x3.h"
+#include "Math/Matrix4x4.h"
+#include "Math/Vector3.h"
 
 namespace Frumpy
 {
@@ -16,6 +18,30 @@ namespace Frumpy
 		Skeleton();
 		virtual ~Skeleton();
 
-		// TODO: How do we define this?
+		class BoneSpace
+		{
+		public:
+			BoneSpace();
+			virtual ~BoneSpace();
+
+			void ResolveBindPoseTransforms(const BoneSpace* parentSpace = nullptr) const;
+			void ResolveCurrentPoseTransforms(const BoneSpace* parentSpace = nullptr) const;
+
+			void ResolveTransforms(const BoneSpace* parentSpace, Matrix4x4 BoneSpace::* childToParent, Matrix4x4 BoneSpace::* objectToBone, Matrix4x4 BoneSpace::* boneToObject) const;
+
+			Matrix4x4 bindPoseChildToParent;
+			Matrix4x4 currentPoseChildToParent;
+
+			mutable Matrix4x4 bindPoseObjectToBone;
+			mutable Matrix4x4 bindPoseBoneToObject;
+
+			mutable Matrix4x4 currentPoseObjectToBone;
+			mutable Matrix4x4 currentPoseBoneToObject;
+
+			BoneSpace** subSpaceArray;
+			unsigned int subSpaceArraySize;
+		};
+
+		BoneSpace* rootSpace;
 	};
 }

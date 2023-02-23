@@ -27,6 +27,7 @@
     <ClInclude Include="Source\FileAssets\Image.h" />
     <ClInclude Include="Source\FileAssets\Mesh.h" />
     <ClInclude Include="Source\FileAssets\Skeleton.h" />
+    <ClInclude Include="Source\FileAssets\Skin.h" />
     <ClInclude Include="Source\FileFormats\FBXFormat.h" />
     <ClInclude Include="Source\FileFormats\OBJFormat.h" />
     <ClInclude Include="Source\Defines.h" />
@@ -47,6 +48,7 @@
     <ClInclude Include="Source\Renderer.h" />
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\SceneObjects\MeshObject.h" />
+    <ClInclude Include="Source\SceneObjects\SkeletonObject.h" />
     <ClInclude Include="Source\Stream.h" />
     <ClInclude Include="Source\Vertex.h" />
   </ItemGroup>
@@ -57,6 +59,7 @@
     <ClCompile Include="Source\FileAssets\Image.cpp" />
     <ClCompile Include="Source\FileAssets\Mesh.cpp" />
     <ClCompile Include="Source\FileAssets\Skeleton.cpp" />
+    <ClCompile Include="Source\FileAssets\Skin.cpp" />
     <ClCompile Include="Source\FileFormats\FBXFormat.cpp" />
     <ClCompile Include="Source\FileFormats\OBJFormat.cpp" />
     <ClCompile Include="Source\FileFormats\PPMFormat.cpp" />
@@ -76,6 +79,7 @@
     <ClCompile Include="Source\Renderer.cpp" />
     <ClCompile Include="Source\Scene.cpp" />
     <ClCompile Include="Source\SceneObjects\MeshObject.cpp" />
+    <ClCompile Include="Source\SceneObjects\SkeletonObject.cpp" />
     <ClCompile Include="Source\Stream.cpp" />
     <ClCompile Include="Source\Vertex.cpp" />
   </ItemGroup>
