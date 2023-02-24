@@ -56,7 +56,7 @@ void Scene::GenerateVisibleObjectsList(const Camera* camera, ObjectList& visible
 	// as a binary-space partition tree.
 	const ConvexHull& frustumHull = camera->frustum.GetFrustumHull();
 	const_cast<Scene*>(this)->ForAllObjects([&visibleObjectList, &frustumHull, &worldToCamera](Object* object) -> bool {
-		if (object->GetRenderFlag(Object::VISIBLE) && object->IntersectsFrustum(frustumHull, worldToCamera))
+		if (object->GetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE) && object->IntersectsFrustum(frustumHull, worldToCamera))
 			visibleObjectList.AddTail(object);
 		return true;
 	});
@@ -65,7 +65,7 @@ void Scene::GenerateVisibleObjectsList(const Camera* camera, ObjectList& visible
 Scene::Object::Object()
 {
 	this->name[0] = '\0';
-	this->renderFlags = RenderFlag::VISIBLE | RenderFlag::IS_LIT;
+	this->renderFlags = FRUMPY_RENDER_FLAG_VISIBLE | FRUMPY_RENDER_FLAG_IS_LIT | FRUMPY_RENDER_FLAG_DEPTH_TEST;
 }
 
 /*virtual*/ Scene::Object::~Object()
@@ -73,19 +73,17 @@ Scene::Object::Object()
 	this->childObjectList.Delete();
 }
 
-void Scene::Object::SetRenderFlag(RenderFlag renderFlag, bool enabled)
+void Scene::Object::SetRenderFlag(uint32_t renderFlag, bool enabled)
 {
-	uint32_t flagBit = (uint32_t)renderFlag;
 	if (enabled)
-		this->renderFlags |= flagBit;
+		this->renderFlags |= renderFlag;
 	else
-		this->renderFlags &= ~flagBit;
+		this->renderFlags &= ~renderFlag;
 }
 
-bool Scene::Object::GetRenderFlag(RenderFlag renderFlag) const
+bool Scene::Object::GetRenderFlag(uint32_t renderFlag) const
 {
-	uint32_t flagBit = (uint32_t)renderFlag;
-	return (this->renderFlags & flagBit) != 0;
+	return (this->renderFlags & renderFlag) != 0;
 }
 
 /*virtual*/ void Scene::Object::CalculateWorldTransform(const Matrix4x4& parentToWorld) const

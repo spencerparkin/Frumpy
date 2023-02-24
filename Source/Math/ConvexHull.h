@@ -5,6 +5,7 @@
 #include "Containers/List.h"
 #include "Matrix4x4.h"
 #include "Aabb.h"
+#include "Edge.h"
 #include <vector>
 #include <set>
 
@@ -71,23 +72,6 @@ namespace Frumpy
 
 		std::vector<Vector3>* pointArray;  // No 3 points should ever by co-linear.
 		std::vector<Facet>* facetArray;
-
-		struct Edge
-		{
-			int i, j;
-
-			bool operator<(const Edge& edge) const
-			{
-				int64_t keyA = this->CalcKey();
-				int64_t keyB = edge.CalcKey();
-				return keyA < keyB;
-			}
-
-			int64_t CalcKey() const
-			{
-				return (this->i < this->j) ? ((int64_t(this->i) << 32) | int64_t(this->j)) : ((int64_t(this->j) << 32) | int64_t(this->i));
-			}
-		};
 
 		mutable std::set<Edge>* cachedEdgeSet;
 		mutable bool cachedEdgeSetValid;

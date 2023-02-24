@@ -38,6 +38,7 @@
     <ClInclude Include="Source\LightSources\SpotLight.h" />
     <ClInclude Include="Source\Math\Aabb.h" />
     <ClInclude Include="Source\Math\ConvexHull.h" />
+    <ClInclude Include="Source\Math\Edge.h" />
     <ClInclude Include="Source\Math\Matrix3x3.h" />
     <ClInclude Include="Source\Math\Matrix4x4.h" />
     <ClInclude Include="Source\Math\Plane.h" />

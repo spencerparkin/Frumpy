@@ -9,6 +9,7 @@ namespace Frumpy
 	class Mesh;
 	class Image;
 	class Camera;
+	struct Edge;
 
 	class FRUMPY_API MeshObject : public Scene::Object
 	{
@@ -31,6 +32,7 @@ namespace Frumpy
 		void SetColor(const Vector4& color);
 
 	private:
+
 		Mesh* mesh;
 		Image* texture;
 		Image::SampleMethod sampleMethod;

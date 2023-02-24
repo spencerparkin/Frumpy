@@ -124,7 +124,7 @@ void Renderer::RenderScene(const Scene* scene, const Camera* camera)
 			for (Scene::ObjectList::Node* node = visibleObjectList.GetHead(); node; node = node->GetNext())
 			{
 				const Scene::Object* object = node->value;
-				if (object->GetRenderFlag(Scene::Object::CASTS_SHADOW))
+				if (object->GetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW))
 					object->Render(*this, &shadowCamera);
 			}
 
@@ -148,7 +148,7 @@ void Renderer::RenderScene(const Scene* scene, const Camera* camera)
 	for (Scene::ObjectList::Node* node = visibleObjectList.GetHead(); node; node = node->GetNext())
 	{
 		const Scene::Object* object = node->value;
-		if (!object->GetRenderFlag(Scene::Object::RenderFlag::HAS_TRANSLUCENCY))
+		if (!object->GetRenderFlag(FRUMPY_RENDER_FLAG_HAS_TRANSLUCENCY))
 			object->Render(*this, camera);
 	}
 	
@@ -159,7 +159,7 @@ void Renderer::RenderScene(const Scene* scene, const Camera* camera)
 	for (Scene::ObjectList::Node* node = visibleObjectList.GetHead(); node; node = node->GetNext())
 	{
 		const Scene::Object* object = node->value;
-		if (object->GetRenderFlag(Scene::Object::RenderFlag::HAS_TRANSLUCENCY))
+		if (object->GetRenderFlag(FRUMPY_RENDER_FLAG_HAS_TRANSLUCENCY))
 			object->Render(*this, camera);
 	}
 	
@@ -201,6 +201,7 @@ void Renderer::SetClearColor(const Vector3& clearColor)
 
 Renderer::RenderJob::RenderJob()
 {
+	this->renderFlags = 0;
 }
 
 /*virtual*/ Renderer::RenderJob::~RenderJob()
@@ -274,8 +275,6 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 	this->vertex[2] = nullptr;
 	this->texture = nullptr;
 	this->sampleMethod = Image::SampleMethod::NEAREST;
-	this->canBeShadowed = false;
-	this->isLit = true;
 }
 
 /*virtual*/ Renderer::TriangleRenderJob::~TriangleRenderJob()
@@ -457,7 +456,7 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 
 			Image::Location location{ unsigned(row), unsigned(col) };
 			Image::Pixel* pixelZ = depthBuffer->GetPixel(location);
-			if (surfaceProperties.cameraSpacePoint.z <= pixelZ->depth)	// TODO: Depth-testing optional?
+			if ((0 != (this->renderFlags & FRUMPY_RENDER_FLAG_DEPTH_TEST)) && surfaceProperties.cameraSpacePoint.z <= pixelZ->depth)
 				continue;
 			
 			pixelZ->depth = (float)surfaceProperties.cameraSpacePoint.z;
@@ -499,8 +498,8 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 
 			Vector4 surfaceColor;
 
-			if (this->isLit)
-				thread->renderer->lightSource->CalcSurfaceColor(surfaceProperties, surfaceColor, this->canBeShadowed ? thread->renderer->shadowBuffer : nullptr);
+			if (0 != (this->renderFlags & FRUMPY_RENDER_FLAG_IS_LIT))
+				thread->renderer->lightSource->CalcSurfaceColor(surfaceProperties, surfaceColor, (0 != (this->renderFlags & FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED)) ? thread->renderer->shadowBuffer : nullptr);
 			else
 				surfaceColor = surfaceProperties.diffuseColor;
 
@@ -661,7 +660,7 @@ void Renderer::LineRenderJob::Rasterize(int row, int col, const Vertex& vertexA,
 
 	Image::Location location{ unsigned(row), unsigned(col) };
 	Image::Pixel* pixelZ = depthBuffer->GetPixel(location);
-	if (surfacePoint.z <= pixelZ->depth)	// TODO: Depth-testing optional?
+	if ((0 != (this->renderFlags & FRUMPY_RENDER_FLAG_DEPTH_TEST)) && surfacePoint.z <= pixelZ->depth)
 		return;
 
 	Vector4 surfaceColor = vertexA.color * ta + vertexB.color * tb;

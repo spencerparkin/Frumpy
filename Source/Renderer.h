@@ -73,6 +73,8 @@ namespace Frumpy
 
 			bool ThreadOverlapsRange(int minRow, int maxRow, Thread* thread);
 			bool InterpolateSurfacePointOfPlanarPrimitive(int row, int col, const Matrix4x4& imageToCamera, const Plane& hitPlane, Vector3& surfacePoint);
+
+			uint32_t renderFlags;
 		};
 
 		class ExitRenderJob : public RenderJob
@@ -96,8 +98,6 @@ namespace Frumpy
 			const Vertex* vertex[3];
 			const Image* texture;
 			Image::SampleMethod sampleMethod;
-			bool canBeShadowed;
-			bool isLit;
 		};
 
 		class LineRenderJob : public RenderJob

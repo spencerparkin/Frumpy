@@ -3,6 +3,7 @@
 #include "FileAssets/Mesh.h"
 #include "Math/Triangle.h"
 #include "Math/Aabb.h"
+#include "Math/Edge.h"
 #include "Camera.h"
 
 using namespace Frumpy;
@@ -24,7 +25,7 @@ void MeshObject::SetColor(const Vector4& color)
 	if (this->mesh)
 	{
 		this->mesh->SetColor(color);
-		this->SetRenderFlag(RenderFlag::HAS_TRANSLUCENCY, color.a != 0.0);
+		this->SetRenderFlag(FRUMPY_RENDER_FLAG_HAS_TRANSLUCENCY, color.a != 0.0);
 	}
 }
 
@@ -74,6 +75,10 @@ void MeshObject::SetColor(const Vector4& color)
 
 	this->mesh->TransformMeshVertices(renderer, this->objectToWorld);
 
+	std::set<Edge>* edgeSet = nullptr;
+	if (0 != (this->renderFlags & FRUMPY_RENDER_FLAG_WIRE_FRAME))
+		edgeSet = new std::set<Edge>();
+
 	for (unsigned int i = 0; i < this->mesh->GetIndexBufferSize(); i += 3)
 	{
 		unsigned int indexA = this->mesh->GetIndex(i + 0);
@@ -111,14 +116,47 @@ void MeshObject::SetColor(const Vector4& color)
 			continue;
 
 		// Render by submitting a job to the renderer.
-		Renderer::TriangleRenderJob* job = new Renderer::TriangleRenderJob();
-		job->vertex[0] = &vertexA;
-		job->vertex[1] = &vertexB;
-		job->vertex[2] = &vertexC;
-		job->texture = this->texture;
-		job->sampleMethod = this->sampleMethod;
-		job->canBeShadowed = this->GetRenderFlag(Scene::Object::CAN_BE_SHADOWED);
-		job->isLit = this->GetRenderFlag(Scene::Object::IS_LIT);
-		renderer.SubmitJob(job);
+		if (0 == (this->renderFlags & FRUMPY_RENDER_FLAG_WIRE_FRAME))
+		{
+			Renderer::TriangleRenderJob* job = new Renderer::TriangleRenderJob();
+			job->vertex[0] = &vertexA;
+			job->vertex[1] = &vertexB;
+			job->vertex[2] = &vertexC;
+			job->texture = this->texture;
+			job->sampleMethod = this->sampleMethod;
+			job->renderFlags = this->renderFlags;
+			renderer.SubmitJob(job);
+		}
+		else
+		{
+			Edge edgeArray[3];
+
+			edgeArray[0].i = indexA;
+			edgeArray[0].j = indexB;
+
+			edgeArray[1].i = indexB;
+			edgeArray[1].j = indexC;
+
+			edgeArray[2].i = indexC;
+			edgeArray[2].j = indexA;
+
+			for (int j = 0; j < 3; j++)
+			{
+				const Edge& edge = edgeArray[j];
+
+				if (edgeSet->end() == edgeSet->find(edge))
+				{
+					Renderer::LineRenderJob* job = new Renderer::LineRenderJob();
+					job->vertex[0] = this->mesh->GetVertex(edge.i);
+					job->vertex[1] = this->mesh->GetVertex(edge.j);
+					job->renderFlags = this->renderFlags;
+					renderer.SubmitJob(job);
+
+					edgeSet->insert(edge);
+				}
+			}
+		}
 	}
+
+	delete edgeSet;
 }

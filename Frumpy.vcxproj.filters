@@ -121,6 +121,9 @@
     <ClInclude Include="Source\SceneObjects\SkeletonObject.h">
       <Filter>Source\SceneObjects</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Math\Edge.h">
+      <Filter>Source\Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Scene.cpp">
