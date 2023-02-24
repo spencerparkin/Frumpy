@@ -64,4 +64,6 @@ private:
 	double objectRotationRate;
 	double cameraRotationRate;
 	double lightRotationRate;
+	bool wireframe;
+	bool backfaceCull;
 };

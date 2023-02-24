@@ -65,7 +65,7 @@ void Scene::GenerateVisibleObjectsList(const Camera* camera, ObjectList& visible
 Scene::Object::Object()
 {
 	this->name[0] = '\0';
-	this->renderFlags = FRUMPY_RENDER_FLAG_VISIBLE | FRUMPY_RENDER_FLAG_IS_LIT | FRUMPY_RENDER_FLAG_DEPTH_TEST;
+	this->renderFlags = FRUMPY_RENDER_FLAG_VISIBLE | FRUMPY_RENDER_FLAG_IS_LIT | FRUMPY_RENDER_FLAG_DEPTH_TEST | FRUMPY_RENDER_FLAG_BACK_FACE_CULL;
 }
 
 /*virtual*/ Scene::Object::~Object()

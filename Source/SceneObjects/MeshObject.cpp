@@ -101,10 +101,13 @@ void MeshObject::SetColor(const Vector4& color)
 		const Vector3& pointC = vertexC.imageSpacePoint;
 
 		// Perform back-face culling in image space.
-		Vector3 triangleNorm;
-		triangleNorm.Cross(pointB - pointA, pointC - pointA);
-		if (triangleNorm.z < 0.0)
-			continue;
+		if (0 != (this->renderFlags & FRUMPY_RENDER_FLAG_BACK_FACE_CULL))
+		{
+			Vector3 triangleNorm;
+			triangleNorm.Cross(pointB - pointA, pointC - pointA);
+			if (triangleNorm.z < 0.0)
+				continue;
+		}
 
 		// Cull against the camera frustum.  (Clipping is done in image space.)
 		const ConvexHull& frustumHull = camera->frustum.GetFrustumHull();

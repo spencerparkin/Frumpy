@@ -44,6 +44,8 @@ Demo::Demo()
     this->objectRotationRate = 20.0;
     this->cameraRotationRate = -18.0;
     this->lightRotationRate = 15.0;
+    this->wireframe = false;
+    this->backfaceCull = true;
 }
 
 /*virtual*/ Demo::~Demo()
@@ -462,6 +464,24 @@ LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
         case IDM_EXIT:
         {
             DestroyWindow(this->hWnd);
+            break;
+        }
+        case ID_RENDER_WIREFRAME:
+        {
+            this->wireframe = !this->wireframe;
+            this->scene->ForAllObjects([this](Frumpy::Scene::Object* object) -> bool {
+                object->SetRenderFlag(FRUMPY_RENDER_FLAG_WIRE_FRAME, this->wireframe);
+                return true;
+            });
+            break;
+        }
+        case ID_RENDER_BACKFACE_CULL:
+        {
+            this->backfaceCull = !this->backfaceCull;
+            this->scene->ForAllObjects([this](Frumpy::Scene::Object* object) -> bool {
+                object->SetRenderFlag(FRUMPY_RENDER_FLAG_BACK_FACE_CULL, this->backfaceCull);
+                return true;
+            });
             break;
         }
         case ID_SCENE_TEAPOT:
@@ -1112,6 +1132,16 @@ void Demo::UpdateOptionsMenuItemChecks(HMENU menuHandle)
                 if (object)
                     checked = object->GetTexture() ? false : true;
                 CheckMenuItem(menuHandle, menuItemID, (checked ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_RENDER_WIREFRAME:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->wireframe ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_RENDER_BACKFACE_CULL:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->backfaceCull ? MF_CHECKED : MF_UNCHECKED));
                 break;
             }
             default:

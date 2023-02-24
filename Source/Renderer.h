@@ -29,6 +29,10 @@ namespace Frumpy
 		Matrix4x4 imageToCamera;
 	};
 
+	// Here we essentially support a fixed-function pipeline, but conceivably, we could
+	// support a kind of vertex and pixel shader abstraction and call that here across the
+	// given vertex buffers and interpolated primitives.  I'm fine without this kind of
+	// abstraction for now, though.
 	class FRUMPY_API Renderer
 	{
 	private:
