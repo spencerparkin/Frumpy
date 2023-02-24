@@ -212,6 +212,44 @@ Renderer::RenderJob::RenderJob()
 	return false;
 }
 
+bool Renderer::RenderJob::ThreadOverlapsRange(int minRow, int maxRow, Thread* thread)
+{
+	if (int(thread->minScanline) <= minRow && minRow <= int(thread->maxScanline))
+		return true;
+
+	if (int(thread->minScanline) <= maxRow && maxRow <= int(thread->maxScanline))
+		return true;
+
+	if (minRow <= int(thread->minScanline) && int(thread->minScanline) <= maxRow)
+		return true;
+
+	if (minRow <= int(thread->maxScanline) && int(thread->maxScanline) <= maxRow)
+		return true;
+
+	return false;
+}
+
+bool Renderer::RenderJob::InterpolateSurfacePointOfPlanarPrimitive(int row, int col, const Matrix4x4& imageToCamera, const Plane& hitPlane, Vector3& surfacePoint)
+{
+	Vector3 imagePointA(double(col), double(row), 0.0);
+	Vector3 imagePointB(double(col), double(row), -1.0);
+
+	Vector3 cameraPointA, cameraPointB;
+
+	imageToCamera.TransformPoint(imagePointA, cameraPointA);
+	imageToCamera.TransformPoint(imagePointB, cameraPointB);
+
+	Vector3 rayDirection = cameraPointB - cameraPointA;	// I'm not sure why we can't just use cameraPointA = <0,0,0>.
+	double lambda = 0.0;
+	if (hitPlane.RayCast(cameraPointA, rayDirection, lambda))
+	{
+		surfacePoint = cameraPointA + rayDirection * lambda;
+		return true;
+	}
+	
+	return false;
+}
+
 //-------------------------- Renderer::ExitRenderJob --------------------------
 
 Renderer::ExitRenderJob::ExitRenderJob()
@@ -253,22 +291,7 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 	double minY = FRUMPY_MIN(FRUMPY_MIN(vertexA.imageSpacePoint.y, vertexB.imageSpacePoint.y), vertexC.imageSpacePoint.y);
 	double maxY = FRUMPY_MAX(FRUMPY_MAX(vertexA.imageSpacePoint.y, vertexB.imageSpacePoint.y), vertexC.imageSpacePoint.y);
 
-	int minRow = int(minY);
-	int maxRow = int(maxY);
-
-	if (int(thread->minScanline) <= minRow && minRow <= int(thread->maxScanline))
-		return true;
-
-	if (int(thread->minScanline) <= maxRow && maxRow <= int(thread->maxScanline))
-		return true;
-
-	if (minRow <= int(thread->minScanline) && int(thread->minScanline) <= maxRow)
-		return true;
-
-	if (minRow <= int(thread->maxScanline) && int(thread->maxScanline) <= maxRow)
-		return true;
-
-	return false;
+	return this->ThreadOverlapsRange(int(minY), int(maxY), thread);
 }
 
 /*virtual*/ void Renderer::TriangleRenderJob::Render(Thread* thread)
@@ -428,25 +451,11 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 
 		for (int col = minCol; col <= maxCol; col++)
 		{
-			Image::Location location{ unsigned(row), unsigned(col) };
-
-			Vector3 imagePointA(double(col), double(row), 0.0);
-			Vector3 imagePointB(double(col), double(row), -1.0);
-
-			Vector3 cameraPointA, cameraPointB;
-
-			graphicsMatrices.imageToCamera.TransformPoint(imagePointA, cameraPointA);
-			graphicsMatrices.imageToCamera.TransformPoint(imagePointB, cameraPointB);
-
 			LightSource::SurfaceProperties surfaceProperties;
-
-			Vector3 rayDirection = cameraPointB - cameraPointA;	// Not sure why we can't just use cameraPointA = <0,0,0>.
-			double lambda = 0.0;
-			if (planeOfTriangle.RayCast(cameraPointA, rayDirection, lambda))
-				surfaceProperties.cameraSpacePoint = cameraPointA + rayDirection * lambda;
-			else
+			if(!this->InterpolateSurfacePointOfPlanarPrimitive(row, col, graphicsMatrices.imageToCamera, planeOfTriangle, surfaceProperties.cameraSpacePoint))
 				surfaceProperties.cameraSpacePoint = (vertexA.cameraSpacePoint + vertexB.cameraSpacePoint + vertexC.cameraSpacePoint) / 3.0;
 
+			Image::Location location{ unsigned(row), unsigned(col) };
 			Image::Pixel* pixelZ = depthBuffer->GetPixel(location);
 			if (surfaceProperties.cameraSpacePoint.z <= pixelZ->depth)	// TODO: Depth-testing optional?
 				continue;
@@ -518,6 +527,146 @@ Renderer::TriangleRenderJob::TriangleRenderJob()
 			frameBuffer->SetPixel(location, color);
 		}
 	}
+}
+
+//-------------------------- Renderer::LineRenderJob --------------------------
+
+Renderer::LineRenderJob::LineRenderJob()
+{
+	this->vertex[0] = nullptr;
+	this->vertex[1] = nullptr;
+}
+
+/*virtual*/ Renderer::LineRenderJob::~LineRenderJob()
+{
+}
+
+/*virtual*/ bool Renderer::LineRenderJob::ShouldRenderOnThread(Thread* thread)
+{
+	const Vertex& vertexA = *this->vertex[0];
+	const Vertex& vertexB = *this->vertex[1];
+
+	double minY = FRUMPY_MIN(vertexA.imageSpacePoint.y, vertexB.imageSpacePoint.y);
+	double maxY = FRUMPY_MAX(vertexA.imageSpacePoint.y, vertexB.imageSpacePoint.y);
+
+	return this->ThreadOverlapsRange(int(minY), int(maxY), thread);
+}
+
+/*virtual*/ void Renderer::LineRenderJob::Render(Thread* thread)
+{
+	const GraphicsMatrices& graphicsMatrices = thread->renderer->graphicsMatrices;
+
+	Image* frameBuffer = nullptr;
+	Image* depthBuffer = nullptr;
+
+	if (thread->renderer->renderPass == RenderPass::OPAQUE_PASS || thread->renderer->renderPass == RenderPass::TRANSPARENT_PASS)
+	{
+		frameBuffer = thread->renderer->frameBuffer;
+		depthBuffer = thread->renderer->depthBuffer;
+	}
+	else if (thread->renderer->renderPass == RenderPass::SHADOW_PASS)
+	{
+		frameBuffer = thread->renderer->shadowBuffer;
+		depthBuffer = thread->renderer->shadowBuffer;
+	}
+	else
+		return;
+
+	const Vertex& vertexA = *this->vertex[0];
+	const Vertex& vertexB = *this->vertex[1];
+
+	Vector3 vectorA = vertexB.cameraSpacePoint - vertexA.cameraSpacePoint;
+	double lengthA = vectorA.Length();
+	Vector3 vectorB;
+	vectorB.Cross(Vector3(0.0, 0.0, 1.0), vectorA);
+	double lengthB = vectorB.Length();
+	if (lengthB == 0.0)
+		return;
+	vectorB *= lengthA / lengthB;
+
+	Triangle triangle;
+	triangle.vertex[0] = vertexA.cameraSpacePoint;
+	triangle.vertex[1] = vertexB.cameraSpacePoint;
+	triangle.vertex[2] = vertexA.cameraSpacePoint + vectorB;
+
+	Plane planeOfLine;
+	planeOfLine.SetFromTriangle(triangle);
+
+	double minY = FRUMPY_MIN(vertexA.imageSpacePoint.y, vertexB.imageSpacePoint.y);
+	double maxY = FRUMPY_MAX(vertexA.imageSpacePoint.y, vertexB.imageSpacePoint.y);
+
+	double minX = FRUMPY_MIN(vertexA.imageSpacePoint.x, vertexB.imageSpacePoint.x);
+	double maxX = FRUMPY_MAX(vertexA.imageSpacePoint.x, vertexB.imageSpacePoint.x);
+
+	if (maxX - minX > maxY - minY)
+	{
+		int minCol = int(::ceil(minX));
+		int maxCol = int(::floor(maxX));
+
+		if (double(maxCol) == maxX)
+			maxCol--;
+
+		minCol = FRUMPY_MAX(minCol, 0);
+		maxCol = FRUMPY_MIN(maxCol, int(frameBuffer->GetWidth() - 1));
+
+		for (int col = minCol; col <= maxCol; col++)
+		{
+			double x = double(col);
+			double tb = (x - vertexA.imageSpacePoint.x) / (vertexB.imageSpacePoint.x - vertexA.imageSpacePoint.x);
+			double ta = 1.0 - tb;
+			double y = vertexA.imageSpacePoint.y * ta + vertexB.imageSpacePoint.y * tb;
+
+			int row = int(::round(y));
+
+			if (int(thread->minScanline) <= row && row <= int(thread->maxScanline))
+			{
+				this->Rasterize(row, col, vertexA, vertexB, ta, tb, graphicsMatrices.imageToCamera, planeOfLine, frameBuffer, depthBuffer);
+			}
+		}
+	}
+	else
+	{
+		int minRow = int(::ceil(minY));
+		int maxRow = int(::floor(maxY));
+
+		if (double(maxRow) == maxY)
+			maxRow--;
+
+		minRow = FRUMPY_CLAMP(minRow, int(thread->minScanline), int(thread->maxScanline));
+		maxRow = FRUMPY_CLAMP(maxRow, int(thread->minScanline), int(thread->maxScanline));
+
+		for (int row = minRow; row <= maxRow; row++)
+		{
+			double y = double(row);
+			double tb = (y - vertexA.imageSpacePoint.y) / (vertexB.imageSpacePoint.y - vertexA.imageSpacePoint.y);
+			double ta = 1.0 - tb;
+			double x = vertexA.imageSpacePoint.x * ta + vertexB.imageSpacePoint.x * tb;
+
+			int col = int(::round(x));
+
+			if (0 <= col && col < int(frameBuffer->GetWidth()))
+			{
+				this->Rasterize(row, col, vertexA, vertexB, ta, tb, graphicsMatrices.imageToCamera, planeOfLine, frameBuffer, depthBuffer);
+			}
+		}
+	}
+}
+
+void Renderer::LineRenderJob::Rasterize(int row, int col, const Vertex& vertexA, const Vertex& vertexB, double ta, double tb,
+								const Matrix4x4& imageToCamera, const Plane& planeOfLine, Image* frameBuffer, Image* depthBuffer)
+{
+	Vector3 surfacePoint;
+	if (!this->InterpolateSurfacePointOfPlanarPrimitive(row, col, imageToCamera, planeOfLine, surfacePoint))
+		surfacePoint = (vertexA.cameraSpacePoint + vertexB.cameraSpacePoint) / 2.0;
+
+	Image::Location location{ unsigned(row), unsigned(col) };
+	Image::Pixel* pixelZ = depthBuffer->GetPixel(location);
+	if (surfacePoint.z <= pixelZ->depth)	// TODO: Depth-testing optional?
+		return;
+
+	Vector4 surfaceColor = vertexA.color * ta + vertexB.color * tb;
+	uint32_t color = frameBuffer->MakeColor(surfaceColor);
+	frameBuffer->SetPixel(location, color);
 }
 
 //-------------------------- Renderer::Thread --------------------------

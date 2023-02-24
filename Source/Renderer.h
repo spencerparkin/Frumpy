@@ -16,6 +16,7 @@ namespace Frumpy
 	class Image;
 	class LightSource;
 	class Scene;
+	class Plane;
 
 	struct GraphicsMatrices
 	{
@@ -69,6 +70,9 @@ namespace Frumpy
 
 			virtual void Render(Thread* thread) = 0;
 			virtual bool ShouldRenderOnThread(Thread* thread);
+
+			bool ThreadOverlapsRange(int minRow, int maxRow, Thread* thread);
+			bool InterpolateSurfacePointOfPlanarPrimitive(int row, int col, const Matrix4x4& imageToCamera, const Plane& hitPlane, Vector3& surfacePoint);
 		};
 
 		class ExitRenderJob : public RenderJob
@@ -94,6 +98,21 @@ namespace Frumpy
 			Image::SampleMethod sampleMethod;
 			bool canBeShadowed;
 			bool isLit;
+		};
+
+		class LineRenderJob : public RenderJob
+		{
+		public:
+			LineRenderJob();
+			virtual ~LineRenderJob();
+
+			virtual void Render(Thread* thread) override;
+			virtual bool ShouldRenderOnThread(Thread* thread) override;
+
+			void Rasterize(int row, int col, const Vertex& vertexA, const Vertex& vertexB, double ta, double tb,
+							const Matrix4x4& imageToCamera, const Plane& planeOfLine, Image* frameBuffer, Image* depthBuffer);
+
+			const Vertex* vertex[2];
 		};
 
 		enum RenderPass
