@@ -582,6 +582,27 @@ Renderer::LineRenderJob::LineRenderJob()
 	double minX = FRUMPY_MIN(vertexA.imageSpacePoint.x, vertexB.imageSpacePoint.x);
 	double maxX = FRUMPY_MAX(vertexA.imageSpacePoint.x, vertexB.imageSpacePoint.x);
 
+	auto rasterizeLambda = [this, &graphicsMatrices, &planeOfLine, &vertexA, &vertexB, &depthBuffer, &frameBuffer, &thread](int row, int col, double ta, double tb) {
+		Vector3 surfacePoint;
+		if (!this->InterpolateSurfacePointOfPlanarPrimitive(row, col, graphicsMatrices.imageToCamera, planeOfLine, surfacePoint))
+			surfacePoint = (vertexA.cameraSpacePoint + vertexB.cameraSpacePoint) / 2.0;
+
+		Image::Location location{ unsigned(row), unsigned(col) };
+		Image::Pixel* pixelZ = depthBuffer->GetPixel(location);
+
+		if ((0 != (this->renderFlags & FRUMPY_RENDER_FLAG_DEPTH_TEST)) && surfacePoint.z <= pixelZ->depth)
+			return;
+
+		pixelZ->depth = (float)surfacePoint.z;
+
+		if (thread->renderer->renderPass == RenderPass::SHADOW_PASS)
+			return;
+
+		Vector4 surfaceColor = vertexA.color * ta + vertexB.color * tb;
+		uint32_t color = frameBuffer->MakeColor(surfaceColor);
+		frameBuffer->SetPixel(location, color);
+	};
+
 	if (maxX - minX > maxY - minY)
 	{
 		int minCol = int(::ceil(minX));
@@ -604,7 +625,7 @@ Renderer::LineRenderJob::LineRenderJob()
 
 			if (int(thread->minScanline) <= row && row <= int(thread->maxScanline))
 			{
-				this->Rasterize(row, col, vertexA, vertexB, ta, tb, graphicsMatrices.imageToCamera, planeOfLine, frameBuffer, depthBuffer);
+				rasterizeLambda(row, col, ta, tb);
 			}
 		}
 	}
@@ -630,28 +651,10 @@ Renderer::LineRenderJob::LineRenderJob()
 
 			if (0 <= col && col < int(frameBuffer->GetWidth()))
 			{
-				this->Rasterize(row, col, vertexA, vertexB, ta, tb, graphicsMatrices.imageToCamera, planeOfLine, frameBuffer, depthBuffer);
+				rasterizeLambda(row, col, ta, tb);
 			}
 		}
 	}
-}
-
-void Renderer::LineRenderJob::Rasterize(int row, int col, const Vertex& vertexA, const Vertex& vertexB, double ta, double tb,
-								const Matrix4x4& imageToCamera, const Plane& planeOfLine, Image* frameBuffer, Image* depthBuffer)
-{
-	Vector3 surfacePoint;
-	if (!this->InterpolateSurfacePointOfPlanarPrimitive(row, col, imageToCamera, planeOfLine, surfacePoint))
-		surfacePoint = (vertexA.cameraSpacePoint + vertexB.cameraSpacePoint) / 2.0;
-
-	Image::Location location{ unsigned(row), unsigned(col) };
-	Image::Pixel* pixelZ = depthBuffer->GetPixel(location);
-	if ((0 != (this->renderFlags & FRUMPY_RENDER_FLAG_DEPTH_TEST)) && surfacePoint.z <= pixelZ->depth)
-		return;
-
-	pixelZ->depth = (float)surfacePoint.z;
-	Vector4 surfaceColor = vertexA.color * ta + vertexB.color * tb;
-	uint32_t color = frameBuffer->MakeColor(surfaceColor);
-	frameBuffer->SetPixel(location, color);
 }
 
 //-------------------------- Renderer::Thread --------------------------

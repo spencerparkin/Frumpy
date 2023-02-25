@@ -118,9 +118,6 @@ namespace Frumpy
 			virtual void Render(Thread* thread) override;
 			virtual bool ShouldRenderOnThread(Thread* thread) override;
 
-			void Rasterize(int row, int col, const Vertex& vertexA, const Vertex& vertexB, double ta, double tb,
-							const Matrix4x4& imageToCamera, const Plane& planeOfLine, Image* frameBuffer, Image* depthBuffer);
-
 			const Vertex* vertex[2];
 		};
 
