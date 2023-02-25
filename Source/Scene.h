@@ -40,11 +40,16 @@ namespace Frumpy
 			void SetRenderFlag(uint32_t renderFlag, bool enabled);
 			bool GetRenderFlag(uint32_t renderFlag) const;
 
-			char name[128];
+			void SetName(const char* givenName);
+			const char* GetName() const { return this->name; }
+
 			Matrix4x4 childToParent;
 			mutable Matrix4x4 objectToWorld;
 			ObjectList childObjectList;
 			uint32_t renderFlags;
+
+		private:
+			char name[128];
 		};
 
 		ObjectList objectList;

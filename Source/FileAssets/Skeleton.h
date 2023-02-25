@@ -33,6 +33,9 @@ namespace Frumpy
 
 			void ResolveTransforms(const BoneSpace* parentSpace, Matrix4x4 BoneSpace::* childToParent, Matrix4x4 BoneSpace::* objectToBone, Matrix4x4 BoneSpace::* boneToObject);
 
+			void SetName(const char* givenName);
+			const char* GetName() const { return this->name; }
+
 			Matrix4x4 bindPoseChildToParent;
 			Matrix4x4 currentPoseChildToParent;
 
@@ -43,7 +46,11 @@ namespace Frumpy
 			mutable Matrix4x4 currentPoseBoneToObject;
 
 			std::vector<BoneSpace*>* childSpaceArray;
+
+			char name[128];
 		};
+
+		BoneSpace* FindBoneSpaceByName(const char* givenName);
 
 		BoneSpace* rootSpace;
 	};

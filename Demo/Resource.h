@@ -58,6 +58,7 @@
 #define ID_RENDER_WIREFRAME             32814
 #define ID_RENDER_BACKFACECULL          32815
 #define ID_RENDER_BACKFACE_CULL         32816
+#define ID_ANIMATION_ROTATESKELETON     32817
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -66,7 +67,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        129
-#define _APS_NEXT_COMMAND_VALUE         32817
+#define _APS_NEXT_COMMAND_VALUE         32818
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           110
 #endif

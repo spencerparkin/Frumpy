@@ -40,6 +40,7 @@ Demo::Demo()
     this->rotateObjects = false;
     this->rotateCamera = false;
     this->rotateLight = false;
+    this->animateSkeleton = false;
     this->objectRotationAngle = 0.0;
     this->cameraRotationAngle = 0.0;
     this->lightRotationAngle = 0.0;
@@ -122,18 +123,23 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     Frumpy::Skeleton::BoneSpace* boneSpaceA = new Frumpy::Skeleton::BoneSpace();
     boneSpaceA->bindPoseChildToParent.Identity();
+    boneSpaceA->bindPoseChildToParent.SetRotation(Frumpy::Vector3(0.0, 0.0, 1.0), FRUMPY_DEGS_TO_RADS(20));
+    boneSpaceA->SetName("spaceA");
     skeleton->rootSpace = boneSpaceA;
 
     Frumpy::Skeleton::BoneSpace* boneSpaceB = new Frumpy::Skeleton::BoneSpace();
-    boneSpaceB->bindPoseChildToParent.SetTranslation(Frumpy::Vector3(20.0, 0.0, 0.0));
+    boneSpaceB->bindPoseChildToParent.RigidBodyMotion(Frumpy::Vector3(0.0, 0.0, 1.0), FRUMPY_DEGS_TO_RADS(-20), Frumpy::Vector3(20.0, 0.0, 0.0));
+    boneSpaceB->SetName("spaceB");
     boneSpaceA->childSpaceArray->push_back(boneSpaceB);
 
     Frumpy::Skeleton::BoneSpace* boneSpaceC = new Frumpy::Skeleton::BoneSpace();
     boneSpaceC->bindPoseChildToParent.SetTranslation(Frumpy::Vector3(20.0, 0.0, 0.0));
+    boneSpaceC->SetName("spaceC");
     boneSpaceB->childSpaceArray->push_back(boneSpaceC);
 
     Frumpy::Skeleton::BoneSpace* boneSpaceD = new Frumpy::Skeleton::BoneSpace();
     boneSpaceD->bindPoseChildToParent.SetTranslation(Frumpy::Vector3(20.0, 0.0, 0.0));
+    boneSpaceD->SetName("spaceD");
     boneSpaceC->childSpaceArray->push_back(boneSpaceD);
 
     skeleton->rootSpace->ResetToBindPose();
@@ -141,9 +147,10 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     Frumpy::SkeletonObject* skeletonObject = new Frumpy::SkeletonObject();
     skeletonObject->SetSkeleton(skeleton);
     skeletonObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, true);
+    skeletonObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
     skeletonObject->SetColor(Frumpy::Vector4(1.0, 0.0, 0.0, 1.0));
     skeletonObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
-    strcpy_s(skeletonObject->name, "skeleton");     // Make a function for this!
+    skeletonObject->SetName("skeleton");
     this->scene->objectList.AddTail(skeletonObject);
 
     Frumpy::MeshObject* meshObject = nullptr;
@@ -156,7 +163,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
     meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
-    strcpy_s(meshObject->name, "teapot");
+    meshObject->SetName("teapot");
     this->scene->objectList.AddTail(meshObject);
 
     meshObject = new Frumpy::MeshObject();
@@ -167,7 +174,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
-    strcpy_s(meshObject->name, "torus");
+    meshObject->SetName("torus");
     this->scene->objectList.AddTail(meshObject);
 
     meshObject = new Frumpy::MeshObject();
@@ -178,7 +185,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
-    strcpy_s(meshObject->name, "cube");
+    meshObject->SetName("cube");
     this->scene->objectList.AddTail(meshObject);
 
     meshObject = new Frumpy::MeshObject();
@@ -187,7 +194,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, false);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, true);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, true);
-    strcpy_s(meshObject->name, "ground_plane");
+    meshObject->SetName("ground_plane");
     this->scene->objectList.AddTail(meshObject);
 
     meshObject = new Frumpy::MeshObject();
@@ -197,7 +204,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
     meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
-    strcpy_s(meshObject->name, "tetrahedron");
+    meshObject->SetName("tetrahedron");
     this->scene->objectList.AddTail(meshObject);
 
     meshObject = new Frumpy::MeshObject();
@@ -207,7 +214,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
     meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
-    strcpy_s(meshObject->name, "hexadron");
+    meshObject->SetName("hexadron");
     this->scene->objectList.AddTail(meshObject);
 
     meshObject = new Frumpy::MeshObject();
@@ -217,7 +224,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
     meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
-    strcpy_s(meshObject->name, "octahedron");
+    meshObject->SetName("octahedron");
     this->scene->objectList.AddTail(meshObject);
 
     meshObject = new Frumpy::MeshObject();
@@ -228,7 +235,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_IS_LIT, false);
     meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
-    strcpy_s(meshObject->name, "icosahedron");
+    meshObject->SetName("icosahedron");
     this->scene->objectList.AddTail(meshObject);
 
     meshObject = new Frumpy::MeshObject();
@@ -238,7 +245,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
     meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
-    strcpy_s(meshObject->name, "dodecahedron");
+    meshObject->SetName("dodecahedron");
     this->scene->objectList.AddTail(meshObject);
 
     this->renderer->Startup(8);
@@ -333,7 +340,7 @@ void Demo::Run()
             this->objectRotationAngle += this->objectRotationRate * deltaTimeSeconds;
             int i = 0;
             this->scene->ForAllObjects([=, &i](Frumpy::Scene::Object* object) -> bool {
-                if (0 != strcmp(object->name, "ground_plane"))
+                if (0 != strcmp(object->GetName(), "ground_plane"))
                 {
                     Frumpy::Vector3 translation;
                     Frumpy::Vector3 axis;
@@ -365,6 +372,12 @@ void Demo::Run()
         {
             // Let the user control the camera.
             this->HandleKeyboardInput(deltaTimeSeconds);
+        }
+
+        // Animate the skeleton if configured to do so.
+        if (this->animateSkeleton)
+        {
+            //...
         }
 
         static bool debug = false;
@@ -577,7 +590,7 @@ LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
             {
                 bool castsShadow = !torusObject->GetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW);
                 this->scene->ForAllObjects([=](Frumpy::Scene::Object* object) -> bool {
-                    if (0 != strcmp(object->name, "ground_plane"))
+                    if (0 != strcmp(object->GetName(), "ground_plane"))
                         object->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, castsShadow);
                     return true;
                 });
@@ -594,7 +607,7 @@ LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
             {
                 bool canBeShadowed = !torusObject->GetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED);
                 this->scene->ForAllObjects([=](Frumpy::Scene::Object* object) -> bool {
-                    if (0 != strcmp(object->name, "ground_plane"))
+                    if (0 != strcmp(object->GetName(), "ground_plane"))
                         object->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, canBeShadowed);
                     return true;
                 });
@@ -615,6 +628,11 @@ LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
         case ID_ANIMATION_ROTATEOBJECT:
         {
             this->rotateObjects = !this->rotateObjects;
+            break;
+        }
+        case ID_ANIMATION_ROTATESKELETON:
+        {
+            this->animateSkeleton = !this->animateSkeleton;
             break;
         }
         case ID_FRAMEBUFFER_128X128:
@@ -744,7 +762,7 @@ LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
         case ID_TEXTURING_USETEXTURE:
         {
             this->scene->ForAllObjects([=](Frumpy::Scene::Object* object) -> bool {
-                if (0 != strcmp(object->name, "ground_plane"))
+                if (0 != strcmp(object->GetName(), "ground_plane"))
                 {
                     Frumpy::MeshObject* meshObject = dynamic_cast<Frumpy::MeshObject*>(object);
                     if (meshObject)
@@ -757,7 +775,7 @@ LRESULT Demo::HandleCommandMessage(WPARAM wParam, LPARAM lParam)
         case ID_TEXTURING_USEVERTEXCOLORS:
         {
             this->scene->ForAllObjects([=](Frumpy::Scene::Object* object) -> bool {
-                if (0 != strcmp(object->name, "ground_plane"))
+                if (0 != strcmp(object->GetName(), "ground_plane"))
                 {
                     Frumpy::MeshObject* meshObject = dynamic_cast<Frumpy::MeshObject*>(object);
                     if (meshObject)
@@ -1056,6 +1074,11 @@ void Demo::UpdateOptionsMenuItemChecks(HMENU menuHandle)
             case ID_ANIMATION_ROTATEOBJECT:
             {
                 CheckMenuItem(menuHandle, menuItemID, (this->rotateObjects ? MF_CHECKED : MF_UNCHECKED));
+                break;
+            }
+            case ID_ANIMATION_ROTATESKELETON:
+            {
+                CheckMenuItem(menuHandle, menuItemID, (this->animateSkeleton ? MF_CHECKED : MF_UNCHECKED));
                 break;
             }
             case ID_FRAMEBUFFER_128X128:

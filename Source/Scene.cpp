@@ -18,7 +18,7 @@ Scene::Object* Scene::FindObjectByName(const char* name)
 {
 	Object* foundObject = nullptr;
 	this->ForAllObjects([name, &foundObject](Object* object) -> bool {
-		if (0 == strcmp(name, object->name))
+		if (0 == strcmp(name, object->GetName()))
 		{
 			foundObject = object;
 			return false;
@@ -71,6 +71,11 @@ Scene::Object::Object()
 /*virtual*/ Scene::Object::~Object()
 {
 	this->childObjectList.Delete();
+}
+
+void Scene::Object::SetName(const char* givenName)
+{
+	strcpy_s(this->name, sizeof(this->name), givenName);
 }
 
 void Scene::Object::SetRenderFlag(uint32_t renderFlag, bool enabled)

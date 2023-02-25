@@ -1,4 +1,6 @@
 #include "Skeleton.h"
+#include "Containers/List.h"
+#include <string.h>
 
 using namespace Frumpy;
 
@@ -14,7 +16,13 @@ Skeleton::Skeleton()
 
 Skeleton::BoneSpace::BoneSpace()
 {
+	this->name[0] = '\0';
 	this->childSpaceArray = new std::vector<BoneSpace*>();
+}
+
+void Skeleton::BoneSpace::SetName(const char* givenName)
+{
+	strcpy_s(this->name, sizeof(this->name), givenName);
 }
 
 /*virtual*/ Skeleton::BoneSpace::~BoneSpace()
@@ -56,4 +64,28 @@ void Skeleton::BoneSpace::ResetToBindPose()
 
 	for (unsigned int i = 0; i < this->childSpaceArray->size(); i++)
 		(*this->childSpaceArray)[i]->ResetToBindPose();
+}
+
+Skeleton::BoneSpace* Skeleton::FindBoneSpaceByName(const char* givenName)
+{
+	if (!this->rootSpace)
+		return nullptr;
+
+	List<BoneSpace*> boneSpaceQueue;
+	boneSpaceQueue.AddTail(this->rootSpace);
+
+	while (boneSpaceQueue.GetCount() > 0)
+	{
+		List<BoneSpace*>::Node* node = boneSpaceQueue.GetHead();
+		BoneSpace* boneSpace = node->value;
+		boneSpaceQueue.Remove(node);
+
+		if (0 == strcmp(boneSpace->name, givenName))
+			return boneSpace;
+
+		for (unsigned int i = 0; i < boneSpace->childSpaceArray->size(); i++)
+			boneSpaceQueue.AddTail((*boneSpace->childSpaceArray)[i]);
+	}
+
+	return nullptr;
 }

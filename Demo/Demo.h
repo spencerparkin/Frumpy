@@ -24,7 +24,7 @@ public:
 private:
 
 	LRESULT HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
+	
 	void UpdateOptionsMenuItemChecks(HMENU menuHandle);
 	LRESULT HandleCommandMessage(WPARAM wParam, LPARAM lParam);
 	void HandleKeyboardInput(double deltaTimeSeconds);
@@ -58,6 +58,7 @@ private:
 	bool rotateObjects;
 	bool rotateCamera;
 	bool rotateLight;
+	bool animateSkeleton;
 	double objectRotationAngle;
 	double cameraRotationAngle;
 	double lightRotationAngle;
