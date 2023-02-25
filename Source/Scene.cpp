@@ -66,11 +66,13 @@ Scene::Object::Object()
 {
 	this->name[0] = '\0';
 	this->renderFlags = FRUMPY_RENDER_FLAG_VISIBLE | FRUMPY_RENDER_FLAG_IS_LIT | FRUMPY_RENDER_FLAG_DEPTH_TEST | FRUMPY_RENDER_FLAG_BACK_FACE_CULL;
+	this->renderVertexBuffer = new std::vector<Renderer::Vertex>();
 }
 
 /*virtual*/ Scene::Object::~Object()
 {
 	this->childObjectList.Delete();
+	delete this->renderVertexBuffer;
 }
 
 void Scene::Object::SetName(const char* givenName)

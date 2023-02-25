@@ -7,7 +7,6 @@
 
 #include "framework.h"
 #include "Demo.h"
-#include "Vertex.h"
 #include "AssetManager.h"
 #include "SceneObjects/MeshObject.h"
 #include "SceneObjects/SkeletonObject.h"

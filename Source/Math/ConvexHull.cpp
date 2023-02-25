@@ -158,7 +158,7 @@ Mesh* ConvexHull::Generate(void) const
 	Vector3 center = this->CalcCenter();
 	for (int i = 0; i < (signed)this->pointArray->size(); i++)
 	{
-		Vertex* vertex = mesh->GetVertex(i);
+		Mesh::Vertex* vertex = mesh->GetVertex(i);
 		vertex->objectSpacePoint = (*this->pointArray)[i];
 		vertex->objectSpaceNormal = (*this->pointArray)[i] - center;
 		vertex->objectSpaceNormal.Normalize();

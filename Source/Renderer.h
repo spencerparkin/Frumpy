@@ -12,7 +12,6 @@
 
 namespace Frumpy
 {
-	class Vertex;
 	class Image;
 	class LightSource;
 	class Scene;
@@ -29,10 +28,7 @@ namespace Frumpy
 		Matrix4x4 imageToCamera;
 	};
 
-	// Here we essentially support a fixed-function pipeline, but conceivably, we could
-	// support a kind of vertex and pixel shader abstraction and call that here across the
-	// given vertex buffers and interpolated primitives.  I'm fine without this kind of
-	// abstraction for now, though.
+	// TODO: Add vertex and pixel shader abstractions?
 	class FRUMPY_API Renderer
 	{
 	private:
@@ -61,6 +57,15 @@ namespace Frumpy
 		void SetClearColor(const Vector3& clearColor);
 
 		const GraphicsMatrices& GetGraphicsMatrices() const { return this->graphicsMatrices; }
+
+		struct Vertex
+		{
+			Vector4 color;
+			Vector3 texCoords;
+			Vector3 cameraSpacePoint;
+			Vector3 imageSpacePoint;
+			Vector3 cameraSpaceNormal;
+		};
 
 		class RenderJob;
 

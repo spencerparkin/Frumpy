@@ -7,12 +7,10 @@ SkeletonObject::SkeletonObject()
 {
 	this->skeleton = nullptr;
 	this->color.SetComponents(1.0, 1.0, 1.0, 1.0);
-	this->vertexBuffer = new std::vector<Vertex>();
 }
 
 /*virtual*/ SkeletonObject::~SkeletonObject()
 {
-	delete this->vertexBuffer;
 }
 
 /*virtual*/ bool SkeletonObject::IntersectsFrustum(const ConvexHull& frustumHull, const Matrix4x4& worldToCamera) const
@@ -27,27 +25,19 @@ SkeletonObject::SkeletonObject()
 
 	this->skeleton->rootSpace->ResolveCurrentPoseTransforms();
 
-	this->vertexBuffer->clear();
+	this->renderVertexBuffer->clear();
+
+	this->objectToImage = renderer.GetGraphicsMatrices().worldToImage * this->objectToWorld;
+	this->objectToCamera = renderer.GetGraphicsMatrices().worldToCamera * this->objectToWorld;
 
 	Matrix4x4 identity;
 	this->GenerateVertexBuffer(identity, this->skeleton->rootSpace);
 
-	Matrix4x4 objectToImage = renderer.GetGraphicsMatrices().worldToImage * this->objectToWorld;
-	Matrix4x4 objectToCamera = renderer.GetGraphicsMatrices().worldToCamera * this->objectToWorld;
-
-	for (unsigned int i = 0; i < this->vertexBuffer->size(); i++)
-	{
-		const Vertex& vertex = (*this->vertexBuffer)[i];
-
-		objectToImage.TransformPoint(vertex.objectSpacePoint, vertex.imageSpacePoint);
-		objectToCamera.TransformPoint(vertex.objectSpacePoint, vertex.cameraSpacePoint);
-	}
-
-	for (unsigned int i = 0; i < this->vertexBuffer->size(); i += 2)
+	for (unsigned int i = 0; i < this->renderVertexBuffer->size(); i += 2)
 	{
 		Renderer::LineRenderJob* job = new Renderer::LineRenderJob();
-		job->vertex[0] = &(*this->vertexBuffer)[i];
-		job->vertex[1] = &(*this->vertexBuffer)[i + 1];
+		job->vertex[0] = &(*this->renderVertexBuffer)[i];
+		job->vertex[1] = &(*this->renderVertexBuffer)[i + 1];
 		job->renderFlags = this->renderFlags;
 		renderer.SubmitJob(job);
 	}
@@ -111,8 +101,12 @@ void SkeletonObject::GenerateVertexBuffer(const Matrix4x4& parentToObject, const
 
 void SkeletonObject::AddVertex(const Vector3& vertexPoint, const Vector4& vertexColor) const
 {
-	Vertex vertex;
-	vertex.objectSpacePoint = vertexPoint;
+	Renderer::Vertex vertex;
+
+	this->objectToImage.TransformPoint(vertexPoint, vertex.imageSpacePoint);
+	this->objectToCamera.TransformPoint(vertexPoint, vertex.cameraSpacePoint);
+
 	vertex.color = vertexColor;
-	this->vertexBuffer->push_back(vertex);
+
+	this->renderVertexBuffer->push_back(vertex);
 }

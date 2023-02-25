@@ -11,44 +11,14 @@ Skin::Skin()
 {
 }
 
-/*virtual*/ Vertex* Skin::AllocVertex()
+/*virtual*/ Mesh::Vertex* Skin::CreateVertex()
 {
 	return new PosedVertex();
 }
 
-/*virtual*/ void Skin::TransformMeshVertices(Renderer& renderer, const Matrix4x4& objectToWorld) const
+/*virtual*/ VertexShader* Skin::CreateVertexShader(const Matrix4x4& objectToWorld, const GraphicsMatrices& graphicsMatrices)
 {
-	if (!this->skeleton)
-		return;
-
-	this->skeleton->rootSpace->ResolveCurrentPoseTransforms();
-
-	Matrix4x4 objectToImage = renderer.GetGraphicsMatrices().worldToImage * objectToWorld;
-	Matrix4x4 objectToCamera = renderer.GetGraphicsMatrices().worldToCamera * objectToWorld;
-
-	for (unsigned int i = 0; i < this->vertexBufferSize; i++)
-	{
-		const PosedVertex* vertex = (const PosedVertex*)this->vertexBuffer[i];
-
-		vertex->poseSpacePoint.SetComponents(0.0, 0.0, 0.0);
-
-		for (unsigned int j = 0; j < vertex->boneWeightArraySize; j++)
-		{
-			const BoneWeight& boneWeight = vertex->boneWeightArray[j];
-
-			Vector3 boneSpacePoint;
-			boneWeight.boneSpace->bindPoseObjectToBone.TransformPoint(vertex->objectSpacePoint, boneSpacePoint);
-
-			Vector3 objectSpacePoint;
-			boneWeight.boneSpace->currentPoseBoneToObject.TransformPoint(boneSpacePoint, objectSpacePoint);
-
-			vertex->poseSpacePoint += objectSpacePoint * boneWeight.weight;
-		}
-
-		objectToImage.TransformPoint(vertex->poseSpacePoint, vertex->imageSpacePoint);
-		objectToCamera.TransformPoint(vertex->poseSpacePoint, vertex->cameraSpacePoint);
-		objectToCamera.TransformVector(vertex->poseSpaceNormal, vertex->cameraSpaceNormal);
-	}
+	return new SkinVertexShader(objectToWorld, graphicsMatrices);
 }
 
 Skin::PosedVertex::PosedVertex()
@@ -60,4 +30,37 @@ Skin::PosedVertex::PosedVertex()
 /*virtual*/ Skin::PosedVertex::~PosedVertex()
 {
 	delete[] this->boneWeightArray;
+}
+
+SkinVertexShader::SkinVertexShader(const Matrix4x4& objectToWorld, const GraphicsMatrices& graphicsMatrices) : VertexShader(objectToWorld, graphicsMatrices)
+{
+}
+
+/*virtual*/ SkinVertexShader::~SkinVertexShader()
+{
+}
+
+/*virtual*/ void SkinVertexShader::ProcessVertex(const void* inputVertex, Renderer::Vertex* outputVertex)
+{
+	const Skin::PosedVertex* posedVertex = (const Skin::PosedVertex*)inputVertex;
+
+	Vector3 poseSpacePoint(0.0, 0.0, 0.0);
+	Vector3 poseSpaceNormal = posedVertex->objectSpaceNormal;		// TODO: How do we pose this?
+
+	for (unsigned int i = 0; i < posedVertex->boneWeightArraySize; i++)
+	{
+		const Skin::BoneWeight& boneWeight = posedVertex->boneWeightArray[i];
+
+		Vector3 boneSpacePoint;
+		boneWeight.boneSpace->bindPoseObjectToBone.TransformPoint(posedVertex->objectSpacePoint, boneSpacePoint);
+
+		Vector3 objectSpacePoint;
+		boneWeight.boneSpace->currentPoseBoneToObject.TransformPoint(boneSpacePoint, objectSpacePoint);
+
+		poseSpacePoint += objectSpacePoint * boneWeight.weight;
+	}
+
+	objectToImage.TransformPoint(poseSpacePoint, outputVertex->imageSpacePoint);
+	objectToCamera.TransformPoint(poseSpacePoint, outputVertex->cameraSpacePoint);
+	objectToCamera.TransformVector(poseSpaceNormal, outputVertex->cameraSpaceNormal);
 }

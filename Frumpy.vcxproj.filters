@@ -34,9 +34,6 @@
     <ClInclude Include="Source\Camera.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Vertex.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Renderer.h">
       <Filter>Source</Filter>
     </ClInclude>
@@ -124,15 +121,15 @@
     <ClInclude Include="Source\Math\Edge.h">
       <Filter>Source\Math</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Shader.h">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Scene.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Camera.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Vertex.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Renderer.cpp">
@@ -212,6 +209,9 @@
     </ClCompile>
     <ClCompile Include="Source\SceneObjects\SkeletonObject.cpp">
       <Filter>Source\SceneObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Shader.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

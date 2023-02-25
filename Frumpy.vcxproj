@@ -50,8 +50,8 @@
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\SceneObjects\MeshObject.h" />
     <ClInclude Include="Source\SceneObjects\SkeletonObject.h" />
+    <ClInclude Include="Source\Shader.h" />
     <ClInclude Include="Source\Stream.h" />
-    <ClInclude Include="Source\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\AssetManager.cpp" />
@@ -81,8 +81,8 @@
     <ClCompile Include="Source\Scene.cpp" />
     <ClCompile Include="Source\SceneObjects\MeshObject.cpp" />
     <ClCompile Include="Source\SceneObjects\SkeletonObject.cpp" />
+    <ClCompile Include="Source\Shader.cpp" />
     <ClCompile Include="Source\Stream.cpp" />
-    <ClCompile Include="Source\Vertex.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

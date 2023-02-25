@@ -3,8 +3,6 @@
 #include "Scene.h"
 #include "Math/Vector4.h"
 #include "FileAssets/Skeleton.h"
-#include "Vertex.h"
-#include <vector>
 
 namespace Frumpy
 {
@@ -32,6 +30,7 @@ namespace Frumpy
 
 		Skeleton* skeleton;
 		Vector4 color;
-		mutable std::vector<Vertex>* vertexBuffer;
+		mutable Matrix4x4 objectToImage;
+		mutable Matrix4x4 objectToCamera;
 	};
 }

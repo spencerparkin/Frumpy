@@ -17,35 +17,20 @@ Mesh::Mesh()
 	this->SetIndexBufferSize(0);
 }
 
-/*virtual*/ Vertex* Mesh::AllocVertex()
+/*virtual*/ Mesh::Vertex* Mesh::CreateVertex()
 {
 	return new Vertex();
 }
 
-/*virtual*/ void Mesh::DeallocVertex(Vertex* vertex)
+/*virtual*/ VertexShader* Mesh::CreateVertexShader(const Matrix4x4& objectToWorld, const GraphicsMatrices& graphicsMatrices)
 {
-	delete vertex;
-}
-
-/*virtual*/ void Mesh::TransformMeshVertices(Renderer& renderer, const Matrix4x4& objectToWorld) const
-{
-	Matrix4x4 objectToImage = renderer.GetGraphicsMatrices().worldToImage * objectToWorld;
-	Matrix4x4 objectToCamera = renderer.GetGraphicsMatrices().worldToCamera * objectToWorld;
-
-	for (unsigned int i = 0; i < this->vertexBufferSize; i++)
-	{
-		const Vertex& vertex = *this->vertexBuffer[i];
-
-		objectToImage.TransformPoint(vertex.objectSpacePoint, vertex.imageSpacePoint);
-		objectToCamera.TransformPoint(vertex.objectSpacePoint, vertex.cameraSpacePoint);
-		objectToCamera.TransformVector(vertex.objectSpaceNormal, vertex.cameraSpaceNormal);
-	}
+	return new MeshVertexShader(objectToWorld, graphicsMatrices);
 }
 
 void Mesh::SetVertexBufferSize(unsigned int vertexBufferSize)
 {
 	for (unsigned int i = 0; i < this->vertexBufferSize; i++)
-		this->DeallocVertex(this->vertexBuffer[i]);
+		delete this->vertexBuffer[i];
 
 	delete[] this->vertexBuffer;
 	this->vertexBufferSize = 0;
@@ -56,7 +41,7 @@ void Mesh::SetVertexBufferSize(unsigned int vertexBufferSize)
 		this->vertexBufferSize = vertexBufferSize;
 
 		for (unsigned int i = 0; i < this->vertexBufferSize; i++)
-			this->vertexBuffer[i] = this->AllocVertex();
+			this->vertexBuffer[i] = this->CreateVertex();
 	}
 }
 
@@ -82,7 +67,7 @@ unsigned int Mesh::GetIndexBufferSize() const
 	return this->indexBufferSize;
 }
 
-Vertex* Mesh::GetVertex(unsigned int i)
+Mesh::Vertex* Mesh::GetVertex(unsigned int i)
 {
 	if (i >= this->vertexBufferSize)
 		return nullptr;
@@ -90,7 +75,7 @@ Vertex* Mesh::GetVertex(unsigned int i)
 	return this->vertexBuffer[i];
 }
 
-const Vertex* Mesh::GetVertex(unsigned int i) const
+const Mesh::Vertex* Mesh::GetVertex(unsigned int i) const
 {
 	return const_cast<Mesh*>(this)->GetVertex(i);
 }
@@ -116,4 +101,24 @@ void Mesh::SetColor(const Vector4& color)
 {
 	for (unsigned int i = 0; i < this->vertexBufferSize; i++)
 		this->vertexBuffer[i]->color = color;
+}
+
+MeshVertexShader::MeshVertexShader(const Matrix4x4& objectToWorld, const GraphicsMatrices& graphicsMatrices) : VertexShader(objectToWorld, graphicsMatrices)
+{
+}
+
+/*virtual*/ MeshVertexShader::~MeshVertexShader()
+{
+}
+
+/*virtual*/ void MeshVertexShader::ProcessVertex(const void* inputVertex, Renderer::Vertex* outputVertex)
+{
+	const Mesh::Vertex* meshVertex = (const Mesh::Vertex*)inputVertex;
+
+	outputVertex->color = meshVertex->color;
+	outputVertex->texCoords = meshVertex->texCoords;
+
+	objectToImage.TransformPoint(meshVertex->objectSpacePoint, outputVertex->imageSpacePoint);
+	objectToCamera.TransformPoint(meshVertex->objectSpacePoint, outputVertex->cameraSpacePoint);
+	objectToCamera.TransformVector(meshVertex->objectSpaceNormal, outputVertex->cameraSpaceNormal);
 }

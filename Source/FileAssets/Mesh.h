@@ -2,12 +2,14 @@
 
 #include "AssetManager.h"
 #include "Math/Vector3.h"
-#include "Vertex.h"
+#include "Math/Vector4.h"
+#include "Shader.h"
 
 namespace Frumpy
 {
 	class Renderer;
 	class Matrix4x4;
+	class VertexShader;
 
 	// These are always triangle meshes.  I should probably rename the class to be more specific.
 	class FRUMPY_API Mesh : public AssetManager::Asset
@@ -16,9 +18,10 @@ namespace Frumpy
 		Mesh();
 		virtual ~Mesh();
 
-		virtual void TransformMeshVertices(Renderer& renderer, const Matrix4x4& objectToWorld) const;
-		virtual Vertex* AllocVertex();
-		virtual void DeallocVertex(Vertex* vertex);
+		struct Vertex;
+
+		virtual Vertex* CreateVertex();
+		virtual VertexShader* CreateVertexShader(const Matrix4x4& objectToWorld, const GraphicsMatrices& graphicsMatrices);
 
 		void SetVertexBufferSize(unsigned int vertexBufferSize);
 		unsigned int GetVertexBufferSize() const;
@@ -37,11 +40,28 @@ namespace Frumpy
 		unsigned int* GetRawIndexBuffer() { return this->indexBuffer; }
 		const unsigned int* GetRawIndexBuffer() const { return this->indexBuffer; }
 
+		struct Vertex
+		{
+			Vector3 objectSpacePoint;
+			Vector3 objectSpaceNormal;
+			Vector4 color;
+			Vector3 texCoords;
+		};
+
 	protected:
 		Vertex** vertexBuffer;
 		unsigned int vertexBufferSize;
 
 		unsigned int* indexBuffer;
 		unsigned int indexBufferSize;
+	};
+
+	class MeshVertexShader : public VertexShader
+	{
+	public:
+		MeshVertexShader(const Matrix4x4& objectToWorld, const GraphicsMatrices& graphicsMatrices);
+		virtual ~MeshVertexShader();
+
+		virtual void ProcessVertex(const void* inputVertex, Renderer::Vertex* outputVertex) override;
 	};
 }

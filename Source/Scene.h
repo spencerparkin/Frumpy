@@ -4,6 +4,7 @@
 #include "Math/Matrix4x4.h"
 #include "Containers/List.h"
 #include "Math/Plane.h"
+#include "Renderer.h"
 #include <functional>
 
 namespace Frumpy
@@ -48,8 +49,9 @@ namespace Frumpy
 			ObjectList childObjectList;
 			uint32_t renderFlags;
 
-		private:
+		protected:
 			char name[128];
+			mutable std::vector<Renderer::Vertex>* renderVertexBuffer;
 		};
 
 		ObjectList objectList;

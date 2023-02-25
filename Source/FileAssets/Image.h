@@ -7,8 +7,6 @@
 
 namespace Frumpy
 {
-	class Vertex;
-
 	// An image can be a render target or a render source (texture).
 	// All images are of the same format: RGBA, 32-bit, and can be depth buffers too.
 	// The goal of Frumpy is simply to render into one of these images.

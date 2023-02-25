@@ -15,15 +15,11 @@ namespace Frumpy
 		Skin();
 		virtual ~Skin();
 
-		virtual void TransformMeshVertices(Renderer& renderer, const Matrix4x4& objectToWorld) const override;
-		virtual Vertex* AllocVertex() override;
+		virtual Vertex* CreateVertex() override;
+		virtual VertexShader* CreateVertexShader(const Matrix4x4& objectToWorld, const GraphicsMatrices& graphicsMatrices) override;
 
 		void SetSkeleton(Skeleton* skeleton) { this->skeleton = skeleton; }
 		Skeleton* GetSkeleton() { return this->skeleton; }
-
-	protected:
-
-		Skeleton* skeleton;
 
 		struct BoneWeight
 		{
@@ -39,9 +35,19 @@ namespace Frumpy
 
 			BoneWeight* boneWeightArray;
 			unsigned int boneWeightArraySize;
-
-			mutable Vector3 poseSpacePoint;
-			mutable Vector3 poseSpaceNormal;
 		};
+
+	protected:
+
+		Skeleton* skeleton;
+	};
+
+	class SkinVertexShader : public VertexShader
+	{
+	public:
+		SkinVertexShader(const Matrix4x4& objectToWorld, const GraphicsMatrices& graphicsMatrices);
+		virtual ~SkinVertexShader();
+
+		virtual void ProcessVertex(const void* inputVertex, Renderer::Vertex* outputVertex) override;
 	};
 }

@@ -73,7 +73,17 @@ void MeshObject::SetColor(const Vector4& color)
 	if (!this->mesh)
 		return;
 
-	this->mesh->TransformMeshVertices(renderer, this->objectToWorld);
+	VertexShader* vertexShader = this->mesh->CreateVertexShader(this->objectToWorld, renderer.GetGraphicsMatrices());
+
+	this->renderVertexBuffer->clear();
+
+	for (unsigned int i = 0; i < this->mesh->GetVertexBufferSize(); i++)
+	{
+		const Mesh::Vertex* vertex = this->mesh->GetVertex(i);
+		Renderer::Vertex renderVertex;
+		vertexShader->ProcessVertex(vertex, &renderVertex);
+		this->renderVertexBuffer->push_back(renderVertex);
+	}
 
 	std::set<Edge>* edgeSet = nullptr;
 	if (0 != (this->renderFlags & FRUMPY_RENDER_FLAG_WIRE_FRAME))
@@ -92,9 +102,9 @@ void MeshObject::SetColor(const Vector4& color)
 			continue;
 		}
 
-		const Vertex& vertexA = *this->mesh->GetVertex(indexA);
-		const Vertex& vertexB = *this->mesh->GetVertex(indexB);
-		const Vertex& vertexC = *this->mesh->GetVertex(indexC);
+		const Renderer::Vertex& vertexA = (*this->renderVertexBuffer)[indexA];
+		const Renderer::Vertex& vertexB = (*this->renderVertexBuffer)[indexB];
+		const Renderer::Vertex& vertexC = (*this->renderVertexBuffer)[indexC];
 
 		const Vector3& pointA = vertexA.imageSpacePoint;
 		const Vector3& pointB = vertexB.imageSpacePoint;
@@ -150,8 +160,8 @@ void MeshObject::SetColor(const Vector4& color)
 				if (edgeSet->end() == edgeSet->find(edge))
 				{
 					Renderer::LineRenderJob* job = new Renderer::LineRenderJob();
-					job->vertex[0] = this->mesh->GetVertex(edge.i);
-					job->vertex[1] = this->mesh->GetVertex(edge.j);
+					job->vertex[0] = &(*this->renderVertexBuffer)[edge.i];
+					job->vertex[1] = &(*this->renderVertexBuffer)[edge.j];
 					job->renderFlags = this->renderFlags;
 					renderer.SubmitJob(job);
 
@@ -162,4 +172,5 @@ void MeshObject::SetColor(const Vector4& color)
 	}
 
 	delete edgeSet;
+	delete vertexShader;
 }

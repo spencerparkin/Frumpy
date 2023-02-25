@@ -100,7 +100,7 @@ void OBJFormat::ProcessTokenizedLine(const std::vector<std::string>& tokenArray,
 			std::vector<std::string> vertexTokenArray;
 			this->TokenizeLine(token, '/', vertexTokenArray, false);
 
-			Vertex vertex;
+			Mesh::Vertex vertex;
 
 			int point_i = (vertexTokenArray.size() > 0 && vertexTokenArray[0].size() > 0) ? ::atoi(vertexTokenArray[0].c_str()) : INT_MAX;
 			int texCoords_i = (vertexTokenArray.size() > 1 && vertexTokenArray[1].size() > 0) ? ::atoi(vertexTokenArray[1].c_str()) : INT_MAX;
@@ -137,13 +137,13 @@ void OBJFormat::FlushMesh(List<AssetManager::Asset*>& assetList)
 
 		// Build the vertex buffer.
 		unsigned int i = 0;
-		std::vector<Vertex> vertexBuffer;
+		std::vector<Mesh::Vertex> vertexBuffer;
 		std::map<std::string, unsigned int> vertexMap;
 		for (ConvexPolygon& polygon : triangleArray)
 		{
-			for (Vertex& vertex : polygon.vertexArray)
+			for (Mesh::Vertex& vertex : polygon.vertexArray)
 			{
-				std::string key = vertex.MakeKey();
+				std::string key = this->MakeKey(&vertex);
 				std::map<std::string, unsigned int>::iterator iter = vertexMap.find(key);
 				if (iter == vertexMap.end())
 				{
@@ -157,9 +157,9 @@ void OBJFormat::FlushMesh(List<AssetManager::Asset*>& assetList)
 		std::vector<unsigned int> indexBuffer;
 		for (ConvexPolygon& polygon : triangleArray)
 		{
-			for (Vertex& vertex : polygon.vertexArray)
+			for (Mesh::Vertex& vertex : polygon.vertexArray)
 			{
-				std::string key = vertex.MakeKey();
+				std::string key = this->MakeKey(&vertex);
 				std::map<std::string, unsigned int>::iterator iter = vertexMap.find(key);
 				if (iter != vertexMap.end())
 					indexBuffer.push_back(iter->second);
@@ -209,7 +209,7 @@ void OBJFormat::LookupAndAssign(const std::vector<Vector3>& vectorArray, int i, 
 
 void OBJFormat::ConvexPolygon::Tesselate(std::vector<ConvexPolygon>& triangleArray) const
 {
-	std::vector<Vertex> vertexArrayCopy = this->vertexArray;
+	std::vector<Mesh::Vertex> vertexArrayCopy = this->vertexArray;
 
 	while (vertexArrayCopy.size() > 2)
 	{
@@ -242,7 +242,7 @@ void OBJFormat::ConvexPolygon::Tesselate(std::vector<ConvexPolygon>& triangleArr
 		triangle.vertexArray.push_back(vertexArrayCopy[(j + 2) % vertexArrayCopy.size()]);
 		triangleArray.push_back(triangle);
 
-		std::vector<Vertex>::iterator iter = vertexArrayCopy.begin() + ((j + 1) % vertexArrayCopy.size());
+		std::vector<Mesh::Vertex>::iterator iter = vertexArrayCopy.begin() + ((j + 1) % vertexArrayCopy.size());
 		vertexArrayCopy.erase(iter);
 	}
 }
@@ -287,7 +287,7 @@ void OBJFormat::DumpMesh(std::ofstream& fileStream, const Mesh* mesh)
 	for (unsigned int i = 0; i < mesh->GetVertexBufferSize(); i++)
 	{
 		// TODO: Output vertex colors too?
-		const Vertex* vertex = mesh->GetVertex(i);
+		const Mesh::Vertex* vertex = mesh->GetVertex(i);
 		fileStream << "v " << vertex->objectSpacePoint.x << " " << vertex->objectSpacePoint.y << " " << vertex->objectSpacePoint.z << "\n";
 	}
 
@@ -295,7 +295,7 @@ void OBJFormat::DumpMesh(std::ofstream& fileStream, const Mesh* mesh)
 
 	for (unsigned int i = 0; i < mesh->GetVertexBufferSize(); i++)
 	{
-		const Vertex* vertex = mesh->GetVertex(i);
+		const Mesh::Vertex* vertex = mesh->GetVertex(i);
 		fileStream << "vt " << vertex->texCoords.x << " " << vertex->texCoords.y << " " << vertex->texCoords.z << "\n";
 	}
 
@@ -303,7 +303,7 @@ void OBJFormat::DumpMesh(std::ofstream& fileStream, const Mesh* mesh)
 
 	for (unsigned int i = 0; i < mesh->GetVertexBufferSize(); i++)
 	{
-		const Vertex* vertex = mesh->GetVertex(i);
+		const Mesh::Vertex* vertex = mesh->GetVertex(i);
 		fileStream << "vn " << vertex->objectSpaceNormal.x << " " << vertex->objectSpaceNormal.y << " " << vertex->objectSpaceNormal.z << "\n";
 	}
 
@@ -348,3 +348,24 @@ void OBJFormat::DumpPolyline(std::ofstream& fileStream, const Polyline* polyline
 	this->totalVertices += (int)polyline->vertexArray->size();
 }
 */
+
+std::string OBJFormat::MakeKey(const Mesh::Vertex* vertex)
+{
+	std::stringstream stringStream;
+	stringStream <<
+		vertex->objectSpacePoint.x << "|" <<
+		vertex->objectSpacePoint.y << "|" <<
+		vertex->objectSpacePoint.z << "|" <<
+		vertex->objectSpaceNormal.x << "|" <<
+		vertex->objectSpaceNormal.y << "|" <<
+		vertex->objectSpaceNormal.z << "|" <<
+		vertex->texCoords.x << "|" <<
+		vertex->texCoords.y << "|" <<
+		vertex->texCoords.z << "|" <<
+		vertex->color.r << "|" <<
+		vertex->color.g << "|" <<
+		vertex->color.b << "|" <<
+		vertex->color.a;
+	std::string key = stringStream.str();
+	return key;
+}

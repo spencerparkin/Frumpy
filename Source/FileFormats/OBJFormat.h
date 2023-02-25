@@ -2,7 +2,7 @@
 
 #include "AssetManager.h"
 #include "Math/Vector3.h"
-#include "Vertex.h"
+#include "FileAssets/Mesh.h"
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -27,7 +27,7 @@ namespace Frumpy
 
 		struct ConvexPolygon
 		{
-			std::vector<Vertex> vertexArray;
+			std::vector<Mesh::Vertex> vertexArray;
 
 			void Tesselate(std::vector<ConvexPolygon>& triangleArray) const;
 		};
@@ -52,5 +52,6 @@ namespace Frumpy
 		void FlushMesh(List<AssetManager::Asset*>& assetList);
 		void DumpMesh(std::ofstream& fileStream, const Mesh* mesh);
 		//void DumpPolyline(std::ofstream& fileStream, const Polyline* polyline);
+		std::string MakeKey(const Mesh::Vertex* vertex);
 	};
 }
