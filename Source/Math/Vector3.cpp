@@ -210,6 +210,33 @@ bool Vector3::Rotation(const Vector3& vector, const Vector3& axis, double angle)
 	return true;
 }
 
+void Vector3::MakeOrthogonalTo(const Vector3& vector)
+{
+	double absX = fabs(vector.x);
+	double absY = fabs(vector.y);
+	double absZ = fabs(vector.z);
+
+	if (absX < absY && absX < absZ)
+	{
+		this->x = 0.0;
+		this->y = -vector.z;
+		this->z = vector.y;
+		
+	}
+	else if (absY < absX && absY < absZ)
+	{
+		this->x = -vector.z;
+		this->y = 0.0;
+		this->z = vector.x;
+	}
+	else
+	{
+		this->x = -vector.y;
+		this->y = vector.x;
+		this->z = 0.0;
+	}
+}
+
 void Vector3::Lerp(const Vector3& vectorA, const Vector3& vectorB, double alpha)
 {
 	*this = vectorA * (1.0 - alpha) + vectorB * alpha;

@@ -2,6 +2,9 @@
 
 #include "Scene.h"
 #include "Math/Vector4.h"
+#include "FileAssets/Skeleton.h"
+#include "Vertex.h"
+#include <vector>
 
 namespace Frumpy
 {
@@ -24,8 +27,11 @@ namespace Frumpy
 
 	private:
 
-		Skeleton* skeleton;
+		void GenerateVertexBuffer(const Matrix4x4& parentToObject, const Skeleton::BoneSpace* childSpace) const;
+		void AddVertex(const Vector3& vertexPoint, const Vector4& vertexColor) const;
 
+		Skeleton* skeleton;
 		Vector4 color;
+		mutable std::vector<Vertex>* vertexBuffer;
 	};
 }

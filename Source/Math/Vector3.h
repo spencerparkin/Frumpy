@@ -44,6 +44,8 @@ namespace Frumpy
 
 		bool IsEqualTo(const Vector3& vector, double eps = FRUMPY_EPS) const;
 
+		void MakeOrthogonalTo(const Vector3& vector);
+
 		void Lerp(const Vector3& vectorA, const Vector3& vectorB, double alpha);
 		void Slerp(const Vector3& vectorA, const Vector3& vectorB, double alpha);
 

@@ -14,37 +14,46 @@ Skeleton::Skeleton()
 
 Skeleton::BoneSpace::BoneSpace()
 {
-	this->subSpaceArray = nullptr;
-	this->subSpaceArraySize = 0;
+	this->childSpaceArray = new std::vector<BoneSpace*>();
 }
 
 /*virtual*/ Skeleton::BoneSpace::~BoneSpace()
 {
-	for (unsigned int i = 0; i < this->subSpaceArraySize; i++)
-		delete this->subSpaceArray[i];
+	for (unsigned int i = 0; i < this->childSpaceArray->size(); i++)
+		delete (*this->childSpaceArray)[i];
+
+	delete this->childSpaceArray;
 }
 
 void Skeleton::BoneSpace::ResolveBindPoseTransforms(const BoneSpace* parentSpace /*= nullptr*/) const
 {
-	this->ResolveTransforms(parentSpace, &BoneSpace::bindPoseChildToParent, &BoneSpace::bindPoseObjectToBone, &BoneSpace::bindPoseBoneToObject);
+	const_cast<BoneSpace*>(this)->ResolveTransforms(parentSpace, &BoneSpace::bindPoseChildToParent, &BoneSpace::bindPoseObjectToBone, &BoneSpace::bindPoseBoneToObject);
 }
 
 void Skeleton::BoneSpace::ResolveCurrentPoseTransforms(const BoneSpace* parentSpace /*= nullptr*/) const
 {
-	this->ResolveTransforms(parentSpace, &BoneSpace::currentPoseChildToParent, &BoneSpace::currentPoseObjectToBone, &BoneSpace::currentPoseBoneToObject);
+	const_cast<BoneSpace*>(this)->ResolveTransforms(parentSpace, &BoneSpace::currentPoseChildToParent, &BoneSpace::currentPoseObjectToBone, &BoneSpace::currentPoseBoneToObject);
 }
 
-void Skeleton::BoneSpace::ResolveTransforms(const BoneSpace* parentSpace, Matrix4x4 BoneSpace::* childToParent, Matrix4x4 BoneSpace::* objectToBone, Matrix4x4 BoneSpace::* boneToObject) const
+void Skeleton::BoneSpace::ResolveTransforms(const BoneSpace* parentSpace, Matrix4x4 BoneSpace::* childToParent, Matrix4x4 BoneSpace::* objectToBone, Matrix4x4 BoneSpace::* boneToObject)
 {
-	Matrix4x4 objectToParent;
+	Matrix4x4 parentToObject;
 	if (!parentSpace)
-		objectToParent.Identity();
+		parentToObject.Identity();
 	else
-		objectToParent = parentSpace->*objectToBone;
+		parentToObject = parentSpace->*boneToObject;
 
-	*const_cast<Matrix4x4*>(&(this->*objectToBone)) = objectToParent * this->*childToParent;
-	const_cast<Matrix4x4*>(&(this->*boneToObject))->Invert(this->*objectToBone);
+	this->*boneToObject = parentToObject * this->*childToParent;
+	(this->*objectToBone).Invert(this->*boneToObject);
 
-	for (unsigned int i = 0; i < this->subSpaceArraySize; i++)
-		this->subSpaceArray[i]->ResolveTransforms(this, childToParent, objectToBone, boneToObject);
+	for (unsigned int i = 0; i < this->childSpaceArray->size(); i++)
+		(*this->childSpaceArray)[i]->ResolveTransforms(this, childToParent, objectToBone, boneToObject);
+}
+
+void Skeleton::BoneSpace::ResetToBindPose()
+{
+	this->currentPoseChildToParent = this->bindPoseChildToParent;
+
+	for (unsigned int i = 0; i < this->childSpaceArray->size(); i++)
+		(*this->childSpaceArray)[i]->ResetToBindPose();
 }

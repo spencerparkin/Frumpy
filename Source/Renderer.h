@@ -146,7 +146,7 @@ namespace Frumpy
 
 			List<RenderJob*> renderJobQueue;
 			std::mutex renderJobQueueMutex;
-			std::counting_semaphore<7000> renderJobQueueSemaphore;
+			std::counting_semaphore<10000> renderJobQueueSemaphore;
 			std::thread* thread;
 			bool exitSignaled;
 			Renderer* renderer;

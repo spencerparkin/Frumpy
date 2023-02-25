@@ -10,9 +10,11 @@
 #include "Vertex.h"
 #include "AssetManager.h"
 #include "SceneObjects/MeshObject.h"
+#include "SceneObjects/SkeletonObject.h"
 #include "LightSources/SpotLight.h"
 #include "LightSources/DirectionalLight.h"
 #include "LightSources/AmbientLight.h"
+#include "FileAssets/Skeleton.h"
 #include "Math/ConvexHull.h"
 #include "ProfileBlock.h"
 #include <time.h>
@@ -114,102 +116,126 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->scene = new Frumpy::Scene();
 
     this->camera = new Frumpy::Camera();
-    this->camera->LookAt(Frumpy::Vector3(100.0, 100.0, 0.0), Frumpy::Vector3(0.0, 20.0, 0.0), Frumpy::Vector3(0.0, 1.0, 0.0));
+    this->camera->LookAt(Frumpy::Vector3(0.0, 100.0, 100.0), Frumpy::Vector3(0.0, 20.0, 0.0), Frumpy::Vector3(0.0, 1.0, 0.0));
 
-    Frumpy::MeshObject* object = nullptr;
+    Frumpy::Skeleton* skeleton = new Frumpy::Skeleton();
 
-    object = new Frumpy::MeshObject();
-    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Teapot001")));
-    object->SetColor(Frumpy::Vector4(1.0, 0.0, 0.0, 0.0));
-    object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
-    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
-    strcpy_s(object->name, "teapot");
-    this->scene->objectList.AddTail(object);
+    Frumpy::Skeleton::BoneSpace* boneSpaceA = new Frumpy::Skeleton::BoneSpace();
+    boneSpaceA->bindPoseChildToParent.SetTranslation(Frumpy::Vector3(20.0, 0.0, 0.0));
+    skeleton->rootSpace = boneSpaceA;
 
-    object = new Frumpy::MeshObject();
-    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Torus001")));
-    object->SetColor(Frumpy::Vector4(0.0, 1.0, 0.0, 0.0));
-    object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
-    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, -10.0));
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
-    strcpy_s(object->name, "torus");
-    this->scene->objectList.AddTail(object);
+    Frumpy::Skeleton::BoneSpace* boneSpaceB = new Frumpy::Skeleton::BoneSpace();
+    boneSpaceB->bindPoseChildToParent.SetTranslation(Frumpy::Vector3(20.0, 0.0, 0.0));
+    boneSpaceA->childSpaceArray->push_back(boneSpaceB);
 
-    object = new Frumpy::MeshObject();
-    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Box001")));
-    object->SetColor(Frumpy::Vector4(0.0, 0.0, 1.0, 0.0));
-    object->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
-    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 10.0));
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
-    strcpy_s(object->name, "cube");
-    this->scene->objectList.AddTail(object);
+    Frumpy::Skeleton::BoneSpace* boneSpaceC = new Frumpy::Skeleton::BoneSpace();
+    boneSpaceC->bindPoseChildToParent.SetTranslation(Frumpy::Vector3(20.0, 0.0, 0.0));
+    boneSpaceB->childSpaceArray->push_back(boneSpaceC);
 
-    object = new Frumpy::MeshObject();
-    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Plane001")));
-    object->SetColor(Frumpy::Vector4(1.0, 1.0, 1.0, 0.0));
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, false);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, true);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, true);
-    strcpy_s(object->name, "ground_plane");
-    this->scene->objectList.AddTail(object);
+    skeleton->rootSpace->ResetToBindPose();
 
-    object = new Frumpy::MeshObject();
-    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Tetrahedron")));
-    object->SetColor(Frumpy::Vector4(1.0, 1.0, 0.0, 0.0));
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
-    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
-    strcpy_s(object->name, "tetrahedron");
-    this->scene->objectList.AddTail(object);
+    Frumpy::SkeletonObject* skeletonObject = new Frumpy::SkeletonObject();
+    skeletonObject->SetSkeleton(skeleton);
+    skeletonObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, true);
+    skeletonObject->SetColor(Frumpy::Vector4(1.0, 0.0, 0.0, 1.0));
+    skeletonObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
+    strcpy_s(skeletonObject->name, "skeleton");     // Make a function for this!
+    this->scene->objectList.AddTail(skeletonObject);
 
-    object = new Frumpy::MeshObject();
-    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Hexadron")));
-    object->SetColor(Frumpy::Vector4(0.0, 1.0, 1.0, 0.0));
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
-    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
-    strcpy_s(object->name, "hexadron");
-    this->scene->objectList.AddTail(object);
+    Frumpy::MeshObject* meshObject = nullptr;
 
-    object = new Frumpy::MeshObject();
-    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Octahedron")));
-    object->SetColor(Frumpy::Vector4(1.0, 0.0, 1.0, 0.0));
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
-    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
-    strcpy_s(object->name, "octahedron");
-    this->scene->objectList.AddTail(object);
+    meshObject = new Frumpy::MeshObject();
+    meshObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Teapot001")));
+    meshObject->SetColor(Frumpy::Vector4(1.0, 0.0, 0.0, 0.0));
+    meshObject->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
+    meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
+    strcpy_s(meshObject->name, "teapot");
+    this->scene->objectList.AddTail(meshObject);
 
-    object = new Frumpy::MeshObject();
-    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Icosahedron")));
-    object->SetColor(Frumpy::Vector4(0.0, 0.5, 1.0, 0.5));
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_IS_LIT, false);
-    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
-    strcpy_s(object->name, "icosahedron");
-    this->scene->objectList.AddTail(object);
+    meshObject = new Frumpy::MeshObject();
+    meshObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Torus001")));
+    meshObject->SetColor(Frumpy::Vector4(0.0, 1.0, 0.0, 0.0));
+    meshObject->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
+    meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, -10.0));
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
+    strcpy_s(meshObject->name, "torus");
+    this->scene->objectList.AddTail(meshObject);
 
-    object = new Frumpy::MeshObject();
-    object->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Dodecahedron")));
-    object->SetColor(Frumpy::Vector4(0.5, 1.0, 0.5, 0.0));
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
-    object->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
-    object->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
-    strcpy_s(object->name, "dodecahedron");
-    this->scene->objectList.AddTail(object);
+    meshObject = new Frumpy::MeshObject();
+    meshObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Box001")));
+    meshObject->SetColor(Frumpy::Vector4(0.0, 0.0, 1.0, 0.0));
+    meshObject->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
+    meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 10.0));
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
+    strcpy_s(meshObject->name, "cube");
+    this->scene->objectList.AddTail(meshObject);
+
+    meshObject = new Frumpy::MeshObject();
+    meshObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Plane001")));
+    meshObject->SetColor(Frumpy::Vector4(1.0, 1.0, 1.0, 0.0));
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, false);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, true);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
+    strcpy_s(meshObject->name, "ground_plane");
+    this->scene->objectList.AddTail(meshObject);
+
+    meshObject = new Frumpy::MeshObject();
+    meshObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Tetrahedron")));
+    meshObject->SetColor(Frumpy::Vector4(1.0, 1.0, 0.0, 0.0));
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
+    meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
+    strcpy_s(meshObject->name, "tetrahedron");
+    this->scene->objectList.AddTail(meshObject);
+
+    meshObject = new Frumpy::MeshObject();
+    meshObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Hexadron")));
+    meshObject->SetColor(Frumpy::Vector4(0.0, 1.0, 1.0, 0.0));
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
+    meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
+    strcpy_s(meshObject->name, "hexadron");
+    this->scene->objectList.AddTail(meshObject);
+
+    meshObject = new Frumpy::MeshObject();
+    meshObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Octahedron")));
+    meshObject->SetColor(Frumpy::Vector4(1.0, 0.0, 1.0, 0.0));
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
+    meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
+    strcpy_s(meshObject->name, "octahedron");
+    this->scene->objectList.AddTail(meshObject);
+
+    meshObject = new Frumpy::MeshObject();
+    meshObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Icosahedron")));
+    meshObject->SetColor(Frumpy::Vector4(0.0, 0.5, 1.0, 0.5));
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_IS_LIT, false);
+    meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
+    strcpy_s(meshObject->name, "icosahedron");
+    this->scene->objectList.AddTail(meshObject);
+
+    meshObject = new Frumpy::MeshObject();
+    meshObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Dodecahedron")));
+    meshObject->SetColor(Frumpy::Vector4(0.5, 1.0, 0.5, 0.0));
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
+    meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
+    strcpy_s(meshObject->name, "dodecahedron");
+    this->scene->objectList.AddTail(meshObject);
 
     this->renderer->Startup(8);
 
