@@ -186,7 +186,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     meshObject->SetColor(Frumpy::Vector4(1.0, 1.0, 1.0, 0.0));
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, false);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, true);
-    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, true);
     strcpy_s(meshObject->name, "ground_plane");
     this->scene->objectList.AddTail(meshObject);
 

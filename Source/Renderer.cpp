@@ -8,6 +8,7 @@
 #include "Scene.h"
 #include "Camera.h"
 #include <math.h>
+#include <assert.h>
 
 using namespace Frumpy;
 
@@ -563,23 +564,18 @@ Renderer::LineRenderJob::LineRenderJob()
 	const Vertex& vertexA = *this->vertex[0];
 	const Vertex& vertexB = *this->vertex[1];
 
-	// TODO: Depth-testing of line segments isn't working and this is the only code I can think of that might be to blame.
 	Vector3 vectorA = vertexB.cameraSpacePoint - vertexA.cameraSpacePoint;
-	double lengthA = vectorA.Length();
 	Vector3 vectorB;
-	vectorB.Cross(Vector3(0.0, 0.0, 1.0), vectorA);
-	double lengthB = vectorB.Length();
-	if (lengthB == 0.0)
-		return;
-	vectorB *= lengthA / lengthB;
+	vectorB.Cross(vectorA, Vector3(0.0, 0.0, 1.0));
+	Vector3 vectorC;
+	vectorC.Cross(vectorB, vectorA);
 
-	Triangle triangle;
-	triangle.vertex[0] = vertexA.cameraSpacePoint;
-	triangle.vertex[1] = vertexB.cameraSpacePoint;
-	triangle.vertex[2] = vertexA.cameraSpacePoint + vectorB;
+	Plane planeOfLine(vertexA.cameraSpacePoint, vectorC);
 
-	Plane planeOfLine;
-	planeOfLine.SetFromTriangle(triangle);
+#if defined FRUMPY_DEBUG
+	bool containsPoint = planeOfLine.ContainsPoint(vertexB.cameraSpacePoint, FRUMPY_EPS);
+	assert(containsPoint);
+#endif //FRUMPY_DEBUG
 
 	double minY = FRUMPY_MIN(vertexA.imageSpacePoint.y, vertexB.imageSpacePoint.y);
 	double maxY = FRUMPY_MAX(vertexA.imageSpacePoint.y, vertexB.imageSpacePoint.y);
@@ -653,6 +649,7 @@ void Renderer::LineRenderJob::Rasterize(int row, int col, const Vertex& vertexA,
 	if ((0 != (this->renderFlags & FRUMPY_RENDER_FLAG_DEPTH_TEST)) && surfacePoint.z <= pixelZ->depth)
 		return;
 
+	pixelZ->depth = (float)surfacePoint.z;
 	Vector4 surfaceColor = vertexA.color * ta + vertexB.color * tb;
 	uint32_t color = frameBuffer->MakeColor(surfaceColor);
 	frameBuffer->SetPixel(location, color);
