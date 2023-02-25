@@ -121,7 +121,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     Frumpy::Skeleton* skeleton = new Frumpy::Skeleton();
 
     Frumpy::Skeleton::BoneSpace* boneSpaceA = new Frumpy::Skeleton::BoneSpace();
-    boneSpaceA->bindPoseChildToParent.SetTranslation(Frumpy::Vector3(20.0, 0.0, 0.0));
+    boneSpaceA->bindPoseChildToParent.Identity();
     skeleton->rootSpace = boneSpaceA;
 
     Frumpy::Skeleton::BoneSpace* boneSpaceB = new Frumpy::Skeleton::BoneSpace();
@@ -131,6 +131,10 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     Frumpy::Skeleton::BoneSpace* boneSpaceC = new Frumpy::Skeleton::BoneSpace();
     boneSpaceC->bindPoseChildToParent.SetTranslation(Frumpy::Vector3(20.0, 0.0, 0.0));
     boneSpaceB->childSpaceArray->push_back(boneSpaceC);
+
+    Frumpy::Skeleton::BoneSpace* boneSpaceD = new Frumpy::Skeleton::BoneSpace();
+    boneSpaceD->bindPoseChildToParent.SetTranslation(Frumpy::Vector3(20.0, 0.0, 0.0));
+    boneSpaceC->childSpaceArray->push_back(boneSpaceD);
 
     skeleton->rootSpace->ResetToBindPose();
 

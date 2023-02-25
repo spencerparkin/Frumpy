@@ -63,41 +63,46 @@ void SkeletonObject::GenerateVertexBuffer(const Matrix4x4& parentToObject, const
 	parentToObject.TransformPoint(pointA, pointA);
 	childToObject.TransformPoint(pointB, pointB);
 
-	this->AddVertex(pointA, this->color);
-	this->AddVertex(pointB, this->color);
-
-	Vector3 axis = pointB - pointA;
-	axis.Normalize();
-
-	Vector3 pointC;
-	pointC.Lerp(pointA, pointB, 0.3);
-
-	double radius = (pointB - pointA).Length() / 10.0;
-		
-	Vector3 pointArray[4];
-	int pointArraySize = sizeof(pointArray) / sizeof(Vector3);
-	double angle = 2.0 * FRUMPY_PI / double(pointArraySize);
-
-	pointArray[0].MakeOrthogonalTo(axis);
-	pointArray[0].Scale(radius / pointArray[0].Length());
-	for (int i = 1; i < pointArraySize; i++)
-		pointArray[i].Rotation(pointArray[i - 1], axis, angle);
-
-	for (int i = 0; i < pointArraySize; i++)
-		pointArray[i] += pointC;
-
-	for (int i = 0; i < pointArraySize; i++)
+	// Bones are only drawn between bone spaces.
+	if (childSpace != this->skeleton->rootSpace)
 	{
-		int j = (i + 1) % pointArraySize;
-
-		this->AddVertex(pointArray[i], this->color);
-		this->AddVertex(pointArray[j], this->color);
-
-		this->AddVertex(pointArray[i], this->color);
 		this->AddVertex(pointA, this->color);
-
-		this->AddVertex(pointArray[i], this->color);
 		this->AddVertex(pointB, this->color);
+
+		Vector3 axis = pointB - pointA;
+		axis.Normalize();
+
+		Vector3 pointC;
+		pointC.Lerp(pointA, pointB, 0.3);
+
+		double length = (pointB - pointA).Length();
+		double radius = length / 10.0;
+
+		Vector3 pointArray[4];
+		int pointArraySize = sizeof(pointArray) / sizeof(Vector3);
+		double angle = 2.0 * FRUMPY_PI / double(pointArraySize);
+
+		pointArray[0].MakeOrthogonalTo(axis);
+		pointArray[0].Scale(radius / pointArray[0].Length());
+		for (int i = 1; i < pointArraySize; i++)
+			pointArray[i].Rotation(pointArray[i - 1], axis, angle);
+
+		for (int i = 0; i < pointArraySize; i++)
+			pointArray[i] += pointC;
+
+		for (int i = 0; i < pointArraySize; i++)
+		{
+			int j = (i + 1) % pointArraySize;
+
+			this->AddVertex(pointArray[i], this->color);
+			this->AddVertex(pointArray[j], this->color);
+
+			this->AddVertex(pointArray[i], this->color);
+			this->AddVertex(pointA, this->color);
+
+			this->AddVertex(pointArray[i], this->color);
+			this->AddVertex(pointB, this->color);
+		}
 	}
 
 	for (unsigned int i = 0; i < childSpace->childSpaceArray->size(); i++)
