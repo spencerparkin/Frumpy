@@ -126,43 +126,22 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     Frumpy::Animation::Sequence animSeq;
 
     animSeq.name = "spaceA";
-    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
-        Frumpy::Quaternion(),
-        Frumpy::Vector3(0.0, 0.0, 0.0), 0.0 });
-    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
-        Frumpy::Quaternion(Frumpy::Vector3(0.0, 0.0, 1.0), FRUMPY_DEGS_TO_RADS(10)),
-        Frumpy::Vector3(0.0, 0.0, 0.0), 10.0 });
-    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
-        Frumpy::Quaternion(),
-        Frumpy::Vector3(0.0, 0.0, 0.0), 20.0 });
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{ Frumpy::Matrix3x3(), 0.0 });
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{ Frumpy::Matrix3x3(Frumpy::Vector3(0.0, 1.0, 0.0), FRUMPY_DEGS_TO_RADS(90.0)), 10.0 });
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{ Frumpy::Matrix3x3(), 20.0 });
     animation->sequenceArray->push_back(animSeq);
 
-    animSeq.name = "spaceB";
-    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
-        Frumpy::Quaternion(),
-        Frumpy::Vector3(20.0, 0.0, 0.0), 0.0 });
-    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
-        Frumpy::Quaternion(Frumpy::Vector3(0.0, 1.0, 0.0), FRUMPY_DEGS_TO_RADS(5)),
-        Frumpy::Vector3(20.0, 0.0, 0.0), 5.0 });
-    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
-        Frumpy::Quaternion(Frumpy::Vector3(0.0, 0.0, 1.0), FRUMPY_DEGS_TO_RADS(5)),
-        Frumpy::Vector3(20.0, 0.0, 0.0), 15.0 });
-    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
-        Frumpy::Quaternion(),
-        Frumpy::Vector3(20.0, 0.0, 0.0), 20.0 });
+    /*animSeq.name = "spaceB";
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{ Frumpy::Matrix3x3(), 0.0 });
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{ Frumpy::Matrix3x3(Frumpy::Vector3(1.0, 0.0, 0.0), FRUMPY_DEGS_TO_RADS(30.0)), 5.0 });
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{ Frumpy::Matrix3x3(), 20.0 });
     animation->sequenceArray->push_back(animSeq);
 
     animSeq.name = "spaceC";
-    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
-        Frumpy::Quaternion(),
-        Frumpy::Vector3(20.0, 0.0, 0.0), 0.0 });
-    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
-        Frumpy::Quaternion(Frumpy::Vector3(0.0, 0.0, 1.0), FRUMPY_DEGS_TO_RADS(10)),
-        Frumpy::Vector3(20.0, 0.0, 0.0), 10.0 });
-    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
-        Frumpy::Quaternion(),
-        Frumpy::Vector3(20.0, 0.0, 0.0), 20.0 });
-    animation->sequenceArray->push_back(animSeq);
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{ Frumpy::Matrix3x3(), 0.0 });
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{ Frumpy::Matrix3x3(Frumpy::Vector3(0.0, 1.0, 0.0), FRUMPY_DEGS_TO_RADS(25.0)), 10.0 });
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{ Frumpy::Matrix3x3(), 20.0 });
+    animation->sequenceArray->push_back(animSeq);*/
 
     this->skeleton = new Frumpy::Skeleton();
 
@@ -250,7 +229,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     meshObject->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
-    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, true);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, false);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_BACK_FACE_CULL, false);
     meshObject->SetName("tube");
     this->scene->objectList.AddTail(meshObject);
@@ -437,6 +416,9 @@ void Demo::Run()
         {
             this->animation->Animate(deltaTimeSeconds);
         }
+
+        static double debugTime = 0.0;
+        this->animation->SetTime(debugTime);
 
         static bool debug = false;
         if (debug)

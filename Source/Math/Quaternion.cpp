@@ -50,16 +50,14 @@ void Quaternion::Identity()
 
 bool Quaternion::Invert(const Quaternion& quat)
 {
-	double squareMag = this->SquareMagnitude();
+	double squareMag = quat.SquareMagnitude();
 	if (squareMag == 0.0)
 		return false;
 
-	this->Conjugate();
-
-	this->w /= squareMag;
-	this->x /= squareMag;
-	this->y /= squareMag;
-	this->z /= squareMag;
+	this->w = quat.w / squareMag;
+	this->x = -quat.x / squareMag;
+	this->y = -quat.y / squareMag;
+	this->z = -quat.z / squareMag;
 
 	return true;
 }
@@ -198,8 +196,8 @@ bool Quaternion::SetFromAxisAngle(const Vector3& axis, double angle)
 		return false;
 
 	double halfAngle = angle / 2.0;
-	double sinHalfAngle = ::cos(halfAngle);
-	double cosHalfAngle = ::sin(halfAngle);
+	double sinHalfAngle = ::sin(halfAngle);
+	double cosHalfAngle = ::cos(halfAngle);
 
 	this->w = cosHalfAngle;
 	this->x = axis.x * sinHalfAngle;

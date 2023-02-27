@@ -64,55 +64,60 @@ bool Animation::Unbind()
 
 void Animation::Animate(double deltaTime)
 {
-	if (!this->boundSkeleton)
-		return;
-
-	this->time += this->playRate * deltaTime;
+	double newTime = this->time + this->playRate * deltaTime;
 
 	if (this->wrap)
 	{
-		if (this->time > this->maxTime)
-			this->time -= this->maxTime - this->minTime;
+		if (newTime > this->maxTime)
+			newTime -= this->maxTime - this->minTime;
 
-		if (this->time < this->minTime)
-			this->time += this->maxTime - this->minTime;
-	}
-	else
-	{
-		if (this->time > this->maxTime)
-			this->time = this->maxTime;
-
-		if (this->time < this->minTime)
-			this->time = this->minTime;
+		if (newTime < this->minTime)
+			newTime += this->maxTime - this->minTime;
 	}
 
-	for (Sequence& sequence : *this->sequenceArray)
+	this->SetTime(newTime);
+}
+
+void Animation::SetTime(double givenTime)
+{
+	this->time = givenTime;
+
+	if (this->time > this->maxTime)
+		this->time = this->maxTime;
+
+	if (this->time < this->minTime)
+		this->time = this->minTime;
+
+	if (this->boundSkeleton)
 	{
-		// This is a really silly way to interpolate between key-frames, but it's something for now.
-		// Note that we don't have continuity of derivatives or anything like that.  I.e., it's not "smooth."
-		for (unsigned int i = 0; i < sequence.keyFrameArray.size() - 1; i++)
+		for (Sequence& sequence : *this->sequenceArray)
 		{
-			int j = i + 1;
-
-			const KeyFrame& keyFrameA = sequence.keyFrameArray[i];
-			const KeyFrame& keyFrameB = sequence.keyFrameArray[j];
-
-			if (keyFrameA.time <= this->time && this->time < keyFrameB.time)
+			// This is a really silly way to interpolate between key-frames, but it's something for now.
+			// Note that we don't have continuity of derivatives or anything like that.  I.e., it's not "smooth."
+			for (unsigned int i = 0; i < sequence.keyFrameArray.size() - 1; i++)
 			{
-				double alpha = (time - keyFrameA.time) / (keyFrameB.time - keyFrameA.time);
+				int j = i + 1;
 
-				Quaternion interpolatedOrientation;
-				interpolatedOrientation.Interpolate(keyFrameA.orientation, keyFrameB.orientation, alpha);
+				const KeyFrame& keyFrameA = sequence.keyFrameArray[i];
+				const KeyFrame& keyFrameB = sequence.keyFrameArray[j];
 
-				Vector3 interpolatedTranslation;
-				interpolatedTranslation.Lerp(keyFrameA.translation, keyFrameB.translation, alpha);
+				if (keyFrameA.time <= this->time && this->time < keyFrameB.time)
+				{
+					double alpha = (time - keyFrameA.time) / (keyFrameB.time - keyFrameA.time);
 
-				sequence.boundTransform->RigidBodyMotion(interpolatedOrientation, interpolatedTranslation);
+					Matrix3x3 interpolatedOrientation;
+					interpolatedOrientation.InterpolateRotations(keyFrameA.orientation, keyFrameB.orientation, alpha);
+
+					// This only overwrites the upper-left 3x3 submatrix of the 4x4 matrix.
+					*sequence.boundTransform = interpolatedOrientation;
+
+					break;
+				}
 			}
 		}
-	}
 
-	this->boundSkeleton->rootSpace->ResolveCurrentPoseTransforms();
+		this->boundSkeleton->rootSpace->ResolveCurrentPoseTransforms();
+	}
 }
 
 void Animation::SetPlayRate(double givenPlayRate)

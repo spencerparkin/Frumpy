@@ -6,15 +6,24 @@ using namespace Frumpy;
 
 Matrix3x3::Matrix3x3()
 {
+	this->Identity();
 }
 
 Matrix3x3::Matrix3x3(const Matrix3x3& matrix)
 {
+	for (unsigned int i = 0; i < 3; i++)
+		for (unsigned int j = 0; j < 3; j++)
+			this->ele[i][j] = matrix.ele[i][j];
 }
 
 Matrix3x3::Matrix3x3(const Quaternion& quat)
 {
-	quat.GetToMatrix(*this);
+	this->SetRotation(quat);
+}
+
+Matrix3x3::Matrix3x3(const Vector3& axis, double angle)
+{
+	this->SetRotation(axis, angle);
 }
 
 /*virtual*/ Matrix3x3::~Matrix3x3()
@@ -130,12 +139,47 @@ void Matrix3x3::GetRotation(double& yaw, double& pitch, double& roll) const
 
 void Matrix3x3::SetRotation(const Vector3& axis, double angle)
 {
-	//...
+	Quaternion quat;
+	quat.SetFromAxisAngle(axis, angle);
+	quat.GetToMatrix(*this);
 }
 
 void Matrix3x3::GetRotation(Vector3& axis, double& angle) const
 {
-	//...
+	// TODO: There's a bug here.
+	Quaternion quat;
+	quat.SetFromMatrix(*this);
+	quat.GetToAxisAngle(axis, angle);
+}
+
+void Matrix3x3::SetRotation(const Quaternion& quat)
+{
+	quat.GetToMatrix(*this);
+}
+
+void Matrix3x3::GetRotation(Quaternion& quat) const
+{
+	quat.SetFromMatrix(*this);
+}
+
+// Here we assume that the two given matrices are rotation matrices.
+void Matrix3x3::InterpolateRotations(const Matrix3x3& matrixA, const Matrix3x3& matrixB, double alpha)
+{
+	Matrix3x3 matrixAInv;
+	matrixAInv.Invert(matrixA);
+
+	Matrix3x3 matrixC;
+	matrixC.Multiply(matrixB, matrixAInv);
+
+	// It follows now that matrixC is a rotation matrix, because such matrices form a group.
+	Vector3 axis;
+	double angle;
+	matrixC.GetRotation(axis, angle);
+
+	// We interpolate by rotating matrixA some part of the way to matrixB.
+	angle *= alpha;
+	matrixC.SetRotation(axis, angle);
+	this->Multiply(matrixC, matrixA);
 }
 
 namespace Frumpy

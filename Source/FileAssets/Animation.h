@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Defines.h"
-#include "Math/Quaternion.h"
-#include "Math/Vector3.h"
+#include "Math/Matrix3x3.h"
 #include "Math/Matrix4x4.h"
+#include "Math/Vector3.h"
 #include <vector>
 #include <string>
 
@@ -21,16 +21,16 @@ namespace Frumpy
 		bool Unbind();
 
 		void Animate(double deltaTime);
+		
 		void SetPlayRate(double givenPlayRate);
 		double GetPlayRate() const { return this->playRate; }
 
-		// TODO: Key-frame should just be an orientation, and I think I may
-		//       switch over to using a Matrix3x3 instead of a quaternion,
-		//       because I can imagine interpolating those easier.
+		void SetTime(double givenTime);
+		double GetTime() const { return this->time; }
+
 		struct KeyFrame
 		{
-			Quaternion orientation;
-			Vector3 translation;	// TODO: Get rid of this.  Bones don't lengthen or shorten when the rig is animated.
+			Matrix3x3 orientation;
 			double time;
 		};
 

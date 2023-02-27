@@ -15,6 +15,7 @@ namespace Frumpy
 		Matrix3x3();
 		Matrix3x3(const Matrix3x3& matrix);
 		Matrix3x3(const Quaternion& quat);
+		Matrix3x3(const Vector3& axis, double angle);
 		virtual ~Matrix3x3();
 
 		void Identity();
@@ -35,6 +36,11 @@ namespace Frumpy
 
 		void SetRotation(const Vector3& axis, double angle);
 		void GetRotation(Vector3& axis, double& angle) const;
+
+		void SetRotation(const Quaternion& quat);
+		void GetRotation(Quaternion& quat) const;
+
+		void InterpolateRotations(const Matrix3x3& matrixA, const Matrix3x3& matrixB, double alpha);
 
 		double ele[3][3];
 	};
