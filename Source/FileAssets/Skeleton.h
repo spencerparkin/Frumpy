@@ -6,6 +6,7 @@
 #include "Math/Vector3.h"
 #include "Math/Vector4.h"
 #include <vector>
+#include <functional>
 
 namespace Frumpy
 {
@@ -49,6 +50,8 @@ namespace Frumpy
 
 			char name[128];
 		};
+
+		void ForAllBoneSpaces(std::function<bool(BoneSpace*)> lambda);
 
 		BoneSpace* FindBoneSpaceByName(const char* givenName);
 

@@ -30,8 +30,12 @@ namespace Frumpy
 
 		struct PosedVertex : public Vertex
 		{
-			std::vector<BoneWeight*> boneWeightArray;
+			std::vector<BoneWeight> boneWeightArray;
+
+			void NormalizeWeights();
 		};
+
+		bool AutoGenerateBoneWeights(unsigned int numBonesPerVertex);
 
 	protected:
 

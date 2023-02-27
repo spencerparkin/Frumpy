@@ -67,10 +67,10 @@ void Skeleton::BoneSpace::ResetToBindPose()
 		(*this->childSpaceArray)[i]->ResetToBindPose();
 }
 
-Skeleton::BoneSpace* Skeleton::FindBoneSpaceByName(const char* givenName)
+void Skeleton::ForAllBoneSpaces(std::function<bool(BoneSpace*)> lambda)
 {
 	if (!this->rootSpace)
-		return nullptr;
+		return;
 
 	List<BoneSpace*> boneSpaceQueue;
 	boneSpaceQueue.AddTail(this->rootSpace);
@@ -81,12 +81,26 @@ Skeleton::BoneSpace* Skeleton::FindBoneSpaceByName(const char* givenName)
 		BoneSpace* boneSpace = node->value;
 		boneSpaceQueue.Remove(node);
 
-		if (0 == strcmp(boneSpace->name, givenName))
-			return boneSpace;
+		if (!lambda(boneSpace))
+			return;
 
 		for (unsigned int i = 0; i < boneSpace->childSpaceArray->size(); i++)
 			boneSpaceQueue.AddTail((*boneSpace->childSpaceArray)[i]);
 	}
+}
 
-	return nullptr;
+Skeleton::BoneSpace* Skeleton::FindBoneSpaceByName(const char* givenName)
+{
+	BoneSpace* foundSpace = nullptr;
+
+	this->ForAllBoneSpaces([&foundSpace, givenName](BoneSpace* boneSpace) -> bool {
+		if (0 == strcmp(boneSpace->name, givenName))
+		{
+			foundSpace = boneSpace;
+			return false;
+		}
+		return true;
+	});
+
+	return foundSpace;
 }
