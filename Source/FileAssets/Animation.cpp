@@ -29,7 +29,7 @@ bool Animation::BindTo(Skeleton* skeleton)
 
 	for(Sequence& sequence : *this->sequenceArray)
 	{
-		Skeleton::BoneSpace* boneSpace = skeleton->FindBoneSpaceByName(sequence.name);
+		Skeleton::BoneSpace* boneSpace = skeleton->FindBoneSpaceByName(sequence.name.c_str());
 		if (!boneSpace)
 		{
 			this->Unbind();

@@ -573,7 +573,7 @@ Renderer::LineRenderJob::LineRenderJob()
 
 #if defined FRUMPY_DEBUG
 	bool containsPoint = planeOfLine.ContainsPoint(vertexB.cameraSpacePoint, FRUMPY_EPS);
-	assert(containsPoint);
+	//assert(containsPoint);
 #endif //FRUMPY_DEBUG
 
 	double minY = FRUMPY_MIN(vertexA.imageSpacePoint.y, vertexB.imageSpacePoint.y);

@@ -5,6 +5,8 @@
 #include "Camera.h"
 #include "FileAssets/Image.h"
 #include "FileAssets/Mesh.h"
+#include "FileAssets/Animation.h"
+#include "FileAssets/Skeleton.h"
 #include "Renderer.h"
 #include "ProfileBlock.h"
 #include "Math/Vector3.h"
@@ -51,6 +53,8 @@ private:
 	Frumpy::Image* shadowBuffer;
 	Frumpy::Renderer* renderer;
 	Frumpy::AssetManager* assetManager;
+	Frumpy::Animation* animation;
+	Frumpy::Skeleton* skeleton;
 	TimingStat frumpyRenderTime;
 	TimingStat demoBlitTime;
 	TimingStat demoMessageTime;

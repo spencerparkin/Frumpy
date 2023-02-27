@@ -5,6 +5,7 @@
 #include "Math/Vector3.h"
 #include "Math/Matrix4x4.h"
 #include <vector>
+#include <string>
 
 namespace Frumpy
 {
@@ -32,7 +33,7 @@ namespace Frumpy
 
 		struct Sequence
 		{
-			char name[128];
+			std::string name;
 			std::vector<KeyFrame> keyFrameArray;
 			Matrix4x4* boundTransform;
 		};

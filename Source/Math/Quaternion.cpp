@@ -217,9 +217,15 @@ bool Quaternion::GetToAxisAngle(Vector3& axis, double& angle) const
 
 	double sinHalfAngle = axis.Length();
 	if (sinHalfAngle == 0.0)
-		return false;
+	{
+		axis.x = 1.0;
+		axis.y = 0.0;
+		axis.z = 0.0;
+		angle = 0.0;
+		return true;
+	}
 
-	double halfAngle = ::acos(sinHalfAngle);
+	double halfAngle = ::asin(sinHalfAngle);
 	angle = 2.0 * halfAngle;
 	axis /= sinHalfAngle;
 
@@ -240,6 +246,7 @@ void Quaternion::TransformVector(const Vector3& vector, Vector3& vectorTransform
 	vectorTransform.z = vectorQuatTransformed.z;
 }
 
+// TODO: This is probably dumb.  Fix it.
 bool Quaternion::Interpolate(const Quaternion& quatA, const Quaternion& quatB, double alpha)
 {
 	Vector3 axisA, axisB;

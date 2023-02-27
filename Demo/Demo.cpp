@@ -13,7 +13,6 @@
 #include "LightSources/SpotLight.h"
 #include "LightSources/DirectionalLight.h"
 #include "LightSources/AmbientLight.h"
-#include "FileAssets/Skeleton.h"
 #include "Math/ConvexHull.h"
 #include "ProfileBlock.h"
 #include <time.h>
@@ -35,6 +34,8 @@ Demo::Demo()
     this->shadowBuffer = nullptr;
     this->renderer = nullptr;
     this->assetManager = nullptr;
+    this->animation = nullptr;
+    this->skeleton = nullptr;
     this->lastMouseMove = -1;
     this->rotateObjects = false;
     this->rotateCamera = false;
@@ -118,16 +119,59 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->camera = new Frumpy::Camera();
     this->camera->LookAt(Frumpy::Vector3(0.0, 100.0, 100.0), Frumpy::Vector3(0.0, 20.0, 0.0), Frumpy::Vector3(0.0, 1.0, 0.0));
 
-    Frumpy::Skeleton* skeleton = new Frumpy::Skeleton();
+    this->animation = new Frumpy::Animation();
+    this->animation->playRate = 1.0;
+
+    Frumpy::Animation::Sequence animSeq;
+
+    animSeq.name = "spaceA";
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
+        Frumpy::Quaternion(),
+        Frumpy::Vector3(0.0, 0.0, 0.0), 0.0 });
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
+        Frumpy::Quaternion(Frumpy::Vector3(0.0, 0.0, 1.0), FRUMPY_DEGS_TO_RADS(10)),
+        Frumpy::Vector3(0.0, 0.0, 0.0), 10.0 });
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
+        Frumpy::Quaternion(),
+        Frumpy::Vector3(0.0, 0.0, 0.0), 20.0 });
+    animation->sequenceArray->push_back(animSeq);
+
+    animSeq.name = "spaceB";
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
+        Frumpy::Quaternion(),
+        Frumpy::Vector3(20.0, 0.0, 0.0), 0.0 });
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
+        Frumpy::Quaternion(Frumpy::Vector3(0.0, 1.0, 0.0), FRUMPY_DEGS_TO_RADS(5)),
+        Frumpy::Vector3(20.0, 0.0, 0.0), 5.0 });
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
+        Frumpy::Quaternion(Frumpy::Vector3(0.0, 0.0, 1.0), FRUMPY_DEGS_TO_RADS(5)),
+        Frumpy::Vector3(20.0, 0.0, 0.0), 15.0 });
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
+        Frumpy::Quaternion(),
+        Frumpy::Vector3(20.0, 0.0, 0.0), 20.0 });
+    animation->sequenceArray->push_back(animSeq);
+
+    animSeq.name = "spaceC";
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
+        Frumpy::Quaternion(),
+        Frumpy::Vector3(20.0, 0.0, 0.0), 0.0 });
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
+        Frumpy::Quaternion(Frumpy::Vector3(0.0, 0.0, 1.0), FRUMPY_DEGS_TO_RADS(10)),
+        Frumpy::Vector3(20.0, 0.0, 0.0), 10.0 });
+    animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{
+        Frumpy::Quaternion(),
+        Frumpy::Vector3(20.0, 0.0, 0.0), 20.0 });
+    animation->sequenceArray->push_back(animSeq);
+
+    this->skeleton = new Frumpy::Skeleton();
 
     Frumpy::Skeleton::BoneSpace* boneSpaceA = new Frumpy::Skeleton::BoneSpace();
     boneSpaceA->bindPoseChildToParent.Identity();
-    boneSpaceA->bindPoseChildToParent.SetRotation(Frumpy::Vector3(0.0, 0.0, 1.0), FRUMPY_DEGS_TO_RADS(20));
     boneSpaceA->SetName("spaceA");
-    skeleton->rootSpace = boneSpaceA;
+    this->skeleton->rootSpace = boneSpaceA;
 
     Frumpy::Skeleton::BoneSpace* boneSpaceB = new Frumpy::Skeleton::BoneSpace();
-    boneSpaceB->bindPoseChildToParent.RigidBodyMotion(Frumpy::Vector3(0.0, 0.0, 1.0), FRUMPY_DEGS_TO_RADS(-20), Frumpy::Vector3(20.0, 0.0, 0.0));
+    boneSpaceB->bindPoseChildToParent.SetTranslation(Frumpy::Vector3(20.0, 0.0, 0.0));
     boneSpaceB->SetName("spaceB");
     boneSpaceA->childSpaceArray->push_back(boneSpaceB);
 
@@ -141,10 +185,12 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     boneSpaceD->SetName("spaceD");
     boneSpaceC->childSpaceArray->push_back(boneSpaceD);
 
-    skeleton->rootSpace->ResetToBindPose();
+    this->skeleton->rootSpace->ResetToBindPose();
+
+    this->animation->BindTo(skeleton);
 
     Frumpy::SkeletonObject* skeletonObject = new Frumpy::SkeletonObject();
-    skeletonObject->SetSkeleton(skeleton);
+    skeletonObject->SetSkeleton(this->skeleton);
     skeletonObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, true);
     skeletonObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
     skeletonObject->SetColor(Frumpy::Vector4(1.0, 0.0, 0.0, 1.0));
@@ -376,7 +422,7 @@ void Demo::Run()
         // Animate the skeleton if configured to do so.
         if (this->animateSkeleton)
         {
-            //...
+            this->animation->Animate(deltaTimeSeconds);
         }
 
         static bool debug = false;
@@ -452,6 +498,18 @@ int Demo::Shutdown()
     {
         delete this->assetManager;
         this->assetManager = nullptr;
+    }
+
+    if (this->animation)
+    {
+        delete this->animation;
+        this->animation = nullptr;
+    }
+
+    if (this->skeleton)
+    {
+        delete this->skeleton;
+        this->skeleton = nullptr;
     }
 
     return this->msg.wParam;
