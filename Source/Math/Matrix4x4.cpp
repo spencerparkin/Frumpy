@@ -2,6 +2,7 @@
 #include "Math/Matrix3x3.h"
 #include "Math/Vector3.h"
 #include "Math/Vector4.h"
+#include "Math/Quaternion.h"
 #include <math.h>
 
 using namespace Frumpy;
@@ -65,6 +66,13 @@ void Matrix4x4::operator=(const Matrix4x4& matrix)
 {
 	for (int i = 0; i < 4; i++)
 		for (int j = 0; j < 4; j++)
+			this->ele[i][j] = matrix.ele[i][j];
+}
+
+void Matrix4x4::operator=(const Matrix3x3& matrix)
+{
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
 			this->ele[i][j] = matrix.ele[i][j];
 }
 
@@ -314,13 +322,17 @@ void Matrix4x4::SetRotation(const Vector3& axis, double angle)
 
 void Matrix4x4::RigidBodyMotion(const Vector3& axis, double angle, const Vector3& delta)
 {
-	Matrix4x4 rotation;
-	rotation.SetRotation(axis, angle);
+	this->Identity();
+	this->SetRotation(axis, angle);
+	this->SetTranslation(delta);
+}
 
-	Matrix4x4 translation;
-	translation.SetTranslation(delta);
-
-	*this = translation * rotation;
+void Matrix4x4::RigidBodyMotion(const Quaternion& quat, const Vector3& delta)
+{
+	Vector3 axis;
+	double angle;
+	quat.GetToAxisAngle(axis, angle);
+	this->RigidBodyMotion(axis, angle, delta);
 }
 
 void Matrix4x4::Projection(double hfovi, double vfovi, double near, double far)

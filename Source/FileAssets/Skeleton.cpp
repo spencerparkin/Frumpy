@@ -1,5 +1,6 @@
 #include "Skeleton.h"
 #include "Containers/List.h"
+#include "Animation.h"
 #include <string.h>
 
 using namespace Frumpy;

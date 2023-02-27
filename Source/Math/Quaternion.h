@@ -16,26 +16,38 @@ namespace Frumpy
 		Quaternion(const Quaternion& quat);
 		Quaternion(const Matrix3x3& rotationMatrix);
 		Quaternion(const Vector3& unitAxis, double angle);
+		Quaternion(const Vector3& vector);
 		virtual ~Quaternion();
 
 		void Identity();
 		bool Invert(const Quaternion& quat);
-		void Normalize();
-		void Conjugate();		// The inverse of a normalized quaternion is its conjugate.
+		bool Normalize();
+		void Conjugate();
+		double SquareMagnitude() const;
+
+		void Scale(double scalar);
+
+		void Add(const Quaternion& leftQuat, const Quaternion& rightQuat);
+		void Subtract(const Quaternion& leftQuat, const Quaternion& rightQuat);
 
 		void Multiply(const Quaternion& leftQuat, const Quaternion& rightQuat);
 		bool Divide(const Quaternion& leftQuat, const Quaternion& rightQuat);
 
-		void SetFromMatrix(const Matrix3x3& rotationMatrix);
-		void GetToMatrix(Matrix3x3& rotationMatrix) const;
+		bool SetFromMatrix(const Matrix3x3& rotationMatrix);
+		bool GetToMatrix(Matrix3x3& rotationMatrix) const;
 		
-		void SetFromAxisAngle(const Vector3& unitAxis, double angle);
-		void GetToAxisAngle(Vector3& unitAxis, double& angle) const;
+		bool SetFromAxisAngle(const Vector3& axis, double angle);
+		bool GetToAxisAngle(Vector3& axis, double& angle) const;
 
 		void TransformVector(const Vector3& vector, Vector3& vectorTransform) const;
+
+		bool Interpolate(const Quaternion& quatA, const Quaternion& quatB, double alpha);
 
 		double w, x, y, z;
 	};
 
+	FRUMPY_API Quaternion operator+(const Quaternion& leftQuat, const Quaternion& rightQuat);
+	FRUMPY_API Quaternion operator-(const Quaternion& leftQuat, const Quaternion& rightQuat);
 	FRUMPY_API Quaternion operator*(const Quaternion& leftQuat, const Quaternion& rightQuat);
+	FRUMPY_API Quaternion operator/(const Quaternion& leftQuat, const Quaternion& rightQuat);
 }

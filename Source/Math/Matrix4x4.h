@@ -7,6 +7,7 @@ namespace Frumpy
 	class Vector3;
 	class Vector4;
 	class Matrix3x3;
+	class Quaternion;
 
 	// These are 4x4 matrices geared toward 3D computer graphics applications.
 	class FRUMPY_API Matrix4x4
@@ -41,6 +42,8 @@ namespace Frumpy
 		double Determinant() const;
 
 		void RigidBodyMotion(const Vector3& axis, double angle, const Vector3& delta);
+		void RigidBodyMotion(const Quaternion& quat, const Vector3& delta);
+
 		void Projection(double hfovi, double vfovi, double near, double far);
 
 		void SetTranslation(const Vector3& translation);
@@ -51,6 +54,7 @@ namespace Frumpy
 		bool OrthonormalizeOrientation();
 
 		void operator=(const Matrix4x4& matrix);
+		void operator=(const Matrix3x3& matrix);
 
 		double ele[4][4];
 	};
