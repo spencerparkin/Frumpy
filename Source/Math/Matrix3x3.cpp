@@ -146,7 +146,6 @@ void Matrix3x3::SetRotation(const Vector3& axis, double angle)
 
 void Matrix3x3::GetRotation(Vector3& axis, double& angle) const
 {
-	// TODO: There's a bug here.
 	Quaternion quat;
 	quat.SetFromMatrix(*this);
 	quat.GetToAxisAngle(axis, angle);

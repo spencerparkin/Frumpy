@@ -166,7 +166,7 @@ bool Quaternion::SetFromMatrix(const Matrix3x3& rotationMatrix)
 
 	this->w = 0.25 * ::sqrt(FRUMPY_SQUARED(r11 + r22 + r33 + 1.0) + FRUMPY_SQUARED(r32 - r23) + FRUMPY_SQUARED(r13 - r31) + FRUMPY_SQUARED(r21 - r12));
 	this->x = 0.25 * ::sqrt(FRUMPY_SQUARED(r32 - r23) + FRUMPY_SQUARED(r11 - r22 - r33 + 1.0) + FRUMPY_SQUARED(r21 + r12) + FRUMPY_SQUARED(r31 + r13)) * FRUMPY_SIGN(r32 - r23);
-	this->w = 0.25 * ::sqrt(FRUMPY_SQUARED(r13 - r31) + FRUMPY_SQUARED(r21 + r12) + FRUMPY_SQUARED(r22 - r11 - r33 + 1.0) + FRUMPY_SQUARED(r32 + r23)) * FRUMPY_SIGN(r13 - r31);
+	this->y = 0.25 * ::sqrt(FRUMPY_SQUARED(r13 - r31) + FRUMPY_SQUARED(r21 + r12) + FRUMPY_SQUARED(r22 - r11 - r33 + 1.0) + FRUMPY_SQUARED(r32 + r23)) * FRUMPY_SIGN(r13 - r31);
 	this->z = 0.25 * ::sqrt(FRUMPY_SQUARED(r21 - r12) + FRUMPY_SQUARED(r31 + r13) + FRUMPY_SQUARED(r32 + r23) + FRUMPY_SQUARED(r33 - r11 - r22 + 1.0)) * FRUMPY_SIGN(r21 - r12);
 
 	return true;
