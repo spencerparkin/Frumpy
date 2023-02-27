@@ -25,8 +25,9 @@ namespace Frumpy
 
 	private:
 
-		void GenerateVertexBuffer(const Matrix4x4& parentToObject, const Skeleton::BoneSpace* childSpace) const;
+		void GenerateVertexBuffer(const Skeleton::BoneSpace* parentSpace) const;
 		void AddVertex(const Vector3& vertexPoint, const Vector4& vertexColor) const;
+		void DrawBone(const Vector3& pointA, const Vector3& pointB) const;
 
 		Skeleton* skeleton;
 		Vector4 color;
