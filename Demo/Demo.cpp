@@ -65,6 +65,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->assetManager->LoadAssets("Meshes/Teapot.obj");
     this->assetManager->LoadAssets("Meshes/Cube.obj");
     this->assetManager->LoadAssets("Meshes/Torus.obj");
+    this->assetManager->LoadAssets("Meshes/Tube.obj");
     this->assetManager->LoadAssets("Meshes/GroundPlane.obj");
     this->assetManager->LoadAssets("Meshes/TubeSkeleton.fbx");
 
@@ -240,6 +241,17 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, true);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, true);
     meshObject->SetName("ground_plane");
+    this->scene->objectList.AddTail(meshObject);
+
+    meshObject = new Frumpy::MeshObject();
+    meshObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Cylinder001")));
+    meshObject->SetColor(Frumpy::Vector4(1.0, 1.0, 1.0, 0.0));
+    meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
+    meshObject->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, true);
+    meshObject->SetName("tube");
     this->scene->objectList.AddTail(meshObject);
 
     meshObject = new Frumpy::MeshObject();
