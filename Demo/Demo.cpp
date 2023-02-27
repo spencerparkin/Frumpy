@@ -251,6 +251,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CAN_BE_SHADOWED, false);
     meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, true);
+    meshObject->SetRenderFlag(FRUMPY_RENDER_FLAG_BACK_FACE_CULL, false);
     meshObject->SetName("tube");
     this->scene->objectList.AddTail(meshObject);
 

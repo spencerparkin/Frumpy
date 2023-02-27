@@ -21,17 +21,6 @@ Skin::Skin()
 	return new SkinVertexShader(objectToWorld, graphicsMatrices);
 }
 
-Skin::PosedVertex::PosedVertex()
-{
-	this->boneWeightArray = nullptr;
-	this->boneWeightArraySize = 0;
-}
-
-/*virtual*/ Skin::PosedVertex::~PosedVertex()
-{
-	delete[] this->boneWeightArray;
-}
-
 SkinVertexShader::SkinVertexShader(const Matrix4x4& objectToWorld, const GraphicsMatrices& graphicsMatrices) : VertexShader(objectToWorld, graphicsMatrices)
 {
 }
@@ -45,11 +34,11 @@ SkinVertexShader::SkinVertexShader(const Matrix4x4& objectToWorld, const Graphic
 	const Skin::PosedVertex* posedVertex = (const Skin::PosedVertex*)inputVertex;
 
 	Vector3 poseSpacePoint(0.0, 0.0, 0.0);
-	Vector3 poseSpaceNormal = posedVertex->objectSpaceNormal;		// TODO: How do we pose this?
+	Vector3 poseSpaceNormal(0.0, 0.0, 0.0);
 
-	for (unsigned int i = 0; i < posedVertex->boneWeightArraySize; i++)
+	for (unsigned int i = 0; i < posedVertex->boneWeightArray.size(); i++)
 	{
-		const Skin::BoneWeight& boneWeight = posedVertex->boneWeightArray[i];
+		const Skin::BoneWeight& boneWeight = *posedVertex->boneWeightArray[i];
 
 		Vector3 boneSpacePoint;
 		boneWeight.boneSpace->bindPoseObjectToBone.TransformPoint(posedVertex->objectSpacePoint, boneSpacePoint);
@@ -58,7 +47,17 @@ SkinVertexShader::SkinVertexShader(const Matrix4x4& objectToWorld, const Graphic
 		boneWeight.boneSpace->currentPoseBoneToObject.TransformPoint(boneSpacePoint, objectSpacePoint);
 
 		poseSpacePoint += objectSpacePoint * boneWeight.weight;
+
+		Vector3 boneSpaceNormal;
+		boneWeight.boneSpace->bindPoseObjectToBone.TransformVector(posedVertex->objectSpaceNormal, boneSpaceNormal);
+
+		Vector3 objectSpaceNormal;
+		boneWeight.boneSpace->currentPoseBoneToObject.TransformVector(boneSpaceNormal, objectSpaceNormal);
+
+		poseSpaceNormal += objectSpaceNormal * boneWeight.weight;
 	}
+
+	poseSpaceNormal.Normalize();
 
 	objectToImage.TransformPoint(poseSpacePoint, outputVertex->imageSpacePoint);
 	objectToCamera.TransformPoint(poseSpacePoint, outputVertex->cameraSpacePoint);

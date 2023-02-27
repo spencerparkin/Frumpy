@@ -3,6 +3,7 @@
 #include "Mesh.h"
 #include "Math/Vector3.h"
 #include "Skeleton.h"
+#include <vector>
 
 namespace Frumpy
 {
@@ -27,14 +28,9 @@ namespace Frumpy
 			double weight;
 		};
 
-		class PosedVertex : public Vertex
+		struct PosedVertex : public Vertex
 		{
-		public:
-			PosedVertex();
-			virtual ~PosedVertex();
-
-			BoneWeight* boneWeightArray;
-			unsigned int boneWeightArraySize;
+			std::vector<BoneWeight*> boneWeightArray;
 		};
 
 	protected:
