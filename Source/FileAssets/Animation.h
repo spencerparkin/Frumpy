@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Defines.h"
+#include "AssetManager.h"
 #include "Math/Matrix3x3.h"
 #include "Math/Matrix4x4.h"
 #include "Math/Vector3.h"
@@ -11,7 +12,7 @@ namespace Frumpy
 {
 	class Skeleton;
 
-	class FRUMPY_API Animation
+	class FRUMPY_API Animation : public AssetManager::Asset
 	{
 	public:
 		Animation();

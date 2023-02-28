@@ -27,6 +27,18 @@ Mesh::Mesh()
 	return new MeshVertexShader(objectToWorld, graphicsMatrices);
 }
 
+/*virtual*/ void Mesh::BecomeCopyOf(const Mesh* mesh)
+{
+	this->SetVertexBufferSize(mesh->GetVertexBufferSize());
+	this->SetIndexBufferSize(mesh->GetIndexBufferSize());
+
+	for (unsigned int i = 0; i < this->vertexBufferSize; i++)
+		*(this->vertexBuffer[i]) = *(mesh->vertexBuffer[i]);
+
+	for (unsigned int i = 0; i < this->indexBufferSize; i++)
+		this->indexBuffer[i] = mesh->indexBuffer[i];
+}
+
 void Mesh::SetVertexBufferSize(unsigned int vertexBufferSize)
 {
 	for (unsigned int i = 0; i < this->vertexBufferSize; i++)

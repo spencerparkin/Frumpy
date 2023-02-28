@@ -128,7 +128,7 @@ void OBJFormat::FlushMesh(List<AssetManager::Asset*>& assetList)
 	{
 		// Create a named mesh asset.
 		Mesh* mesh = new Mesh();
-		strcpy_s(mesh->name, sizeof(mesh->name), this->data->name.c_str());
+		mesh->SetName(this->data->name.c_str());
 		
 		// Convert the list of polygons to a list of triangles.
 		std::vector<ConvexPolygon> triangleArray;
@@ -308,7 +308,7 @@ void OBJFormat::DumpMesh(std::ofstream& fileStream, const Mesh* mesh)
 	}
 
 	fileStream << "\n";
-	fileStream << "g " << mesh->name << "\n\n";
+	fileStream << "g " << mesh->GetName() << "\n\n";
 
 	for (unsigned int i = 0; i < mesh->GetIndexBufferSize(); i += 3)
 	{

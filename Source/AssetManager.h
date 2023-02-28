@@ -19,6 +19,10 @@ namespace Frumpy
 
 			virtual Asset* Clone() const;
 
+			void SetName(const char* givenName);
+			const char* GetName() const { return this->name; }
+
+		protected:
 			char name[256];
 		};
 

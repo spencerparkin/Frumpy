@@ -22,6 +22,7 @@ namespace Frumpy
 
 		virtual Vertex* CreateVertex();
 		virtual VertexShader* CreateVertexShader(const Matrix4x4& objectToWorld, const GraphicsMatrices& graphicsMatrices);
+		virtual void BecomeCopyOf(const Mesh* mesh);
 
 		void SetVertexBufferSize(unsigned int vertexBufferSize);
 		unsigned int GetVertexBufferSize() const;

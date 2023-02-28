@@ -24,11 +24,11 @@ bool AssetManager::AddAsset(Asset* asset)
 {
 	Asset* existingAsset = nullptr;
 
-	this->assetMap.Find(asset->name, existingAsset);
+	this->assetMap.Find(asset->GetName(), existingAsset);
 	if (existingAsset)
 		delete existingAsset;
 
-	this->assetMap.Insert(asset->name, asset);
+	this->assetMap.Insert(asset->GetName(), asset);
 	return true;
 }
 
@@ -127,6 +127,11 @@ AssetManager::Asset::Asset()
 /*virtual*/ AssetManager::Asset* AssetManager::Asset::Clone() const
 {
 	return nullptr;
+}
+
+void AssetManager::Asset::SetName(const char* givenName)
+{
+	strcpy_s(this->name, sizeof(this->name), givenName);
 }
 
 //----------------------- AssetManager::FileFormat -----------------------

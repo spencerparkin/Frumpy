@@ -11,7 +11,6 @@ Skin::Skin()
 
 /*virtual*/ Skin::~Skin()
 {
-	delete this->skeleton;
 }
 
 /*virtual*/ Mesh::Vertex* Skin::CreateVertex()
@@ -31,6 +30,8 @@ bool Skin::AutoGenerateBoneWeights(unsigned int numBonesPerVertex)
 {
 	if (!this->skeleton || numBonesPerVertex == 0)
 		return false;
+
+	this->skeleton->rootSpace->ResolveBindPoseTransforms();
 
 	struct Bone
 	{

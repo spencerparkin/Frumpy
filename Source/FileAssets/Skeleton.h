@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Defines.h"
+#include "AssetManager.h"
 #include "Math/Matrix3x3.h"
 #include "Math/Matrix4x4.h"
 #include "Math/Vector3.h"
@@ -15,7 +16,7 @@ namespace Frumpy
 	// Each vertex is weighted to one or more bones.  The skeleton can
 	// be driven or posed by an animation each frame over time, or
 	// manipulated manually by user code.
-	class FRUMPY_API Skeleton
+	class FRUMPY_API Skeleton : public AssetManager::Asset
 	{
 	public:
 		Skeleton();

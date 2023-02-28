@@ -13,6 +13,7 @@
 #include "LightSources/SpotLight.h"
 #include "LightSources/DirectionalLight.h"
 #include "LightSources/AmbientLight.h"
+#include "FileAssets/Skin.h"
 #include "Math/ConvexHull.h"
 #include "ProfileBlock.h"
 #include <time.h>
@@ -34,8 +35,6 @@ Demo::Demo()
     this->shadowBuffer = nullptr;
     this->renderer = nullptr;
     this->assetManager = nullptr;
-    this->animation = nullptr;
-    this->skeleton = nullptr;
     this->lastMouseMove = -1;
     this->rotateObjects = false;
     this->rotateCamera = false;
@@ -74,27 +73,27 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
 
     convexHull.Generate(Frumpy::ConvexHull::Polyhedron::REGULAR_TETRAHEDRON, 10.0);
     mesh = convexHull.Generate();
-    strcpy_s(mesh->name, sizeof(mesh->name), "Tetrahedron");
+    mesh->SetName("Tetrahedron");
     this->assetManager->AddAsset(mesh);
 
     convexHull.Generate(Frumpy::ConvexHull::Polyhedron::REGULAR_HEXADRON, 10.0);
     mesh = convexHull.Generate();
-    strcpy_s(mesh->name, sizeof(mesh->name), "Hexadron");
+    mesh->SetName("Hexadron");
     this->assetManager->AddAsset(mesh);
 
     convexHull.Generate(Frumpy::ConvexHull::Polyhedron::REGULAR_OCTAHEDRON, 10.0);
     mesh = convexHull.Generate();
-    strcpy_s(mesh->name, sizeof(mesh->name), "Octahedron");
+    mesh->SetName("Octahedron");
     this->assetManager->AddAsset(mesh);
 
     convexHull.Generate(Frumpy::ConvexHull::Polyhedron::REGULAR_ICOSAHEDRON, 10.0);
     mesh = convexHull.Generate();
-    strcpy_s(mesh->name, sizeof(mesh->name), "Icosahedron");
+    mesh->SetName("Icosahedron");
     this->assetManager->AddAsset(mesh);
 
     convexHull.Generate(Frumpy::ConvexHull::Polyhedron::REGULAR_DODECAHEDRON, 10.0);
     mesh = convexHull.Generate();
-    strcpy_s(mesh->name, sizeof(mesh->name), "Dodecahedron");
+    mesh->SetName("Dodecahedron");
     this->assetManager->AddAsset(mesh);
 
     this->renderer = new Frumpy::Renderer();
@@ -120,8 +119,10 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->camera = new Frumpy::Camera();
     this->camera->LookAt(Frumpy::Vector3(0.0, 100.0, 100.0), Frumpy::Vector3(0.0, 20.0, 0.0), Frumpy::Vector3(0.0, 1.0, 0.0));
 
-    this->animation = new Frumpy::Animation();
-    this->animation->playRate = 1.0;
+    Frumpy::Animation* animation = new Frumpy::Animation();
+    animation->playRate = 1.0;
+    animation->SetName("animation");
+    this->assetManager->AddAsset(animation);
 
     Frumpy::Animation::Sequence animSeq;
     animSeq.name = "spaceA";
@@ -144,12 +145,14 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     animSeq.keyFrameArray.push_back(Frumpy::Animation::KeyFrame{ Frumpy::Matrix3x3(), 20.0 });
     animation->sequenceArray->push_back(animSeq);
 
-    this->skeleton = new Frumpy::Skeleton();
+    Frumpy::Skeleton* skeleton = new Frumpy::Skeleton();
+    skeleton->SetName("skeleton");
+    this->assetManager->AddAsset(skeleton);
 
     Frumpy::Skeleton::BoneSpace* boneSpaceA = new Frumpy::Skeleton::BoneSpace();
     boneSpaceA->bindPoseChildToParent.Identity();
     boneSpaceA->SetName("spaceA");
-    this->skeleton->rootSpace = boneSpaceA;
+    skeleton->rootSpace = boneSpaceA;
 
     Frumpy::Skeleton::BoneSpace* boneSpaceB = new Frumpy::Skeleton::BoneSpace();
     boneSpaceB->bindPoseChildToParent.SetTranslation(Frumpy::Vector3(20.0, 0.0, 0.0));
@@ -166,12 +169,21 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     boneSpaceD->SetName("spaceD");
     boneSpaceC->childSpaceArray->push_back(boneSpaceD);
 
-    this->skeleton->rootSpace->ResetToBindPose();
+    skeleton->rootSpace->ResetToBindPose();
 
-    this->animation->BindTo(skeleton);
+    animation->BindTo(skeleton);
 
+    Frumpy::Mesh* cylinderMesh = dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Cylinder001"));
+    Frumpy::Skin* cylinderSkin = new Frumpy::Skin();
+    cylinderSkin->BecomeCopyOf(cylinderMesh);
+    cylinderSkin->SetName("Cylinder001_skin");
+    cylinderSkin->SetSkeleton(skeleton);
+    cylinderSkin->AutoGenerateBoneWeights(2);
+    this->assetManager->AddAsset(cylinderSkin);
+
+    // Typically, skeletons aren't rendered, but I'm doing so for debugging purposes.
     Frumpy::SkeletonObject* skeletonObject = new Frumpy::SkeletonObject();
-    skeletonObject->SetSkeleton(this->skeleton);
+    skeletonObject->SetSkeleton(skeleton);
     skeletonObject->SetRenderFlag(FRUMPY_RENDER_FLAG_VISIBLE, true);
     skeletonObject->SetRenderFlag(FRUMPY_RENDER_FLAG_CASTS_SHADOW, true);
     skeletonObject->SetColor(Frumpy::Vector4(1.0, 0.0, 0.0, 1.0));
@@ -224,7 +236,7 @@ bool Demo::Setup(HINSTANCE hInstance, int nCmdShow)
     this->scene->objectList.AddTail(meshObject);
 
     meshObject = new Frumpy::MeshObject();
-    meshObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Cylinder001")));
+    meshObject->SetMesh(dynamic_cast<Frumpy::Mesh*>(this->assetManager->FindAssetByName("Cylinder001_skin")));
     meshObject->SetColor(Frumpy::Vector4(1.0, 1.0, 1.0, 0.0));
     meshObject->childToParent.SetTranslation(Frumpy::Vector3(0.0, 20.0, 0.0));
     meshObject->SetTexture(dynamic_cast<Frumpy::Image*>(this->assetManager->FindAssetByName("Images/texture.ppm")));
@@ -415,11 +427,10 @@ void Demo::Run()
         // Animate the skeleton if configured to do so.
         if (this->animateSkeleton)
         {
-            this->animation->Animate(deltaTimeSeconds);
+            Frumpy::Animation* animation = dynamic_cast<Frumpy::Animation*>(this->assetManager->FindAssetByName("animation"));
+            if (animation)
+                animation->Animate(deltaTimeSeconds);
         }
-
-        //static double debugTime = 0.0;
-        //this->animation->SetTime(debugTime);
 
         static bool debug = false;
         if (debug)
@@ -494,18 +505,6 @@ int Demo::Shutdown()
     {
         delete this->assetManager;
         this->assetManager = nullptr;
-    }
-
-    if (this->animation)
-    {
-        delete this->animation;
-        this->animation = nullptr;
-    }
-
-    if (this->skeleton)
-    {
-        delete this->skeleton;
-        this->skeleton = nullptr;
     }
 
     return this->msg.wParam;

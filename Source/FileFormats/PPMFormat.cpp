@@ -76,7 +76,7 @@ PPMFormat::PPMFormat()
 
 	if (image)
 	{
-		strcpy_s(image->name, sizeof(image->name), filePath);
+		image->SetName(filePath);
 		assetList.AddTail(image);
 	}
 

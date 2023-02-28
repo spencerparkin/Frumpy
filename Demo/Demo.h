@@ -53,8 +53,6 @@ private:
 	Frumpy::Image* shadowBuffer;
 	Frumpy::Renderer* renderer;
 	Frumpy::AssetManager* assetManager;
-	Frumpy::Animation* animation;
-	Frumpy::Skeleton* skeleton;
 	TimingStat frumpyRenderTime;
 	TimingStat demoBlitTime;
 	TimingStat demoMessageTime;
