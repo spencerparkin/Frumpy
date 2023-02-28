@@ -149,4 +149,7 @@ SkinVertexShader::SkinVertexShader(const Matrix4x4& objectToWorld, const Graphic
 	objectToImage.TransformPoint(poseSpacePoint, outputVertex->imageSpacePoint);
 	objectToCamera.TransformPoint(poseSpacePoint, outputVertex->cameraSpacePoint);
 	objectToCamera.TransformVector(poseSpaceNormal, outputVertex->cameraSpaceNormal);
+
+	outputVertex->texCoords = posedVertex->texCoords;
+	outputVertex->color = posedVertex->color;
 }
